@@ -1,0 +1,21 @@
+# Go 编译、测试与覆盖率产物
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+cover.out
+coverage.*
+
+# 本地 Go workspace 文件
+go.work
+go.work.sum
+
+# JetBrains IDE 的个人工程配置
+.idea/
+
+# 操作系统生成文件
+.DS_Store
+Thumbs.db
