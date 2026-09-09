@@ -14,6 +14,9 @@
 ```powershell
 go run ./examples/program-structure
 go run ./examples/variables
+go run ./examples/errors
+go run ./examples/defer
+go run ./examples/panic-recover
 ```
 
 检查全部包能否正常编译和测试：
@@ -53,6 +56,45 @@ go test ./...
 - 内层短变量声明造成的变量遮蔽；
 - 局部变量未使用时的编译错误；
 - 变量的词法作用域、运行时生命周期与逃逸分析之间的区别。
+
+### defer、return 与 panic/recover
+
+目录：`examples/defer`
+
+这个示例通过可运行对比演示：
+
+- defer 的注册时机、普通实参求值和闭包读取变量的区别；
+- 多个 defer 后注册先执行（LIFO）；
+- 成功取得资源后立即安排清理，并妥善处理 `Close` 错误；
+- return 确定结果值、执行 defer、返回调用者的先后关系；
+- 具名结果参数和匿名结果对 defer 修改的不同反应；
+- panic 展开调用栈时如何执行 defer，以及 recover 的作用范围。
+
+### Go error、错误链与自定义错误
+
+目录：`examples/errors`
+
+这个示例通过可运行对比演示：
+
+- `error` 接口和 `(结果, error)` 返回约定；
+- `errors.New` 创建的错误为何可以比较，但相同文案并不代表同一个错误；
+- 哨兵错误以及 `errors.Is` 的语义匹配；
+- `fmt.Errorf` 中 `%w` 和 `%v` 对错误链的不同影响；
+- 带错误码的自定义错误、`Unwrap` 与 `errors.AsType`；
+- 不可比较的动态错误值和 typed nil 两个接口陷阱。
+
+### Go panic、defer 与 recover
+
+目录：`examples/panic-recover`
+
+这个示例通过调用顺序和输出演示：
+
+- `panic` 如何终止当前函数的正常控制流并沿调用栈向外传播；
+- 栈展开时，各层已经注册的 `defer` 如何执行；
+- `recover` 成功后，被中断的函数为何直接返回，而不是从 `panic` 下一行继续；
+- 调用者为何可以从被恢复函数的调用点之后继续执行；
+- `recover` 在普通代码或普通辅助函数中调用时为何返回 `nil`；
+- 每个需要隔离的 goroutine 为何必须在自身入口设置恢复逻辑。
 
 ## VS Code
 
