@@ -10,12 +10,12 @@ import (
 	"fmt"
 
 	// 导入路径由 go.mod 中的“module go-demo”加上目录路径组成。
-	"go-demo/examples/program-structure/mymath"
+	"go-demo/examples/basic-syntax/program-structure/mymath"
 
 	// 目录名是 oddname，但里面声明的是 package classroom。
 	// 所以调用时使用 classroom.Explain，而不是 oddname.Explain。
 	// 这种写法技术上可行，但真实项目通常让目录名和包名保持一致。
-	"go-demo/examples/program-structure/oddname"
+	"go-demo/examples/basic-syntax/program-structure/oddname"
 )
 
 // main 是可执行程序的入口。
@@ -107,5 +107,5 @@ func main() {
 	fmt.Println("② 同一普通目录中的 Go 文件必须声明同一个包")
 	fmt.Println("③ 大写开头的名称可被其他包使用；小写开头的名称仅包内可见")
 	fmt.Println("④ 导入本项目包时，路径从 go.mod 的 module 名开始")
-	fmt.Println("⑤ 推荐用 go run ./examples/program-structure 运行整个包")
+	fmt.Println("⑤ 推荐用 go run ./examples/basic-syntax/program-structure 运行整个包")
 }

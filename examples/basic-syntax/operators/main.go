@@ -2,7 +2,7 @@
 //
 // 运行方式：
 //
-//	go run ./examples/operators
+//	go run ./examples/basic-syntax/operators
 package main
 
 import "fmt"

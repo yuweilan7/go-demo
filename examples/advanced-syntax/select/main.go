@@ -14,7 +14,7 @@ func main() {
 	// 空 select 的确会让当前 goroutine 永久阻塞。为了不破坏默认演示，
 	// 只有显式传入 deadlock 参数时才运行它：
 	//
-	//     go run ./examples/select deadlock
+	//     go run ./examples/advanced-syntax/select deadlock
 	//
 	// 当程序里所有 goroutine 都无法继续时，Go runtime 才会报告 deadlock；
 	// 不是 select {} 语句自己主动抛出了异常。

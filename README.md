@@ -12,11 +12,9 @@
 在项目根目录执行：
 
 ```powershell
-go run ./examples/program-structure
-go run ./examples/variables
-go run ./examples/errors
-go run ./examples/defer
-go run ./examples/panic-recover
+go run ./examples/basic-syntax/variables
+go run ./examples/advanced-syntax/goroutines
+go run ./examples/internals/packageinit
 ```
 
 检查全部包能否正常编译和测试：
@@ -25,11 +23,62 @@ go run ./examples/panic-recover
 go test ./...
 ```
 
+## 目录结构
+
+目录名使用英文，避免中文进入 Go 包的导入路径；下面保留中文定位。
+
+```text
+examples/
+├── basic-syntax/       # 基础语法
+├── advanced-syntax/    # 语法进阶
+└── internals/          # 原理剖析
+```
+
+### 基础语法 `examples/basic-syntax`
+
+| 主题 | 目录 |
+| --- | --- |
+| 依赖管理 | `go-modules` |
+| 异常捕获 | `panic-recover` |
+| error | `errors` |
+| defer | `defer` |
+| 接口 | `interfaces` |
+| 方法 | `methods-embedding` |
+| 指针 | `pointers` |
+| 函数 | `functions` |
+| 循环 | `loops` |
+| 条件句 | `conditionals` |
+| 数组、切片与 map | `arrays-slices-maps` |
+| 结构体 | `structs` |
+| 运算符 | `operators` |
+| 常量 | `constants` |
+| 变量 | `variables` |
+| 基础补充：程序结构、格式化输出、闭包状态、接口断言、指针内存、结构体指针选择器 | `program-structure`、`fmt-verbs`、`closurestate`、`interfaceassertions`、`pointermemory`、`struct-pointer-selector` |
+
+### 语法进阶 `examples/advanced-syntax`
+
+| 主题 | 目录 |
+| --- | --- |
+| Goroutine | `goroutines` |
+| Channel | `channels` |
+| Sync | `sync-primitives` |
+| Select | `select` |
+| Context | `context` |
+| 定时器 | `timers` |
+| 协程池 | `goroutine-pool` |
+| 反射 | `reflection` |
+
+### 原理剖析 `examples/internals`
+
+| 主题 | 目录 |
+| --- | --- |
+| Go 包初始化顺序 | `packageinit` |
+
 ## 当前示例
 
 ### Go 程序与包的组织结构
 
-目录：`examples/program-structure`
+目录：`examples/basic-syntax/program-structure`
 
 这个示例通过详细中文注释和控制台输出演示：
 
@@ -43,7 +92,7 @@ go test ./...
 
 ### Go 变量、零值与短变量声明
 
-目录：`examples/variables`
+目录：`examples/basic-syntax/variables`
 
 这个示例通过可运行对比演示：
 
@@ -59,7 +108,7 @@ go test ./...
 
 ### defer、return 与 panic/recover
 
-目录：`examples/defer`
+目录：`examples/basic-syntax/defer`
 
 这个示例通过可运行对比演示：
 
@@ -72,7 +121,7 @@ go test ./...
 
 ### Go error、错误链与自定义错误
 
-目录：`examples/errors`
+目录：`examples/basic-syntax/errors`
 
 这个示例通过可运行对比演示：
 
@@ -85,7 +134,7 @@ go test ./...
 
 ### Go panic、defer 与 recover
 
-目录：`examples/panic-recover`
+目录：`examples/basic-syntax/panic-recover`
 
 这个示例通过调用顺序和输出演示：
 

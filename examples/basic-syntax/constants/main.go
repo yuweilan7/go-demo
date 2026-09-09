@@ -2,7 +2,7 @@
 //
 // 运行方式：
 //
-//	go run ./examples/constants
+//	go run ./examples/basic-syntax/constants
 package main
 
 import (

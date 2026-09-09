@@ -1,7 +1,7 @@
 // 这个目录故意叫 oddname，包却故意叫 classroom。
 // 这用来证明“目录名和包名承担不同职责”：
 //
-//   - 目录路径决定别人从哪里导入它：go-demo/examples/program-structure/oddname
+//   - 目录路径决定别人从哪里导入它：go-demo/examples/basic-syntax/program-structure/oddname
 //   - package 声明决定这个包在 Go 代码中的默认名称：classroom
 //
 // 二者技术上可以不同，但会增加理解成本，正常项目通常让它们保持一致。

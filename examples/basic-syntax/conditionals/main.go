@@ -2,7 +2,7 @@
 //
 // 运行方式：
 //
-//	go run ./examples/conditionals
+//	go run ./examples/basic-syntax/conditionals
 package main
 
 import "fmt"
