@@ -2,7 +2,7 @@
 
 面向熟练 Java 工程师、Go 初学者。每课有详细中文 README、透彻注释的源码、直接交付的反例/修复、真实可运行实验与必要独立断言，不布置额外 exercise。共同规范见 [TEACHING_STYLE](../learning_prompts/TEACHING_STYLE.md)。
 
-第 0～4 层共 37 课已完成主 agent 独立验收并汇总；剩余 M38、M39 仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
+第 0～5 层共 38 课已完成主 agent 独立验收并汇总；最后 M39 仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
 
 各课是独立 Go module；根 `go test ./...` 不覆盖它们。先读该课 README 的参数/资源/实际范围，再执行例如：
 
@@ -80,7 +80,7 @@ go -C lessons/m17_net_http vet ./...
 
 | 模块 | 内容 | 硬前置 | 交付状态 |
 | --- | --- | --- | --- |
-| [M38](../learning_prompts/M38_failure_recovery_lab.md) | 故障演练：取消、宕机、重复、乱序与恢复对账 | M37、M33、M34 | 待交付 |
+| [M38](m38_failure_recovery_lab/README.md) | 故障演练：取消、宕机、重复、乱序与恢复对账 | M37、M33、M34 | 已验收 |
 
 ## 第 6 层
 

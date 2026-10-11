@@ -1,8 +1,8 @@
 # 课程主验收记录
 
-2026-10-12（Asia/Shanghai），第 0～4 层共 37 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个、第 3 层97个、第 4 层19个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
+2026-10-12（Asia/Shanghai），第 0～5 层共 38 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个、第 3 层97个、第 4 层19个、第 5 层20个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
 
-当前真实交付为 **37/39**。后续 M38、M39 尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证，M37 已将 Gin、GORM/MySQL、Redis、Kafka 与只读 gRPC 接成真实订单业务；综合故障恢复和接手审查仍需分别交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
+当前真实交付为 **38/39**。最后 M39 尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证；M37 接成真实订单业务，M38 已实际验证本课通信故障、进程强杀和原事实恢复。陌生仓库接手与AI审查仍需由M39交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
 
 ## 第 0 层实际验收
 
@@ -76,6 +76,18 @@
 
 主 agent 另用独立只读入口读回本模块全部18次历史与主复验账本：各精确表、键、topic、group均不存在，offset为空、每次SQL关闭为0。原始 `go mod verify` 因 M31 本地 replace 的 `missing ziphash` 仍退出1，失败保留；实际消费的两份生成文件及M31 go.mod/go.sum与已验前置完全一致，实际module图108个远端依赖独立校验通过。ACK后观察错误保留UNKNOWN的源码分类已核对；跨OS强杀、ACK/sent与消费Commit/offset间恢复、Commit通信截断、多节点耐久性仍留M38，未提前声称完成。
 
+## 第 5 层实际验收
+
+[M38](m38_failure_recovery_lab/README.md) 只复用已验M37的公开业务，冻结不变量与[故障矩阵](m38_failure_recovery_lab/FAULT_MATRIX.md)。主agent阅读全部20个公开文件，独立执行默认完整入口112.829s、明确启用实库及真实子进程race的完整测试115.581s、vet。4项辅助与3项Live共7项测试通过；三个OS child在race轮用实际BuildInfo确认-race，父测试的-race没有被误当子进程检测证据。
+
+两轮各核对真实请求超时/应用停止时在途事务、Tx提前error/panic回滚、3Conn池饱和与WaitCount/DB.conn栈、完整201被代理丢弃、实际COM_QUERY COMMIT及server OK截断、Redis真实GET慢reply/EVAL失效回执丢失。提交后真实ctx取消保留UNKNOWN+Canceled，按原event恢复effects1/next2。核心终态3单/qty3/stock7、outbox/inbox/receipt/effects各3、raw5/next5；同Key/Value重复offset0/1/2仅效果1，实际Stable成员1→2→1/generation变化且standby不commit，缓存旧填坏例与Lua拒旧修复都有独立副作用对照。
+
+两轮共6次真实OS强杀，均先认证PID/identity/namespace和实际目标阶段，再查权威SQL/raw/offset，随后Kill/Wait、stdout reader/stdin收尾，才开fresh恢复。K01已提交未publish恢复raw1/next1；K02已ACK未sent重投同event后raw2但效果1/first_offset0/next2；K03消费SQL效果已1而offset未动、缓存仍PENDING，重投去重并再次失效后next1/API RECORDED。完整原key/order/金额299分CNY/ACCEPTED/v1和缓存/API均核对，恢复期间未删旧状态或重置进度。
+
+主agent另用独立只读入口读回14份主复验账本及原首轮失败账本，共15份精确表/键/topic/group不存在、offset空，所有client SQL0；当前全部21个历史与主复验登记child PID不存在。执行者34份历史完整读回保留为独立范围，不冒称主agent重复运行历史实验。原2个本地replace的modverify missing ziphash/exit1仍保留；13个实际消费M37/M31源码和模块文件与已验哈希及基线Git对象一致，108个远端依赖独立校验通过。
+
+草稿收尾缺口已在实跑前修正：所有process/proxy/job/App/手动client实际Done决定是否释放，父自有pipe避免Wait提前关闭reader，hijacked handler独立join，未消费工作error和动态error panic身份保留。首轮500ms未进入目标Tx门的真实失败保留，修正预算未降低断言；README辅助测试数3→4的主审修正文档单独记哈希，19个其余文件及全部运行源码不变。M37未实现同聚合多版本、lease/fencing，矩阵明确不适用；rebalance只验空闲交接，不声称旧generation在途写fencing。没有服务节点宕机、多副本容灾或生产SLA证明。
+
 ## 验证和资源边界
 
 每课 README 的命令都以独立 module 为工作目录。并发课实际使用兼容 Windows/amd64 的便携 GCC 16.2.0 进行 race；CC/CXX/CGO/PATH 只设置在命令进程，没有改变系统设置。默认 mingw32 的构建失败保留为历史诊断，不算检测器已执行。必要故障入口用 build tag、显式命令或有界子进程隔离；正常入口和正向断言保持可运行。
@@ -84,8 +96,8 @@
 
 取消通知、结果可读、handler 退出、清理完成和 owner join 分别核对。M07/M12/M17/M34 的失败路径曾有收尾缺口，已经返工或主修正并独立复验；没有用自然结束、自报 PASS、HTTP 200、编译成功或全进程 goroutine 数量替代验收。正常验证进程、故障子进程、课程独占 listener、HTTP/RPC Body/连接、任务和临时隧道已收尾。性能 profile/调试产物与原始无秘密诊断在忽略目录保留以便追查，不随课程源文件提交。
 
-基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，M21/M24/M27新增真实事务、表结构与Redis/SQL组合，M22/M23/M26/M30运行真实隔离/ORM/缓存/outbox链路，M37另行验证真实订单组合链。M19的进程内幂等不等于跨进程数据库唯一约束；M27的SQL唯一性实验仅固定载荷、同订单顺序重试，M30/M37下游幂等只覆盖各自同Tx SQL效果。现有有界协议与失败窗口证据不能外推到完整故障恢复、跨服务幂等、云观测、生产SLA或长期稳定性。Kafka单副本确认、同进程文件Sync和当前SQL读回也不证明多节点容灾。
+基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，M21/M24/M27新增真实事务、表结构与Redis/SQL组合，M22/M23/M26/M30运行真实隔离/ORM/缓存/outbox链路，M37另行验证真实订单组合链，M38在此业务上验证具体故障恢复矩阵。M19的进程内幂等不等于跨进程数据库唯一约束；M27的SQL唯一性实验仅固定载荷、同订单顺序重试，M30/M37下游幂等只覆盖各自同Tx SQL效果。现有有界协议与指定故障窗口证据不能外推到所有故障恢复、跨服务幂等、云观测、生产SLA或长期稳定性。Kafka单副本确认、同进程文件Sync和当前SQL读回也不证明多节点容灾。
 
 ## 后续层
 
-第 0～4 层均已验收。随后依次 M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。
+第 0～5 层均已验收。最后实施M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。
