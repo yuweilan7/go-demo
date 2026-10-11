@@ -427,19 +427,6 @@
       "wave": 0
     },
     {
-      "id": "M36",
-      "title": "构建、Linux 部署、信号和可回退运行",
-      "prompt": "M36_linux_deployment.md",
-      "lesson_dir": "lessons/m36_linux_deployment",
-      "hard_dependencies": [
-        "M16",
-        "M19"
-      ],
-      "recommended_knowledge": "建议 M00/M34；先部署小服务，综合订单由 M37/M38再使用这些机制。",
-      "priority": "掌握常用",
-      "wave": 3
-    },
-    {
       "id": "M37",
       "title": "综合业务：订单、库存、缓存、RPC 与 Kafka",
       "prompt": "M37_order_backend_capstone.md",
@@ -452,7 +439,7 @@
         "M30",
         "M31"
       ],
-      "recommended_knowledge": "建议 M22/M24/M27/M33/M34/M36；不要求一次引入所有高级机制。",
+      "recommended_knowledge": "建议 M22/M24/M27/M33/M34；不要求一次引入所有高级机制。",
       "priority": "重点",
       "wave": 4
     },
@@ -464,8 +451,7 @@
       "hard_dependencies": [
         "M37",
         "M33",
-        "M34",
-        "M36"
+        "M34"
       ],
       "recommended_knowledge": "建议 M22/M27；按故障实际涉及机制阅读。",
       "priority": "重点",
@@ -528,8 +514,7 @@
       "M23",
       "M26",
       "M30",
-      "M32",
-      "M36"
+      "M32"
     ],
     [
       "M37"
@@ -540,5 +525,13 @@
     [
       "M39"
     ]
+  ],
+  "teaching_standard": "TEACHING_STYLE.md",
+  "course_deliverables": [
+    "README.md",
+    "annotated_go_source",
+    "runnable_experiments",
+    "independent_assertions_as_needed",
+    "STATUS.md"
   ]
 }
