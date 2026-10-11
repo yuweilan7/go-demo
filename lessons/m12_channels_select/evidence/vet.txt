@@ -1,0 +1,3 @@
+command: go -C . vet ./...
+exit: 0
+stdout/stderr:

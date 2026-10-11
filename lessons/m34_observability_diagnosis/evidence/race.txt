@@ -1,0 +1,2 @@
+?   	go-demo/lessons/m34_observability_diagnosis/cmd/demo	[no test files]
+ok  	go-demo/lessons/m34_observability_diagnosis/internal/lab	2.207s

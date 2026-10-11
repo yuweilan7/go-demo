@@ -1,0 +1,11 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go test -race -count=1 -timeout=60s -parallel=2 ./...
+exit_code=1
+classification=compiler failure before detector execution
+FAIL	go-demo/lessons/m10_testing_debugging/cmd/demo [build failed]
+# runtime/cgo
+cc1.exe: sorry, unimplemented: 64-bit mode not compiled in
+FAIL	go-demo/lessons/m10_testing_debugging/internal/lifecycle [build failed]
+FAIL	go-demo/lessons/m10_testing_debugging/internal/order [build failed]
+FAIL	go-demo/lessons/m10_testing_debugging/internal/protocol [build failed]
+FAIL

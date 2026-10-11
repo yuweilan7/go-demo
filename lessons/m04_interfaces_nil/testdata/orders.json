@@ -1,0 +1,4 @@
+[
+  {"id": "ORDER-1001", "status": "PAID", "amount_cents": 12900},
+  {"id": "ORDER-1002", "status": "CREATED", "amount_cents": 6800}
+]

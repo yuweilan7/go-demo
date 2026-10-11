@@ -1,0 +1,5 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging vet -tags=fatalfault ./faults
+exit_code=1
+expected_failure=True
+faults\fatal_test.go:16:3: call to (*testing.T).Fatal from a non-test goroutine

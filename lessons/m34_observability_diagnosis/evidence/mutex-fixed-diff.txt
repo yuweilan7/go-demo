@@ -1,0 +1,20 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: delay
+Time: 2026-10-12 02:12:31 CST
+Showing nodes accounting for 1ms, 0.53% of 187.30ms total
+Dropped 15 nodes (cum <= 0.94ms)
+Showing top 12 nodes out of 47
+      flat  flat%   sum%        cum   cum%
+    0.53ms  0.28%  0.28%     0.53ms  0.28%  sync.(*Mutex).Unlock
+    0.47ms  0.25%  0.53%     0.47ms  0.25%  runtime.unlock
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).Close
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).Close.func1
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).close
+         0     0%  0.53%     0.50ms  0.27%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).startAudit.func1
+         0     0%  0.53%     0.50ms  0.27%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).startAudit.func1.deferwrap2
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.Run
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.Run.func5
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.contentionTrial
+         0     0%  0.53%     0.04ms 0.019%  go-demo/lessons/m34_observability_diagnosis/internal/lab.contentionTrial.func1
+         0     0%  0.53%     0.50ms  0.27%  go.opentelemetry.io/otel/sdk/trace.(*recordingSpan).End

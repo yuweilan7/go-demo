@@ -1,0 +1,18 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: delay
+Time: 2026-10-12 02:12:31 CST
+Showing nodes accounting for 187.15ms, 99.92% of 187.30ms total
+Dropped 79 nodes (cum <= 0.94ms)
+      flat  flat%   sum%        cum   cum%
+  187.15ms 99.92% 99.92%   187.15ms 99.92%  sync.(*Mutex).Unlock
+         0     0% 99.92%   185.80ms 99.20%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).badCheckout
+         0     0% 99.92%   186.28ms 99.46%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout
+         0     0% 99.92%   186.28ms 99.46%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout-fm
+         0     0% 99.92%     1.28ms  0.68%  go.opentelemetry.io/otel/sdk/trace.(*recordingSpan).End
+         0     0% 99.92%     1.28ms  0.68%  go.opentelemetry.io/otel/sdk/trace.(*simpleSpanProcessor).OnEnd
+         0     0% 99.92%   186.80ms 99.73%  net/http.(*ServeMux).ServeHTTP
+         0     0% 99.92%   186.80ms 99.73%  net/http.(*Server).Serve.gowrap3
+         0     0% 99.92%   186.80ms 99.73%  net/http.(*conn).serve
+         0     0% 99.92%   186.80ms 99.73%  net/http.HandlerFunc.ServeHTTP
+         0     0% 99.92%   186.80ms 99.73%  net/http.serverHandler.ServeHTTP

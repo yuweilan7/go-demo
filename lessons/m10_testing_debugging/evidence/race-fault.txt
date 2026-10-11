@@ -1,0 +1,63 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test -race -tags=faults -run=^TestRaceSharedCounter$ -v -count=1 -timeout=30s ./faults
+exit_code=1
+expected_failure=True
+=== RUN   TestRaceSharedCounter
+==================
+WARNING: DATA RACE
+Read at 0x00c00000c6b8 by goroutine 9:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter.func1()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:22 +0xb3
+
+Previous write at 0x00c00000c6b8 by goroutine 10:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter.func1()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:22 +0xc5
+
+Goroutine 9 (running) created at:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:18 +0x97
+  testing.tRunner()
+      D:/Go/src/testing/testing.go:2193 +0x1ca
+  testing.(*T).Run.gowrap1()
+      D:/Go/src/testing/testing.go:2258 +0x38
+
+Goroutine 10 (finished) created at:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:18 +0x97
+  testing.tRunner()
+      D:/Go/src/testing/testing.go:2193 +0x1ca
+  testing.(*T).Run.gowrap1()
+      D:/Go/src/testing/testing.go:2258 +0x38
+==================
+==================
+WARNING: DATA RACE
+Write at 0x00c00000c6b8 by goroutine 9:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter.func1()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:22 +0xc5
+
+Previous write at 0x00c00000c6b8 by goroutine 10:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter.func1()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:22 +0xc5
+
+Goroutine 9 (running) created at:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:18 +0x97
+  testing.tRunner()
+      D:/Go/src/testing/testing.go:2193 +0x1ca
+  testing.(*T).Run.gowrap1()
+      D:/Go/src/testing/testing.go:2258 +0x38
+
+Goroutine 10 (finished) created at:
+  go-demo/lessons/m10_testing_debugging/faults.TestRaceSharedCounter()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/faults/race_test.go:18 +0x97
+  testing.tRunner()
+      D:/Go/src/testing/testing.go:2193 +0x1ca
+  testing.(*T).Run.gowrap1()
+      D:/Go/src/testing/testing.go:2258 +0x38
+==================
+    race_test.go:28: observed count=20000; even 20000 would not prove absence of a data race
+    testing.go:1865: race detected during execution of test
+--- FAIL: TestRaceSharedCounter (0.00s)
+FAIL
+FAIL	go-demo/lessons/m10_testing_debugging/faults	0.160s
+FAIL

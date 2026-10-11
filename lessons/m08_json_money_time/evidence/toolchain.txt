@@ -1,0 +1,18 @@
+go version go1.27.0 windows/amd64
+{
+	"GOARCH": "amd64",
+	"GOEXPERIMENT": "",
+	"GOOS": "windows",
+	"GOROOT": "D:\\Go",
+	"GOTOOLCHAIN": "auto",
+	"GOVERSION": "go1.27.0"
+}
+{
+	"Path": "go-demo/lessons/m08_json_money_time",
+	"Main": true,
+	"Dir": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m08\\go-demo\\lessons\\m08_json_money_time",
+	"GoMod": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m08\\go-demo\\lessons\\m08_json_money_time\\go.mod",
+	"GoVersion": "1.27"
+}
+encoding/json/v2
+encoding/json/jsontext

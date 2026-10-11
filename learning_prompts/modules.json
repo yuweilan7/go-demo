@@ -2,7 +2,7 @@
   "schema_version": 1,
   "planned_on": "2026-10-12",
   "delivery_type": "course_generation_prompts",
-  "course_execution_state": "not_started",
+  "course_execution_state": "running",
   "baseline": {
     "repository": "go-demo",
     "local_go": "go1.27.0 windows/amd64",
@@ -533,5 +533,10 @@
     "runnable_experiments",
     "independent_assertions_as_needed",
     "STATUS.md"
-  ]
+  ],
+  "execution_policy": {
+    "layer_barrier": true,
+    "commit_strategy": "one_commit_per_accepted_layer",
+    "orchestration_document": "ORCHESTRATION.md"
+  }
 }

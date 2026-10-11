@@ -1,0 +1,11 @@
+go-demo/lessons/m01_syntax_packages
+github.com/tidwall/gjson v1.18.0
+github.com/tidwall/match v1.1.1
+github.com/tidwall/pretty v1.2.0
+go-demo/lessons/m01_syntax_packages github.com/tidwall/gjson@v1.18.0
+go-demo/lessons/m01_syntax_packages github.com/tidwall/match@v1.1.1
+go-demo/lessons/m01_syntax_packages github.com/tidwall/pretty@v1.2.0
+go-demo/lessons/m01_syntax_packages go@1.27.0
+github.com/tidwall/gjson@v1.18.0 github.com/tidwall/match@v1.1.1
+github.com/tidwall/gjson@v1.18.0 github.com/tidwall/pretty@v1.2.0
+go@1.27.0 toolchain@go1.27.0

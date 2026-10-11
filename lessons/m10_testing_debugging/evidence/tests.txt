@@ -1,0 +1,176 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test -v -count=1 -shuffle=1729 -timeout=30s ./...
+exit_code=0
+expected_failure=False
+?   	go-demo/lessons/m10_testing_debugging/cmd/demo	[no test files]
+-test.shuffle 1729
+=== RUN   TestAtomicCounterFix
+--- PASS: TestAtomicCounterFix (0.00s)
+=== RUN   TestBackgroundErrorReturnedToOwner
+--- PASS: TestBackgroundErrorReturnedToOwner (0.00s)
+=== RUN   TestStopNotificationIsNotExit
+    worker_test.go:46: Stop returned; worker observed cancellation; Done remains open
+    worker_test.go:54: cleanup gate released; owner joined Done; cleaned=true
+--- PASS: TestStopNotificationIsNotExit (0.00s)
+=== RUN   TestVirtualDeadline
+    worker_test.go:94: virtual elapsed=10s; deadline observed; cleanup joined
+--- PASS: TestVirtualDeadline (0.00s)
+PASS
+ok  	go-demo/lessons/m10_testing_debugging/internal/lifecycle	0.185s
+-test.shuffle 1729
+=== RUN   TestEnvironmentRestored
+=== RUN   TestEnvironmentRestored/serial_environment
+--- PASS: TestEnvironmentRestored (0.00s)
+    --- PASS: TestEnvironmentRestored/serial_environment (0.00s)
+=== RUN   TestParseCents
+=== RUN   TestParseCents/zero
+=== PAUSE TestParseCents/zero
+=== RUN   TestParseCents/one_cent
+=== PAUSE TestParseCents/one_cent
+=== RUN   TestParseCents/order_1299
+=== PAUSE TestParseCents/order_1299
+=== RUN   TestParseCents/upper_bound
+=== PAUSE TestParseCents/upper_bound
+=== RUN   TestParseCents/above_bound
+=== PAUSE TestParseCents/above_bound
+=== RUN   TestParseCents/missing_fraction
+=== PAUSE TestParseCents/missing_fraction
+=== RUN   TestParseCents/one_fraction_digit
+=== PAUSE TestParseCents/one_fraction_digit
+=== RUN   TestParseCents/leading_zero
+=== PAUSE TestParseCents/leading_zero
+=== RUN   TestParseCents/negative
+=== PAUSE TestParseCents/negative
+=== RUN   TestParseCents/exponent
+=== PAUSE TestParseCents/exponent
+=== RUN   TestParseCents/whitespace
+=== PAUSE TestParseCents/whitespace
+=== RUN   TestParseCents/unicode
+=== PAUSE TestParseCents/unicode
+=== RUN   TestParseCents/huge_input
+=== PAUSE TestParseCents/huge_input
+=== CONT  TestParseCents/zero
+=== CONT  TestParseCents/one_fraction_digit
+=== CONT  TestParseCents/leading_zero
+=== CONT  TestParseCents/exponent
+=== CONT  TestParseCents/order_1299
+=== CONT  TestParseCents/one_cent
+=== CONT  TestParseCents/whitespace
+=== CONT  TestParseCents/huge_input
+=== CONT  TestParseCents/unicode
+=== CONT  TestParseCents/negative
+=== CONT  TestParseCents/missing_fraction
+=== CONT  TestParseCents/above_bound
+=== CONT  TestParseCents/upper_bound
+--- PASS: TestParseCents (0.00s)
+    --- PASS: TestParseCents/zero (0.00s)
+    --- PASS: TestParseCents/one_fraction_digit (0.00s)
+    --- PASS: TestParseCents/whitespace (0.00s)
+    --- PASS: TestParseCents/leading_zero (0.00s)
+    --- PASS: TestParseCents/huge_input (0.00s)
+    --- PASS: TestParseCents/exponent (0.00s)
+    --- PASS: TestParseCents/order_1299 (0.00s)
+    --- PASS: TestParseCents/one_cent (0.00s)
+    --- PASS: TestParseCents/negative (0.00s)
+    --- PASS: TestParseCents/unicode (0.00s)
+    --- PASS: TestParseCents/missing_fraction (0.00s)
+    --- PASS: TestParseCents/above_bound (0.00s)
+    --- PASS: TestParseCents/upper_bound (0.00s)
+=== RUN   TestPaymentCreditsExactlyOnce
+--- PASS: TestPaymentCreditsExactlyOnce (0.00s)
+=== RUN   TestParallelIsolatedFixtures
+=== RUN   TestParallelIsolatedFixtures/pay
+=== PAUSE TestParallelIsolatedFixtures/pay
+=== RUN   TestParallelIsolatedFixtures/reject
+=== PAUSE TestParallelIsolatedFixtures/reject
+=== CONT  TestParallelIsolatedFixtures/pay
+=== CONT  TestParallelIsolatedFixtures/reject
+    store_test.go:118: exclusive receipt=C:\Users\Lenovo\AppData\Local\Temp\TestParallelIsolatedFixturesreject1591859546\001\receipt.json state=pending count=0
+=== NAME  TestParallelIsolatedFixtures/pay
+    store_test.go:118: exclusive receipt=C:\Users\Lenovo\AppData\Local\Temp\TestParallelIsolatedFixturespay2098733311\001\receipt.json state=paid count=1
+--- PASS: TestParallelIsolatedFixtures (0.00s)
+    --- PASS: TestParallelIsolatedFixtures/pay (0.00s)
+    --- PASS: TestParallelIsolatedFixtures/reject (0.00s)
+=== RUN   TestMissingOrderDoesNotChangeExistingOrder
+--- PASS: TestMissingOrderDoesNotChangeExistingOrder (0.00s)
+=== RUN   TestCleanupLIFOAndTempDirRemoval
+=== RUN   TestCleanupLIFOAndTempDirRemoval/child
+--- PASS: TestCleanupLIFOAndTempDirRemoval (0.00s)
+    --- PASS: TestCleanupLIFOAndTempDirRemoval/child (0.00s)
+=== RUN   TestDecodePaymentTable
+=== RUN   TestDecodePaymentTable/valid
+=== RUN   TestDecodePaymentTable/number_not_string
+=== RUN   TestDecodePaymentTable/zero_payment
+=== RUN   TestDecodePaymentTable/unknown_field
+=== RUN   TestDecodePaymentTable/second_document
+=== RUN   TestDecodePaymentTable/empty_id
+=== RUN   TestDecodePaymentTable/bad_json
+--- PASS: TestDecodePaymentTable (0.00s)
+    --- PASS: TestDecodePaymentTable/valid (0.00s)
+    --- PASS: TestDecodePaymentTable/number_not_string (0.00s)
+    --- PASS: TestDecodePaymentTable/zero_payment (0.00s)
+    --- PASS: TestDecodePaymentTable/unknown_field (0.00s)
+    --- PASS: TestDecodePaymentTable/second_document (0.00s)
+    --- PASS: TestDecodePaymentTable/empty_id (0.00s)
+    --- PASS: TestDecodePaymentTable/bad_json (0.00s)
+=== RUN   TestRejectedPaymentLeavesBusinessUnchanged
+--- PASS: TestRejectedPaymentLeavesBusinessUnchanged (0.00s)
+=== RUN   FuzzParseCents
+=== RUN   FuzzParseCents/seed#0
+=== RUN   FuzzParseCents/seed#1
+=== RUN   FuzzParseCents/seed#2
+=== RUN   FuzzParseCents/seed#3
+=== RUN   FuzzParseCents/seed#4
+=== RUN   FuzzParseCents/seed#5
+=== RUN   FuzzParseCents/seed#6
+=== RUN   FuzzParseCents/seed#7
+=== RUN   FuzzParseCents/seed#8
+=== RUN   FuzzParseCents/seed#9
+--- PASS: FuzzParseCents (0.00s)
+    --- PASS: FuzzParseCents/seed#0 (0.00s)
+    --- PASS: FuzzParseCents/seed#1 (0.00s)
+    --- PASS: FuzzParseCents/seed#2 (0.00s)
+    --- PASS: FuzzParseCents/seed#3 (0.00s)
+    --- PASS: FuzzParseCents/seed#4 (0.00s)
+    --- PASS: FuzzParseCents/seed#5 (0.00s)
+    --- PASS: FuzzParseCents/seed#6 (0.00s)
+    --- PASS: FuzzParseCents/seed#7 (0.00s)
+    --- PASS: FuzzParseCents/seed#8 (0.00s)
+    --- PASS: FuzzParseCents/seed#9 (0.00s)
+PASS
+ok  	go-demo/lessons/m10_testing_debugging/internal/order	0.196s
+-test.shuffle 1729
+=== RUN   TestRealHTTPPaymentBoundary
+=== RUN   TestRealHTTPPaymentBoundary/mismatch
+=== PAUSE TestRealHTTPPaymentBoundary/mismatch
+=== RUN   TestRealHTTPPaymentBoundary/valid
+=== PAUSE TestRealHTTPPaymentBoundary/valid
+=== RUN   TestRealHTTPPaymentBoundary/invalid_type
+=== PAUSE TestRealHTTPPaymentBoundary/invalid_type
+=== RUN   TestRealHTTPPaymentBoundary/unknown_order
+=== PAUSE TestRealHTTPPaymentBoundary/unknown_order
+=== RUN   TestRealHTTPPaymentBoundary/oversize
+=== PAUSE TestRealHTTPPaymentBoundary/oversize
+=== CONT  TestRealHTTPPaymentBoundary/mismatch
+=== CONT  TestRealHTTPPaymentBoundary/unknown_order
+=== CONT  TestRealHTTPPaymentBoundary/valid
+=== CONT  TestRealHTTPPaymentBoundary/oversize
+=== CONT  TestRealHTTPPaymentBoundary/invalid_type
+=== NAME  TestRealHTTPPaymentBoundary/oversize
+    http_test.go:65: dynamic endpoint=http://127.0.0.1:5696 HTTP=400 code=INVALID_INPUT state=pending credited=0 count=0
+=== NAME  TestRealHTTPPaymentBoundary/mismatch
+    http_test.go:65: dynamic endpoint=http://127.0.0.1:5692 HTTP=409 code=AMOUNT_MISMATCH state=pending credited=0 count=0
+=== NAME  TestRealHTTPPaymentBoundary/invalid_type
+    http_test.go:65: dynamic endpoint=http://127.0.0.1:5694 HTTP=400 code=INVALID_INPUT state=pending credited=0 count=0
+=== NAME  TestRealHTTPPaymentBoundary/unknown_order
+    http_test.go:65: dynamic endpoint=http://127.0.0.1:5695 HTTP=404 code=ORDER_NOT_FOUND state=pending credited=0 count=0
+=== NAME  TestRealHTTPPaymentBoundary/valid
+    http_test.go:65: dynamic endpoint=http://127.0.0.1:5693 HTTP=200 code=PAID state=paid credited=1299 count=1
+--- PASS: TestRealHTTPPaymentBoundary (0.00s)
+    --- PASS: TestRealHTTPPaymentBoundary/mismatch (0.00s)
+    --- PASS: TestRealHTTPPaymentBoundary/invalid_type (0.00s)
+    --- PASS: TestRealHTTPPaymentBoundary/unknown_order (0.00s)
+    --- PASS: TestRealHTTPPaymentBoundary/valid (0.00s)
+    --- PASS: TestRealHTTPPaymentBoundary/oversize (0.50s)
+PASS
+ok  	go-demo/lessons/m10_testing_debugging/internal/protocol	0.721s

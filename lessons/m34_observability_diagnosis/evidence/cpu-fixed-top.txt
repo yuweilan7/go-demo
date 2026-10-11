@@ -1,0 +1,7 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: cpu
+Time: 2026-10-12 02:12:31 CST
+Duration: 1.88ms, Total samples = 0
+Showing nodes accounting for 0, 0% of 0 total
+      flat  flat%   sum%        cum   cum%

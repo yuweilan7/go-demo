@@ -1,0 +1,20 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: cpu
+Time: 2026-10-12 02:12:31 CST
+Duration: 704.61ms, Total samples = 690ms (97.93%)
+Showing nodes accounting for 690ms, 100% of 690ms total
+Showing top 12 nodes out of 15
+      flat  flat%   sum%        cum   cum%
+     680ms 98.55% 98.55%      680ms 98.55%  crypto/internal/fips140/sha256.blockSHANI
+      10ms  1.45%   100%      690ms   100%  crypto/sha256.Sum256
+         0     0%   100%      680ms 98.55%  crypto/internal/fips140/sha256.(*Digest).Write
+         0     0%   100%      680ms 98.55%  crypto/internal/fips140/sha256.block
+         0     0%   100%      690ms   100%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout
+         0     0%   100%      690ms   100%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout.func2
+         0     0%   100%      690ms   100%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout.func2.1
+         0     0%   100%      690ms   100%  go-demo/lessons/m34_observability_diagnosis/internal/lab.Digest
+         0     0%   100%      690ms   100%  go-demo/lessons/m34_observability_diagnosis/internal/lab.digestOnce
+         0     0%   100%      690ms   100%  net/http.(*ServeMux).ServeHTTP
+         0     0%   100%      690ms   100%  net/http.(*conn).serve
+         0     0%   100%      690ms   100%  net/http.HandlerFunc.ServeHTTP

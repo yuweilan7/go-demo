@@ -1,0 +1,9 @@
+{
+	"CC": "D:\\IdeaProject\\go-demo\\.local\\toolchains\\winlibs-16.2.0posix-14.0.0-ucrt-r2\\mingw64\\bin\\gcc.exe",
+	"CGO_ENABLED": "1",
+	"CXX": "D:\\IdeaProject\\go-demo\\.local\\toolchains\\winlibs-16.2.0posix-14.0.0-ucrt-r2\\mingw64\\bin\\g++.exe"
+}
+?   	go-demo/lessons/m08_json_money_time/cmd/demo	[no test files]
+ok  	go-demo/lessons/m08_json_money_time/cmd/jsonv2	3.353s
+ok  	go-demo/lessons/m08_json_money_time/internal/contract	5.967s
+race_exit=0

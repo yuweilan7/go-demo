@@ -1,0 +1,13 @@
+syntax = "proto3";
+package course.compat.v2;
+option go_package = "go-demo/lessons/m31_grpc_protobuf/gen/compatv2";
+message Record {
+  string sku = 1;
+  int32 quantity = 2;
+  reserved 3;
+  reserved "legacy_note";
+  optional int32 discount_basis_points = 4;
+  oneof owner { string email = 5; string warehouse_id = 6; }
+  int64 price_minor = 7;
+  string currency = 8;
+}

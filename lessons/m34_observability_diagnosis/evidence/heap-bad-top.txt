@@ -1,0 +1,20 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: inuse_space
+Time: 2026-10-12 02:12:31 CST
+Showing nodes accounting for 8287.62kB, 99.07% of 8365.70kB total
+Dropped 338 nodes (cum <= 41.83kB)
+Showing top 12 nodes out of 24
+      flat  flat%   sum%        cum   cum%
+    8192kB 97.92% 97.92%     8192kB 97.92%  go-demo/lessons/m34_observability_diagnosis/internal/lab.retainBad
+   77.92kB  0.93% 98.86%    77.97kB  0.93%  runtime.mallocgc
+    8.69kB   0.1% 98.96%    43.41kB  0.52%  encoding/json/v2.makeStructFields.func3
+    8.34kB   0.1% 99.06%    52.44kB  0.63%  encoding/json/v2.makeStructFields
+    0.66kB 0.0078% 99.07%    54.02kB  0.65%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).downstream
+    0.02kB 0.00019% 99.07%  8192.02kB 97.92%  go-demo/lessons/m34_observability_diagnosis/internal/lab.heapExperiment
+         0     0% 99.07%    56.56kB  0.68%  encoding/json.(*Encoder).Encode
+         0     0% 99.07%    56.56kB  0.68%  encoding/json/v2.MarshalEncode
+         0     0% 99.07%    52.44kB  0.63%  encoding/json/v2.makeStructArshaler.func1
+         0     0% 99.07%    55.62kB  0.66%  encoding/json/v2.makeStructArshaler.func2
+         0     0% 99.07%    56.56kB  0.68%  encoding/json/v2.marshalEncode
+         0     0% 99.07%  8208.02kB 98.12%  go-demo/lessons/m34_observability_diagnosis/internal/lab.Run

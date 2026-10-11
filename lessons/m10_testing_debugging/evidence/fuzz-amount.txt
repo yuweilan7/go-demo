@@ -1,0 +1,10 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test ./internal/order -run=^$ -fuzz=^FuzzParseCents$ -fuzztime=3s -parallel=2 -timeout=30s
+exit_code=0
+expected_failure=False
+fuzz: elapsed: 0s, gathering baseline coverage: 0/93 completed
+fuzz: elapsed: 0s, gathering baseline coverage: 93/93 completed, now fuzzing with 2 workers
+fuzz: elapsed: 3s, execs: 244821 (81596/sec), new interesting: 14 (total: 107)
+fuzz: elapsed: 3s, execs: 244821 (0/sec), new interesting: 14 (total: 107)
+PASS
+ok  	go-demo/lessons/m10_testing_debugging/internal/order	3.219s

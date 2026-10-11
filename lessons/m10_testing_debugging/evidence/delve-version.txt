@@ -1,0 +1,7 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=dlv version
+exit_code=0
+expected_failure=False
+Delve Debugger
+Version: 1.27.1
+Build: $Id: 38e5cb2261db4e94a735fecc8bc5ccdc1226f2ef $

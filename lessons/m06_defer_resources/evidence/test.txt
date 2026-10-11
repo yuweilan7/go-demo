@@ -1,0 +1,17 @@
+?   	go-demo/lessons/m06_defer_resources/cmd/demo	[no test files]
+=== RUN   TestRegistrationAndReceivers
+--- PASS: TestRegistrationAndReceivers (0.00s)
+=== RUN   TestReturnSlotsAndErrorVisibility
+--- PASS: TestReturnSlotsAndErrorVisibility (0.00s)
+=== RUN   TestRealFileLifetime
+--- PASS: TestRealFileLifetime (0.01s)
+=== RUN   TestFlushCloseAndJoinedCauses
+--- PASS: TestFlushCloseAndJoinedCauses (0.00s)
+=== RUN   TestBorrowedClientOwnership
+--- PASS: TestBorrowedClientOwnership (0.00s)
+=== RUN   TestProcessBoundary
+--- PASS: TestProcessBoundary (0.12s)
+=== RUN   TestHelperProcess
+--- PASS: TestHelperProcess (0.00s)
+PASS
+ok  	go-demo/lessons/m06_defer_resources/internal/lesson	1.273s

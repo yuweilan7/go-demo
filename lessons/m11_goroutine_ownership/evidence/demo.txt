@@ -1,0 +1,84 @@
+01 E01 caller function-value-evaluated
+02 E01 caller argument-evaluated O-101 units=2 amount=200
+03 E01 caller go-returned (没有隐式 join)
+04 E01 worker body-start amount=200
+05 E01 caller observed-started; done=false; release 尚未关闭
+06 E01 caller release-notified
+07 E01 worker observed-release
+08 E01 worker result-written
+09 E01 worker cleanup-written
+10 E01 worker done-notified (结果与清理已发布)
+11 E01 caller joined value=200 cleaned=true
+12 E02 classic caller observed-all-started; release-notified
+13 E02 classic O-101 result-written
+14 E02 classic O-103 result-written
+15 E02 classic O-102 business-error (不取消兄弟)
+16 E02 classic caller joined amounts=[200 0 500] errors=1
+17 E02 go caller observed-all-started; release-notified
+18 E02 go O-101 result-written
+19 E02 go O-102 business-error (不取消兄弟)
+20 E02 go O-103 result-written
+21 E02 go caller joined amounts=[200 0 500] errors=1
+22 E02 late-add caller Wait-returned; task-unfinished=true
+23 E02 late-add harness released-and-joined
+24 E03 request worker before-send cap=1
+25 E03 request worker send-accepted
+26 E03 request worker resources-released
+27 E03 owner joined buffered-task; mailbox-values=1; receiver-business未执行
+28 E03 request worker before-send cap=0
+29 E03 owner abandoning-result; cancel-notified
+30 E03 request worker cancellation-observed
+31 E03 request worker resources-released
+32 E03 owner joined canceled-task active=0 resources=0 delivered=false
+33 E04 request accepted O-101
+34 E04 request handler-returned (仅确认接纳，服务尚有自己的责任)
+35 E04 request returned+canceled; service-active=1 resources=1
+36 E04 service worker waiting-release O-101
+37 E04 service ledger-written O-101
+38 E04 owner observed-job-done ledger=[O-101]
+39 E04 service worker resources-released
+40 E04 service owner Shutdown-joined
+41 E04 final active=0 resources=0
+E05 fault=early-main exit=0 timeout=false child-reaped=true
+EARLY_READY main-returning worker-not-finished
+E05 fault=no-join exit=1 timeout=true child-reaped=true
+NO_JOIN_READY request-returned outstanding=1 stop-handle-lost
+E05 fault=no-receiver exit=2 timeout=false child-reaped=true
+NO_RECEIVER_READY owner-waiting-done worker-sending-without-receiver
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [chan receive]:
+go-demo/lessons/m11_goroutine_ownership/internal/lesson.RunFault({0xdefcc58a120?, 0x12?}, {0x7ff6dc956180, 0xdefcc584058})
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/internal/lesson/faults.go:71 +0x5c5
+main.main()
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/cmd/demo/main.go:18 +0x58
+
+goroutine 7 [chan send]:
+go-demo/lessons/m11_goroutine_ownership/internal/lesson.RunFault.func3()
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/internal/lesson/faults.go:66 +0x77
+created by go-demo/lessons/m11_goroutine_ownership/internal/lesson.RunFault in goroutine 1
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/internal/lesson/faults.go:63 +0x567
+E05 fault=self-wait exit=2 timeout=false child-reaped=true
+SELF_WAIT_READY task-waits-group-that-includes-itself
+fatal error: all goroutines are asleep - deadlock!
+
+goroutine 1 [sync.WaitGroup.Wait]:
+sync.runtime_SemacquireWaitGroup(0x36?, 0x0?)
+	D:/Go/src/runtime/sema.go:114 +0x2e
+sync.(*WaitGroup).Wait(0x33e6c5de6130)
+	D:/Go/src/sync/waitgroup.go:206 +0x85
+go-demo/lessons/m11_goroutine_ownership/internal/lesson.RunFault({0x33e6c5de6120?, 0x12?}, {0x7ff6dc956180, 0x33e6c5de0058})
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/internal/lesson/faults.go:85 +0x314
+main.main()
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/cmd/demo/main.go:18 +0x58
+
+goroutine 7 [sync.WaitGroup.Wait]:
+sync.runtime_SemacquireWaitGroup(0x7ff6dc7d46a0?, 0x0?)
+	D:/Go/src/runtime/sema.go:114 +0x2e
+sync.(*WaitGroup).Wait(0x33e6c5de6130)
+	D:/Go/src/sync/waitgroup.go:206 +0x85
+go-demo/lessons/m11_goroutine_ownership/internal/lesson.RunFault.func4()
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/internal/lesson/faults.go:80 +0x6f
+created by go-demo/lessons/m11_goroutine_ownership/internal/lesson.RunFault in goroutine 1
+	C:/Users/Lenovo/.codex/worktrees/go-course-m11/go-demo/lessons/m11_goroutine_ownership/internal/lesson/faults.go:77 +0x2b8
+M11 PASS：结果、完成同步、服务作用域、资源清理和有界故障均已核对

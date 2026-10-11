@@ -1,0 +1,59 @@
+?   	go-demo/lessons/m01_syntax_packages/cmd/demo	[no test files]
+=== RUN   TestInputBoundaries
+=== RUN   TestInputBoundaries/maximum_quantity
+=== RUN   TestInputBoundaries/overflow
+=== RUN   TestInputBoundaries/negative_quantity
+=== RUN   TestInputBoundaries/nonnumeric
+=== RUN   TestInputBoundaries/int64_overflow
+=== RUN   TestInputBoundaries/JSON_number
+=== RUN   TestInputBoundaries/missing_field
+=== RUN   TestInputBoundaries/unknown_status
+=== RUN   TestInputBoundaries/malformed
+--- PASS: TestInputBoundaries (0.00s)
+    --- PASS: TestInputBoundaries/maximum_quantity (0.00s)
+    --- PASS: TestInputBoundaries/overflow (0.00s)
+    --- PASS: TestInputBoundaries/negative_quantity (0.00s)
+    --- PASS: TestInputBoundaries/nonnumeric (0.00s)
+    --- PASS: TestInputBoundaries/int64_overflow (0.00s)
+    --- PASS: TestInputBoundaries/JSON_number (0.00s)
+    --- PASS: TestInputBoundaries/missing_field (0.00s)
+    --- PASS: TestInputBoundaries/unknown_status (0.00s)
+    --- PASS: TestInputBoundaries/malformed (0.00s)
+PASS
+ok  	go-demo/lessons/m01_syntax_packages/input	1.608s
+?   	go-demo/lessons/m01_syntax_packages/labs/initorder	[no test files]
+?   	go-demo/lessons/m01_syntax_packages/labs/multifile	[no test files]
+?   	go-demo/lessons/m01_syntax_packages/labs/singlefile	[no test files]
+?   	go-demo/lessons/m01_syntax_packages/labs/twopackages	[no test files]
+?   	go-demo/lessons/m01_syntax_packages/labs/twopackages/validation	[no test files]
+?   	go-demo/lessons/m01_syntax_packages/order	[no test files]
+=== RUN   TestShipBusinessFacts
+=== RUN   TestShipBusinessFacts/paid
+=== RUN   TestShipBusinessFacts/zero_quantity
+=== RUN   TestShipBusinessFacts/created
+=== RUN   TestShipBusinessFacts/cancelled
+=== RUN   TestShipBusinessFacts/already_shipped
+=== RUN   TestShipBusinessFacts/unknown_code
+=== RUN   TestShipBusinessFacts/empty_ID
+=== RUN   TestShipBusinessFacts/negative_price
+=== RUN   TestShipBusinessFacts/too_large_price
+--- PASS: TestShipBusinessFacts (0.00s)
+    --- PASS: TestShipBusinessFacts/paid (0.00s)
+    --- PASS: TestShipBusinessFacts/zero_quantity (0.00s)
+    --- PASS: TestShipBusinessFacts/created (0.00s)
+    --- PASS: TestShipBusinessFacts/cancelled (0.00s)
+    --- PASS: TestShipBusinessFacts/already_shipped (0.00s)
+    --- PASS: TestShipBusinessFacts/unknown_code (0.00s)
+    --- PASS: TestShipBusinessFacts/empty_ID (0.00s)
+    --- PASS: TestShipBusinessFacts/negative_price (0.00s)
+    --- PASS: TestShipBusinessFacts/too_large_price (0.00s)
+=== RUN   TestShadowAndBothRepairs
+--- PASS: TestShadowAndBothRepairs (0.00s)
+=== RUN   TestPolicyOrderAndCause
+--- PASS: TestPolicyOrderAndCause (0.00s)
+=== RUN   TestDependencyBoundary
+--- PASS: TestDependencyBoundary (0.00s)
+PASS
+ok  	go-demo/lessons/m01_syntax_packages/service	1.608s
+?   	go-demo/lessons/m01_syntax_packages/startup/registry	[no test files]
+?   	go-demo/lessons/m01_syntax_packages/startup/sideeffect	[no test files]

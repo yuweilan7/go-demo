@@ -1,0 +1,38 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging run ./cmd/demo
+exit_code=0
+expected_failure=False
+E01 金额规则: 12.99 元必须是 1299 分，1e2.00 必须被拒绝
+accepted cents=1299; rejected exponent err=金额格式或范围无效: 非 ASCII 数字
+E02 错误提交与修复: 订单应收 1299 分，本次支付 1300 分
+wrong err=支付金额与订单金额不符: got=1300 want=1299; state=paid credited=0 count=0
+fixed err=支付金额与订单金额不符: got=1300 want=1299; state=pending credited=0 count=0
+E06 取消通知、观察通知、清理完成、owner 等待退出
+stop returned; observed closed; done open; cleaned=false
+release closed; done closed; owner joined; cleaned=true
+E07 真实 loopback HTTP: 拒绝、支付、重放，并核对实际内存副作用
+actual dynamic endpoint=http://127.0.0.1:5690
+attempt=1 HTTP=409 code=AMOUNT_MISMATCH actual state=pending credited=0 count=0
+attempt=2 HTTP=200 code=PAID actual state=paid credited=1299 count=1
+attempt=3 HTTP=200 code=PAID actual state=paid credited=1299 count=1
+E08 标准 goroutine 栈定位: waitForApproval 等待 owner 的 gate
+goroutine 1 [running]:
+runtime/pprof.writeGoroutineStacks({0x7ff793438a10, 0x3e0ad0006450})
+	D:/Go/src/runtime/pprof/pprof.go:816 +0x69
+runtime/pprof.writeGoroutine({0x7ff793438a10?, 0x3e0ad0006450?}, 0x7ff792ce90f5?)
+	D:/Go/src/runtime/pprof/pprof.go:779 +0x25
+runtime/pprof.(*Profile).WriteTo(0x7ff793080333?, {0x7ff793438a10?, 0x3e0ad0006450?}, 0x7ff793085544?)
+	D:/Go/src/runtime/pprof/pprof.go:405 +0x149
+main.runStack()
+	C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:199 +0x1fe
+main.run({0x7ff79307f0c1?, 0x3e0acfe24080?})
+	C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:56 +0x3f5
+main.main()
+	C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:28 +0x9e
+
+goroutine 35 [chan receive]:
+main.waitForApproval(0x3e0ad001c070, 0x0?, 0x0?)
+	C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:183 +0x53
+created by main.runStack in goroutine 1
+	C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:193 +0x149
+stack captured; owner will close gate and wait for done before returning

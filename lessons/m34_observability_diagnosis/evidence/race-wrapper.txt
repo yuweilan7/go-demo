@@ -1,0 +1,3 @@
+x86_64-w64-mingw32
+?   	go-demo/lessons/m34_observability_diagnosis/cmd/demo	[no test files]
+ok  	go-demo/lessons/m34_observability_diagnosis/internal/lab	1.321s

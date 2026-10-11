@@ -13,6 +13,10 @@ coverage.*
 go.work
 go.work.sum
 
+# 课程调度状态、连接配置、凭据与实验运行报告
+.local/
+.secrets/
+
 # JetBrains IDE 的个人工程配置
 .idea/
 

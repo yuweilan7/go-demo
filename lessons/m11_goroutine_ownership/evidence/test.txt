@@ -1,0 +1,38 @@
+?   	go-demo/lessons/m11_goroutine_ownership/cmd/demo	[no test files]
+=== RUN   TestLifecyclePublication
+--- PASS: TestLifecyclePublication (0.00s)
+=== RUN   TestWaitGroupKeepsBusinessErrorsOutsideGroup
+=== RUN   TestWaitGroupKeepsBusinessErrorsOutsideGroup/classic
+=== RUN   TestWaitGroupKeepsBusinessErrorsOutsideGroup/go
+--- PASS: TestWaitGroupKeepsBusinessErrorsOutsideGroup (0.00s)
+    --- PASS: TestWaitGroupKeepsBusinessErrorsOutsideGroup/classic (0.00s)
+    --- PASS: TestWaitGroupKeepsBusinessErrorsOutsideGroup/go (0.00s)
+=== RUN   TestLateAddWaitIsNotJoin
+--- PASS: TestLateAddWaitIsNotJoin (0.00s)
+=== RUN   TestReceiverAndMailbox
+--- PASS: TestReceiverAndMailbox (0.00s)
+=== RUN   TestRequestOwnersReleaseEveryRegisteredTask
+--- PASS: TestRequestOwnersReleaseEveryRegisteredTask (0.00s)
+=== RUN   TestRequestEndDoesNotEndService
+--- PASS: TestRequestEndDoesNotEndService (0.00s)
+=== RUN   TestServiceShutdownFinishesRunningAndQueuedJobs
+--- PASS: TestServiceShutdownFinishesRunningAndQueuedJobs (0.00s)
+=== RUN   TestFaultChild
+    lesson_test.go:234: 仅由 TestIsolatedFaults 的有界 child 调用
+--- SKIP: TestFaultChild (0.00s)
+=== RUN   TestIsolatedFaults
+=== RUN   TestIsolatedFaults/early-main
+    lesson_test.go:257: 真实 child：exit=0 timeout=false output=EARLY_READY main-returning worker-not-finished
+=== RUN   TestIsolatedFaults/no-join
+    lesson_test.go:257: 真实 child：exit=1 timeout=true output=NO_JOIN_READY request-returned outstanding=1 stop-handle-lost
+=== RUN   TestIsolatedFaults/no-receiver
+    lesson_test.go:257: 真实 child：exit=2 timeout=false output=NO_RECEIVER_READY owner-waiting-done worker-sending-without-receiver
+=== RUN   TestIsolatedFaults/self-wait
+    lesson_test.go:257: 真实 child：exit=2 timeout=false output=SELF_WAIT_READY task-waits-group-that-includes-itself
+--- PASS: TestIsolatedFaults (0.68s)
+    --- PASS: TestIsolatedFaults/early-main (0.03s)
+    --- PASS: TestIsolatedFaults/no-join (0.60s)
+    --- PASS: TestIsolatedFaults/no-receiver (0.02s)
+    --- PASS: TestIsolatedFaults/self-wait (0.02s)
+PASS
+ok  	go-demo/lessons/m11_goroutine_ownership/internal/lesson	1.952s

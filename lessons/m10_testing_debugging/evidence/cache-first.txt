@@ -1,0 +1,5 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test ./internal/order -run=^TestParseCents$
+exit_code=0
+expected_failure=False
+ok  	go-demo/lessons/m10_testing_debugging/internal/order	(cached)

@@ -1,0 +1,68 @@
+=== L04 单文件漏选 | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\multifile run main.go | exit=1 ===
+# command-line-arguments
+.\main.go:6:2: undefined: formatReceipt
+=== L04 整包正常 | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\multifile run . | exit=0 ===
+[L04 package] id=ORD-100 total_cents=2500 files=main.go+format.go
+=== L05 文件 a 在前 | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\initorder run main.go a.go z.go | exit=0 ===
+[L05 variable] base=10
+[L05 variable] derived=11
+[L05 init] a.go.init
+[L05 init] z.go.init
+[L05 main] base=10 derived=11
+=== L05 文件 z 在前 | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\initorder run main.go z.go a.go | exit=0 ===
+[L05 variable] base=10
+[L05 variable] derived=11
+[L05 init] z.go.init
+[L05 init] a.go.init
+[L05 main] base=10 derived=11
+=== L06 singlefile | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages run ./labs/singlefile | exit=0 ===
+[L06 single] id=ORD-100 total_cents=2500
+=== L06 twopackages | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages run ./labs/twopackages | exit=0 ===
+[L06 two-packages] id=ORD-100 total_cents=2500
+=== L07 选中 rules | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\deps\app list -m -json example.com/m01/rules | exit=0 ===
+{
+	"Path": "example.com/m01/rules",
+	"Version": "v1.2.0",
+	"Replace": {
+		"Path": "../rules",
+		"Dir": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m01\\go-demo\\lessons\\m01_syntax_packages\\labs\\deps\\rules",
+		"GoMod": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m01\\go-demo\\lessons\\m01_syntax_packages\\labs\\deps\\rules\\go.mod",
+		"GoVersion": "1.27.0"
+	},
+	"Indirect": true,
+	"Dir": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m01\\go-demo\\lessons\\m01_syntax_packages\\labs\\deps\\rules",
+	"GoMod": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m01\\go-demo\\lessons\\m01_syntax_packages\\labs\\deps\\rules\\go.mod",
+	"GoVersion": "1.27.0"
+}
+=== L07 模块图 | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\deps\app mod graph | exit=0 ===
+example.com/m01/app example.com/m01/quote@v1.0.0
+example.com/m01/app example.com/m01/receipt@v1.0.0
+example.com/m01/app example.com/m01/rules@v1.2.0
+example.com/m01/app go@1.27.0
+example.com/m01/quote@v1.0.0 example.com/m01/rules@v1.1.0
+example.com/m01/quote@v1.0.0 go@1.27.0
+example.com/m01/receipt@v1.0.0 example.com/m01/rules@v1.2.0
+example.com/m01/receipt@v1.0.0 go@1.27.0
+example.com/m01/rules@v1.2.0 go@1.27.0
+go@1.27.0 toolchain@go1.27.0
+=== L07 app 实际调用 | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\deps\app run . | exit=0 ===
+[L07 quote] ORD-100 quote via local-rules-source
+[L07 receipt] ORD-100 receipt via local-rules-source
+=== L07 消费者遗漏 replace | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\deps\consumer run -mod=mod . | exit=1 ===
+go: downloading example.com/m01/rules v1.1.0
+..\quote\quote.go:4:8: module lookup disabled by GOPROXY=off
+=== L07 消费者补齐 replace | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages\labs\deps\consumer run -mod=mod -modfile=fixed.mod . | exit=0 ===
+[L07 consumer] ORD-100 quote via local-rules-source
+=== L08 no-new | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages run ./testdata/compilefail/no-new/main.go | exit=1 ===
+# command-line-arguments
+testdata\compilefail\no-new\main.go:7:11: no new variables on left side of :=
+=== L08 if-scope | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages run ./testdata/compilefail/if-scope/main.go | exit=1 ===
+# command-line-arguments
+testdata\compilefail\if-scope\main.go:11:14: undefined: err
+=== L08 export | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages run ./testdata/compilefail/export/main.go | exit=1 ===
+# command-line-arguments
+testdata\compilefail\export\main.go:9:8: store.save undefined (cannot refer to unexported method save)
+=== L08 overflow | go -C C:\Users\Lenovo\.codex\worktrees\go-course-m01\go-demo\lessons\m01_syntax_packages run ./testdata/compilefail/overflow/main.go | exit=1 ===
+# command-line-arguments
+testdata\compilefail\overflow\main.go:7:23: cannot use input (untyped int constant 256) as uint8 value in variable declaration (overflows)
+PASS: L04-L08 正常路径和预期失败证据均已核对，子进程已全部退出。

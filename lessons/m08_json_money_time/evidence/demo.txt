@@ -1,0 +1,88 @@
+M08 runtime=go1.27.0 contract=order.v1
+
+[E01-A] v1 零值、null 与缺失
+raw={} -> quantity=0 note_nil=true tags_nil=true len=0
+raw={"quantity":null,"tags":null} -> quantity=0 note_nil=true tags_nil=true len=0
+raw={"quantity":0,"tags":[]} -> quantity=0 note_nil=true tags_nil=false len=0
+已有 quantity=7 再解 null -> quantity=7（v1 标量 null 不改原值）
+普通 *int64 raw={} -> nil
+普通 *int64 raw={"quantity":null} -> nil
+普通 *int64 raw={"quantity":0} -> 非nil，*quantity=0
+
+[E01-B] 导出字段、tag 与 omitempty 只控制输出
+v1 omitempty（零数量/空tags省略，非nil空备注保留）={"note":""}
+不省略 tags_nil=true -> {"tags":null}
+不省略 tags_nil=false -> {"tags":[]}
+
+[E01-C] 默认宽松行为与契约拒绝
+raw={"quantity":1,"quantity":9}
+  单次v1 Decode quantity=9 err=<nil>
+  契约DecodePatch err=重复 JSON 名字 "quantity"
+raw={"quantity":1,"quanTity":9}
+  单次v1 Decode quantity=9 err=<nil>
+  契约DecodePatch err=未知或大小写不符的字段 "quanTity"
+raw={"quantitty":3}
+  单次v1 Decode quantity=0 err=<nil>
+  契约DecodePatch err=未知或大小写不符的字段 "quantitty"
+raw={"quantity":1} {"quantity":9}
+  单次v1 Decode quantity=1 err=<nil>
+  契约DecodePatch err=一份请求中出现了第二个 JSON 值
+raw={"quantity":1} trailing
+  单次v1 Decode quantity=1 err=<nil>
+  契约DecodePatch err=JSON 尾随数据: invalid character 'a' in literal true (expecting 'u')
+创建通过 -> {"contract_version":"order.v1","request_id":"req-m08-001","order_id":"9007199254740993","user_id":"42","sku":"SKU-M08","quantity":1,"currency":"CNY","amount_minor":"299","expires_at":"2026-10-12T02:00:00Z","note":"gift","tags":["new"]}
+quantity=0 -> 解码err=<nil>；业务校验err=quantity 必须显式为 1..1000 的整数，不能缺失/null/0
+
+[E01-D] PATCH 三态与原订单副作用
+raw={} -> Present=false Null=false Value=0 apply_err=<nil> candidate_quantity=1 candidate_amount=299 original_quantity=1 original_amount=299
+raw={"quantity":null} -> Present=true Null=true Value=0 apply_err=PATCH quantity 不能是 null/0，范围为 1..1000 original_quantity=1 original_amount=299
+raw={"quantity":0} -> Present=true Null=false Value=0 apply_err=PATCH quantity 不能是 null/0，范围为 1..1000 original_quantity=1 original_amount=299
+raw={"quantity":2} -> Present=true Null=false Value=2 apply_err=<nil> candidate_quantity=2 candidate_amount=598 original_quantity=1 original_amount=299
+raw={} -> {"contract_version":"order.v1","request_id":"req-m08-001","order_id":"9007199254740993","user_id":"42","sku":"SKU-M08","quantity":1,"currency":"CNY","amount_minor":"299","expires_at":"2026-10-12T02:00:00Z","note":"gift","tags":["new"]}
+raw={"note":null} -> {"contract_version":"order.v1","request_id":"req-m08-001","order_id":"9007199254740993","user_id":"42","sku":"SKU-M08","quantity":1,"currency":"CNY","amount_minor":"299","expires_at":"2026-10-12T02:00:00Z","note":null,"tags":["new"]}
+raw={"note":""} -> {"contract_version":"order.v1","request_id":"req-m08-001","order_id":"9007199254740993","user_id":"42","sku":"SKU-M08","quantity":1,"currency":"CNY","amount_minor":"299","expires_at":"2026-10-12T02:00:00Z","note":"","tags":["new"]}
+raw={"tags":null} -> 拒绝=PATCH tags 不能是 null；清空请传 []
+raw={"tags":[]} -> {"contract_version":"order.v1","request_id":"req-m08-001","order_id":"9007199254740993","user_id":"42","sku":"SKU-M08","quantity":1,"currency":"CNY","amount_minor":"299","expires_at":"2026-10-12T02:00:00Z","note":"gift","tags":[]}
+内存owner安装 raw={"quantity":2} err=<nil> final_quantity=2 final_amount=598
+内存owner安装 raw={"quantity":0} err=PATCH quantity 不能是 null/0，范围为 1..1000 final_quantity=2 final_amount=598
+
+[E02-A] map[string]any 的大整数
+原文=9007199254740993 map动态类型=float64 存储=9007199254740992 int64=9007199254740992
+UseNumber=9007199254740993；具体int64=9007199254740993；order.v1线上ID用字符串
+
+[E02-B] 二进制浮点金额与截断
+运行时0.1+0.2=0.30000000000000004 ==0.3=false
+运行时0.29*100=28.99999999999999645 转int64=28（29分丢成28分）
+整数修复：10+20=30 最小单位；币种=CNY
+CNY 0.29 -> 拒额外精度=29 err=<nil>；HalfUp=29 err=<nil>
+CNY 1.005 -> 拒额外精度=0 err=CNY 最多 2 位小数，额外精度必须显式选择舍入；HalfUp=101 err=<nil>
+JPY 1.50 -> 拒额外精度=0 err=JPY 最多 0 位小数，额外精度必须显式选择舍入；HalfUp=2 err=<nil>
+KWD 1.234 -> 拒额外精度=1234 err=<nil>；HalfUp=1234 err=<nil>
+CNY 92233720368547758.08 -> 拒额外精度=0 err=舍入后金额溢出 int64；HalfUp=0 err=舍入后金额溢出 int64
+MaxInt64+1=最小单位加法溢出 int64；不同币种=不能直接相加不同币种 CNY/USD；MaxInt64*2=最小单位乘法溢出 int64
+
+[E02-C] 汇率是方向、精度、时效与舍入的组合契约
+105 CNY最小单位 * (7/50 主单位汇率) -> exact_err=汇率换算: 结果包含不足一个最小单位的部分；HalfUp=USD/15 err=<nil>；到期报价=汇率报价尚未生效或已经到期
+100 SGD最小单位（1 SGD）-> 113 JPY最小单位（113 JPY）
+
+[E03-A] 同一时刻的 UTC、上海、纽约
+expires UTC=2026-10-12T02:00:00Z 上海=2026-10-12T10:00:00+08:00 纽约=2026-10-11T22:00:00-04:00
+相对deadline=-1s now上海=2026-10-12T09:59:59+08:00 now纽约=2026-10-11T21:59:59-04:00 expiredUTC=false expired上海=false expired纽约=false
+相对deadline=0s now上海=2026-10-12T10:00:00+08:00 now纽约=2026-10-11T22:00:00-04:00 expiredUTC=true expired上海=true expired纽约=true
+相对deadline=1s now上海=2026-10-12T10:00:01+08:00 now纽约=2026-10-11T22:00:01-04:00 expiredUTC=true expired上海=true expired纽约=true
+
+[E03-B] 无时区本地文本：Parse 与 ParseInLocation
+Parse=2026-10-12T10:00:00Z ParseInLocation转UTC=2026-10-12T02:00:00Z 相差=8h0m0s；到期wrong=false correct=true
+新接口直接拒绝无offset文本=时间必须是带 Z/offset 的严格 RFC3339，最多 9 位小数
+
+[E03-C] Duration 单位和 Unix 秒/毫秒
+Duration(30)=30ns；30*time.Minute=30m0s
+Unix秒=1791770400 Unix毫秒=1791770400000；毫秒塞入Unix的year=58748 expired=false
+秒塞入UnixMilli=1970-01-21T17:42:50Z expired=true；正确UnixMilli=2026-10-12T02:00:00Z equal=true；范围校验err=Unix 毫秒不在订单时间范围 [2000,2100)，检查是否误传秒
+
+[E03-D] 进程内单调钟、JSON 墙钟与 Equal
+Now含单调钟标记=true Add后含标记=true JSON恢复含标记=false
+end.Sub(start)=30m0s；Equal(恢复)=true；==(恢复)=false；Round(0)Equal=true
+m= 的数值与单调钟测量属于本进程；到期字段落盘后只保留墙钟时刻，不能承诺抗系统改钟。
+
+M08 核心实验完成：副作用仅为本进程的订单值变化。

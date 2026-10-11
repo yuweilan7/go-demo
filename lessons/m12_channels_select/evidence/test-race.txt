@@ -1,0 +1,3 @@
+?   	go-demo/lessons/m12_channels_select/cmd/demo	[no test files]
+?   	go-demo/lessons/m12_channels_select/cmd/fault	[no test files]
+ok  	go-demo/lessons/m12_channels_select/internal/course	8.255s

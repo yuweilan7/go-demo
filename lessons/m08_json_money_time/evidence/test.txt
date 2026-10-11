@@ -1,0 +1,151 @@
+?   	go-demo/lessons/m08_json_money_time/cmd/demo	[no test files]
+=== RUN   TestDefaultsAndCompatibility
+=== RUN   TestDefaultsAndCompatibility/v1
+=== RUN   TestDefaultsAndCompatibility/v2
+=== RUN   TestDefaultsAndCompatibility/v2兼容
+--- PASS: TestDefaultsAndCompatibility (0.00s)
+    --- PASS: TestDefaultsAndCompatibility/v1 (0.00s)
+    --- PASS: TestDefaultsAndCompatibility/v2 (0.00s)
+    --- PASS: TestDefaultsAndCompatibility/v2兼容 (0.00s)
+=== RUN   TestV2InputBoundaries
+--- PASS: TestV2InputBoundaries (0.00s)
+PASS
+ok  	go-demo/lessons/m08_json_money_time/cmd/jsonv2	3.555s
+=== RUN   TestPatchThreeStates
+=== RUN   TestPatchThreeStates/{}
+=== RUN   TestPatchThreeStates/{"quantity":null}
+=== RUN   TestPatchThreeStates/{"quantity":0}
+=== RUN   TestPatchThreeStates/{"quantity":2}
+--- PASS: TestPatchThreeStates (0.02s)
+    --- PASS: TestPatchThreeStates/{} (0.02s)
+    --- PASS: TestPatchThreeStates/{"quantity":null} (0.00s)
+    --- PASS: TestPatchThreeStates/{"quantity":0} (0.00s)
+    --- PASS: TestPatchThreeStates/{"quantity":2} (0.00s)
+=== RUN   TestPatchNullableNoteAndCollection
+=== RUN   TestPatchNullableNoteAndCollection/{}
+=== RUN   TestPatchNullableNoteAndCollection/{"note":null}
+=== RUN   TestPatchNullableNoteAndCollection/{"note":""}
+=== RUN   TestPatchNullableNoteAndCollection/{"tags":[]}
+=== RUN   TestPatchNullableNoteAndCollection/{"tags":null}
+=== RUN   TestPatchNullableNoteAndCollection/{"note":"changed","tags":null}
+--- PASS: TestPatchNullableNoteAndCollection (0.00s)
+    --- PASS: TestPatchNullableNoteAndCollection/{} (0.00s)
+    --- PASS: TestPatchNullableNoteAndCollection/{"note":null} (0.00s)
+    --- PASS: TestPatchNullableNoteAndCollection/{"note":""} (0.00s)
+    --- PASS: TestPatchNullableNoteAndCollection/{"tags":[]} (0.00s)
+    --- PASS: TestPatchNullableNoteAndCollection/{"tags":null} (0.00s)
+    --- PASS: TestPatchNullableNoteAndCollection/{"note":"changed","tags":null} (0.00s)
+=== RUN   TestStrictBoundary
+=== RUN   TestStrictBoundary/{"quantity":1,"quantity":9}
+=== RUN   TestStrictBoundary/{"quantity":1,"\u0071uantity":9}
+=== RUN   TestStrictBoundary/{"QUANTITY":1}
+=== RUN   TestStrictBoundary/{"quantitty":1}
+=== RUN   TestStrictBoundary/{"quantity":1}_{}
+=== RUN   TestStrictBoundary/{"quantity":1}_trailing
+=== RUN   TestStrictBoundary/[]
+=== RUN   TestStrictBoundary/null
+=== RUN   TestStrictBoundary/{"quantity":1.0}
+=== RUN   TestStrictBoundary/{"quantity":"2"}
+=== RUN   TestStrictBoundary/{"quantity":9223372036854775808}
+=== RUN   TestStrictBoundary/{"quantity":
+=== RUN   TestStrictBoundary/{"note":"�"}
+=== RUN   TestStrictBoundary/________________________________________________________________________________
+--- PASS: TestStrictBoundary (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":1,"quantity":9} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":1,"\u0071uantity":9} (0.00s)
+    --- PASS: TestStrictBoundary/{"QUANTITY":1} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantitty":1} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":1}_{} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":1}_trailing (0.00s)
+    --- PASS: TestStrictBoundary/[] (0.00s)
+    --- PASS: TestStrictBoundary/null (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":1.0} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":"2"} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity":9223372036854775808} (0.00s)
+    --- PASS: TestStrictBoundary/{"quantity": (0.00s)
+    --- PASS: TestStrictBoundary/{"note":"�"} (0.00s)
+    --- PASS: TestStrictBoundary/________________________________________________________________________________ (0.00s)
+=== RUN   TestCreateValidation
+=== RUN   TestCreateValidation/"order.v2"
+=== RUN   TestCreateValidation/""
+=== RUN   TestCreateValidation/"order_id":9007199254740993
+=== RUN   TestCreateValidation/"order_id":"09007199254740993"
+=== RUN   TestCreateValidation/"order_id":"18446744073709551616"
+=== RUN   TestCreateValidation/"quantity":0
+=== RUN   TestCreateValidation/"quantity":null
+=== RUN   TestCreateValidation/#00
+=== RUN   TestCreateValidation/"quantity":1001
+=== RUN   TestCreateValidation/"currency":"cny"
+=== RUN   TestCreateValidation/"amount_minor":299
+=== RUN   TestCreateValidation/"amount_minor":"2.99"
+=== RUN   TestCreateValidation/"amount_minor":"0"
+=== RUN   TestCreateValidation/"amount_minor":"-1"
+=== RUN   TestCreateValidation/"amount_minor":"9223372036854775808"
+=== RUN   TestCreateValidation/"amount_minor":null
+=== RUN   TestCreateValidation/"expires_at":"2026-10-12T01:59:00Z"
+=== RUN   TestCreateValidation/"expires_at":null
+=== RUN   TestCreateValidation/"tags":null
+=== RUN   TestCreateValidation/#01
+--- PASS: TestCreateValidation (0.00s)
+    --- PASS: TestCreateValidation/"order.v2" (0.00s)
+    --- PASS: TestCreateValidation/"" (0.00s)
+    --- PASS: TestCreateValidation/"order_id":9007199254740993 (0.00s)
+    --- PASS: TestCreateValidation/"order_id":"09007199254740993" (0.00s)
+    --- PASS: TestCreateValidation/"order_id":"18446744073709551616" (0.00s)
+    --- PASS: TestCreateValidation/"quantity":0 (0.00s)
+    --- PASS: TestCreateValidation/"quantity":null (0.00s)
+    --- PASS: TestCreateValidation/#00 (0.00s)
+    --- PASS: TestCreateValidation/"quantity":1001 (0.00s)
+    --- PASS: TestCreateValidation/"currency":"cny" (0.00s)
+    --- PASS: TestCreateValidation/"amount_minor":299 (0.00s)
+    --- PASS: TestCreateValidation/"amount_minor":"2.99" (0.00s)
+    --- PASS: TestCreateValidation/"amount_minor":"0" (0.00s)
+    --- PASS: TestCreateValidation/"amount_minor":"-1" (0.00s)
+    --- PASS: TestCreateValidation/"amount_minor":"9223372036854775808" (0.00s)
+    --- PASS: TestCreateValidation/"amount_minor":null (0.00s)
+    --- PASS: TestCreateValidation/"expires_at":"2026-10-12T01:59:00Z" (0.00s)
+    --- PASS: TestCreateValidation/"expires_at":null (0.00s)
+    --- PASS: TestCreateValidation/"tags":null (0.00s)
+    --- PASS: TestCreateValidation/#01 (0.00s)
+=== RUN   TestDecimalAndOverflow
+=== RUN   TestDecimalAndOverflow/CNY/0.29
+=== RUN   TestDecimalAndOverflow/CNY/1.005
+=== RUN   TestDecimalAndOverflow/CNY/1.005#01
+=== RUN   TestDecimalAndOverflow/CNY/1.004
+=== RUN   TestDecimalAndOverflow/CNY/1.999
+=== RUN   TestDecimalAndOverflow/JPY/1.50
+=== RUN   TestDecimalAndOverflow/KWD/1.234
+=== RUN   TestDecimalAndOverflow/CNY/92233720368547758.07
+=== RUN   TestDecimalAndOverflow/CNY/92233720368547758.075
+=== RUN   TestDecimalAndOverflow/CNY/-1
+=== RUN   TestDecimalAndOverflow/CNY/1e2
+=== RUN   TestDecimalAndOverflow/CNY/1.
+=== RUN   TestDecimalAndOverflow/CNY/.5
+=== RUN   TestDecimalAndOverflow/CNY/NaN
+=== RUN   TestDecimalAndOverflow/XXX/1
+=== RUN   TestDecimalAndOverflow/CNY/1
+--- PASS: TestDecimalAndOverflow (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/0.29 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1.005 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1.005#01 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1.004 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1.999 (0.00s)
+    --- PASS: TestDecimalAndOverflow/JPY/1.50 (0.00s)
+    --- PASS: TestDecimalAndOverflow/KWD/1.234 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/92233720368547758.07 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/92233720368547758.075 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/-1 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1e2 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1. (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/.5 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/NaN (0.00s)
+    --- PASS: TestDecimalAndOverflow/XXX/1 (0.00s)
+    --- PASS: TestDecimalAndOverflow/CNY/1 (0.00s)
+=== RUN   TestFXBoundaries
+--- PASS: TestFXBoundaries (0.00s)
+=== RUN   TestTimeContract
+--- PASS: TestTimeContract (0.00s)
+=== RUN   TestMonotonicSerialization
+--- PASS: TestMonotonicSerialization (0.00s)
+PASS
+ok  	go-demo/lessons/m08_json_money_time/internal/contract	3.559s

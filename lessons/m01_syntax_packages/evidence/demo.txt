@@ -1,0 +1,27 @@
+[L00 init] registry 变量初始化
+[L00 init] registry.init
+[L00 init] sideeffect 注册 "demo-validator"
+[L00 init] main 变量初始化：names=[demo-validator]
+[L00 init] main.init
+[L00 main] names=[demo-validator]
+
+[L01] 请求文本 → 校验 → 出库记录
+[L01 zero] count=0 text="" enabled=false err=<nil> status=unknown
+[L01 accepted] id=ORD-100 quantity=2 total_cents=2500 records=1
+[L01 rejected] id=ORD-100 err=出库拒绝：订单 ORD-100 的数量必须在 [1,255] records=1
+[L01 rejected] id=ORD-101 err=出库拒绝：订单 ORD-101 尚未支付：status=created records=1
+[L01 rejected] id=ORD-102 err=出库拒绝：订单 ORD-102 的状态码不受支持：status=Status(99) records=1
+
+[L02] 同名 err 的三个路径
+[L02 bad] inner_err=订单 ORD-100 的数量必须在 [1,255]
+[L02 bad] caller_err=<nil> quantity=0 records=1
+[L02 fixed =] caller_err=出库拒绝：订单 ORD-100 的数量必须在 [1,255] records=0
+[L02 fixed return] caller_err=出库拒绝：订单 ORD-100 的数量必须在 [1,255] records=0
+
+[L03] 数值和多重赋值
+[L03 widths] int=64位 int64=固定64位 uint8=0..255
+[L03 conversion] constant=255 runtime uint16(256)->uint8=0
+[L03 checked] 256 被 8 位输入边界拒绝：strconv.ParseUint: parsing "256": value out of range
+[L03 assignment] left=ORD-101 right=ORD-100
+[L03 named] whole_yuan=25 remainder_cents=0
+[DONE] 正常路径与危险/修复对照断言全部成立

@@ -1,0 +1,17 @@
+Type: delay
+Showing nodes accounting for 2285.98ms, 99.94% of 2287.26ms total
+Dropped 93 nodes (cum <= 11.44ms)
+Showing top 12 nodes out of 29
+      flat  flat%   sum%        cum   cum%
+ 1896.83ms 82.93% 82.93%  1896.83ms 82.93%  runtime.selectgo
+  201.55ms  8.81% 91.74%   201.55ms  8.81%  runtime.chanrecv1
+  187.60ms  8.20% 99.94%   187.60ms  8.20%  sync.(*Mutex).Lock
+         0     0% 99.94%    24.58ms  1.07%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).Await
+         0     0% 99.94%   373.74ms 16.34%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).badCheckout
+         0     0% 99.94%   194.34ms  8.50%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).callDependency
+         0     0% 99.94%   381.43ms 16.68%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout
+         0     0% 99.94%   188.86ms  8.26%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).downstream
+         0     0% 99.94%   406.76ms 17.78%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*driverOwner).launch.func1
+         0     0% 99.94%   406.76ms 17.78%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*driverOwner).start.func1
+         0     0% 99.94%   216.78ms  9.48%  go-demo/lessons/m34_observability_diagnosis/internal/lab.Run
+         0     0% 99.94%   216.78ms  9.48%  go-demo/lessons/m34_observability_diagnosis/internal/lab.Run.func5

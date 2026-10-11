@@ -1,0 +1,10 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test -tags=faults -run=^TestSharedFixture -count=1 -parallel=2 -timeout=30s ./faults
+exit_code=1
+expected_failure=True
+--- FAIL: TestSharedFixtureContaminatesSibling (0.00s)
+    --- FAIL: TestSharedFixtureContaminatesSibling/expect_pending (0.00s)
+        logic_test.go:61: shared fixture state=paid count=1; this test wanted an independent pending order
+FAIL
+FAIL	go-demo/lessons/m10_testing_debugging/faults	0.125s
+FAIL

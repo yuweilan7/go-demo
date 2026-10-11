@@ -1,0 +1,35 @@
+syntax = "proto3";
+package course.inventory.v1;
+option go_package = "go-demo/lessons/m31_grpc_protobuf/gen/inventoryv1";
+
+service Inventory {
+  rpc Reserve(ReserveRequest) returns (ReserveReply);
+  rpc Inspect(InspectRequest) returns (Stock);
+  rpc Watch(stream WatchRequest) returns (stream Stock);
+}
+
+// 这些模式只用于有界教学故障，生产 API 不应允许用户选择实现缺陷。
+enum ProcessingMode {
+  NORMAL = 0;
+  DROP_CONTEXT_BEFORE_COMMIT = 1;
+  PROPAGATE_CONTEXT_BEFORE_COMMIT = 2;
+  COMMIT_BEFORE_RESPONSE = 3;
+  PANIC_BEFORE_COMMIT = 4;
+}
+message ReserveRequest {
+  string request_id = 1;
+  string sku = 2;
+  int32 quantity = 3;
+  ProcessingMode mode = 4;
+}
+message ReserveReply { string request_id = 1; int32 remaining = 2; }
+message InspectRequest { string sku = 1; }
+message Stock {
+  string sku = 1;
+  int32 available = 2;
+  int32 sequence = 3;
+  bytes padding = 4;
+}
+// Conflict 放入 gRPC status 的 Any details，不把缺货伪装成成功响应。
+message Conflict { string sku = 1; int32 requested = 2; int32 available = 3; }
+message WatchRequest { string run_id = 1; string sku = 2; int32 samples = 3; int32 padding_bytes = 4; }

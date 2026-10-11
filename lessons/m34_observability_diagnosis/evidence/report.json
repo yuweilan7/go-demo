@@ -1,0 +1,27 @@
+{
+  "environment": {
+    "captured_at": "2026-10-11T18:12:30.7375714Z",
+    "go_version": "go1.27.0",
+    "os": "windows",
+    "arch": "amd64",
+    "logical_cpus": 16,
+    "gomaxprocs": 16,
+    "otel_version": "v1.47.0",
+    "limits": "work overall 45s; HTTP 4s; driver cleanup fresh 3s per owner; server cleanup fresh 3s; child 5s; 400000 x 4KiB digest; retained array 8MiB; 3 listeners per trial; 2 concurrent requests",
+    "scope": "local real HTTP and local stdouttrace exporter; possible concurrent course builds; timings are this sample, no cloud backend or performance SLA"
+  },
+  "bad_queued_while_io": true,
+  "fixed_completed_before_release": true,
+  "unknown_committed": true,
+  "canceled_not_dispatched": true,
+  "cpu_checksum": 9793410642751206272,
+  "cpu_bad_ms": 704.6107,
+  "cpu_fixed_ms": 0.5033,
+  "cpu_timing_scope": "Result.Elapsed from after driver span Start through client.Do response headers/error; excludes response body decode/Close and span.End",
+  "digest_bad_calls": 400000,
+  "digest_fixed_calls": 1,
+  "exported_local_spans": 42,
+  "validated_remote_parent_edges": 18,
+  "validated_async_links": 6,
+  "cleanup": "each async driver child canceled/gate released and independent Done joined with fresh cleanup budget; all HTTP handlers/listeners and owned audit goroutines separately joined; transports idle connections closed; CPU/trace stopped; profile settings restored on return; bounded child processes exited"
+}

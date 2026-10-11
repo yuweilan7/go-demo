@@ -1,0 +1,20 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: delay
+Time: 2026-10-12 02:12:31 CST
+Showing nodes accounting for 1555.03ms, 100% of 1555.16ms total
+Dropped 76 nodes (cum <= 7.78ms)
+Showing top 12 nodes out of 34
+      flat  flat%   sum%        cum   cum%
+ 1166.52ms 75.01% 75.01%  1166.52ms 75.01%  runtime.selectgo
+  201.48ms 12.96% 87.97%   201.48ms 12.96%  runtime.chanrecv1
+  187.03ms 12.03%   100%   187.03ms 12.03%  sync.(*Mutex).Lock (inline)
+         0     0%   100%    22.23ms  1.43%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).Await
+         0     0%   100%   373.76ms 24.03%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).badCheckout
+         0     0%   100%   187.96ms 12.09%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).callDependency
+         0     0%   100%   374.56ms 24.09%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout
+         0     0%   100%   374.56ms 24.09%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout-fm
+         0     0%   100%   184.24ms 11.85%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).downstream
+         0     0%   100%   184.24ms 11.85%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).downstream-fm
+         0     0%   100%   397.14ms 25.54%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*driverOwner).launch.func1
+         0     0%   100%   397.14ms 25.54%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*driverOwner).start.func1

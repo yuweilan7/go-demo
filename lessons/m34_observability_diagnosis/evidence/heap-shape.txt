@@ -1,0 +1,4 @@
+same receipt bytes=true
+bad len=16 cap=8388608
+fixed len=16 cap=16
+profile is allocation-site evidence, not an object reference graph or RSS promise

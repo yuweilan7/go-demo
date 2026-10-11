@@ -1,0 +1,10 @@
+Command (module workdir): go test -race ./... -count=1
+Environment: go1.27.0 windows/amd64, CGO_ENABLED=1, CC=gcc
+Compiler: D:/MinGW/bin/gcc.exe, MinGW.org GCC-8.2.0-3 (32-bit)
+Exit code: 1
+Raw output:
+# runtime/cgo
+cc1.exe: sorry, unimplemented: 64-bit mode not compiled in
+FAIL	go-demo/lessons/m17_net_http/cmd/demo [build failed]
+FAIL	go-demo/lessons/m17_net_http/internal/lab [build failed]
+FAIL

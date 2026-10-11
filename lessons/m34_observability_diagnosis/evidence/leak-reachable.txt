@@ -1,0 +1,12 @@
+kind=reachable runtime=go1.27.0 live_wait_stack=true detected_target=false leak_count=0 debug=1
+--- goroutineleak actual text ---
+goroutineleak profile: total 0
+
+--- live waiting stack ---
+goroutine 8 [chan receive]:
+go-demo/lessons/m34_observability_diagnosis/internal/lab.reachableWaiter(0x1e2b9a4b63f0, 0x0?, 0x1e2b9a527f48?)
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/profiles.go:150 +0x53
+created by go-demo/lessons/m34_observability_diagnosis/internal/lab.LeakChild in goroutine 1
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/profiles.go:166 +0x225
+
+owner repair: close(gate) then await(done); worker exit confirmed

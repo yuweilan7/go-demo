@@ -1,0 +1,8 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test -race -count=1 -timeout=60s -parallel=2 ./...
+exit_code=0
+expected_failure=False
+?   	go-demo/lessons/m10_testing_debugging/cmd/demo	[no test files]
+ok  	go-demo/lessons/m10_testing_debugging/internal/lifecycle	1.266s
+ok  	go-demo/lessons/m10_testing_debugging/internal/order	1.267s
+ok  	go-demo/lessons/m10_testing_debugging/internal/protocol	1.769s

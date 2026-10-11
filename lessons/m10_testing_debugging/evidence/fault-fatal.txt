@@ -1,0 +1,12 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test -vet=off -tags=fatalfault -run=^TestFatalInWorker$ -v -count=1 -timeout=30s ./faults
+exit_code=1
+expected_failure=True
+=== RUN   TestFatalInWorker
+    fatal_test.go:16: 故意错误：在 worker 中 Fatal
+    fatal_test.go:20: owner continued after worker Fatal; worker defer closed done
+    fatal_test.go:24: owner reached its final line; the test remains failed
+--- FAIL: TestFatalInWorker (0.00s)
+FAIL
+FAIL	go-demo/lessons/m10_testing_debugging/faults	0.150s
+FAIL

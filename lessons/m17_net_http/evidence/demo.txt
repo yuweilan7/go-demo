@@ -1,0 +1,76 @@
+
+[E01 复用 Client/Transport 与同步调用] PASS
+  connect_done=true first_response_byte=true status=200 protocol=HTTP/1.1
+  conn_ids=1,1 second.GotConn.Reused=true bodies=0
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=2 Serve=joined listener=closed
+
+[E02 body 泄漏 -> 池等待 -> 有界修复] PASS
+  danger: open_bodies=1; CloseIdleConnections 后仍被占用；second=deadline; second 未到达 handler
+  repair: EOF_bytes=1048576 third.conn=1 reused=true open_bodies=0
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=2 Serve=joined listener=closed
+
+[E03 状态/JSON/业务/大小/早断开] PASS
+  /missing status=404 bytes=38 error=HTTP status=404 code=NOT_FOUND body_owner=0
+  /bad-json status=200 bytes=8 error=解析 JSON: unexpected end of JSON input body_owner=0
+  /business-error status=200 bytes=41 error=业务失败: OUT_OF_STOCK body_owner=0
+  /legacy status=200 bytes=31 error=业务失败: NOT_COMMITTED body_owner=0
+  /large status=200 bytes=1025 error=读到 1025 字节，上限 1024: 响应超过字节上限 body_owner=0
+  /early status=200 bytes=2 error=读取响应体: unexpected EOF body_owner=0
+  /late-status status=200 bytes=37 error=业务失败: REJECTED body_owner=0
+  /fixed-status status=409 bytes=37 error=HTTP status=409 code=REJECTED body_owner=0
+  legacy: HTTP200 != 业务提交；实际账本 rows=0；late-status=200, fixed-status=409
+  cleanup: bodies=0 owned_requests=0 accepted=3 live=0 handled=8 Serve=joined listener=closed
+
+[E04 重复下单与输入边界] PASS
+  danger duplicate_rows=2; repair same_order_ids=3,3 safe_stage_total_rows=3（仅修复分支新增1行）
+  input: oversize=413 trailing_json=400 missing_auth=401 rejected_side_effects=0
+  lost-order: commit 后断开，client=发送/等待响应头: Post "http://127.0.0.1:2107/lost-order": EOF；handler_delta=1 ledger=3->4；GetBody=nil，POST自动重发=0
+  cleanup: bodies=0 owned_requests=0 accepted=2 live=0 handled=9 Serve=joined listener=closed
+
+[E05 请求取消与仍发生的业务副作用] PASS
+  /cancel-order entered -> client_result=Canceled -> server_observed_cancel -> release -> handler_done -> independent_request_join; ledger=0->1
+  /cooperative-order entered -> client_result=Canceled -> server_observed_cancel -> release -> handler_done -> independent_request_join; ledger=1->1
+  cleanup: bodies=0 owned_requests=0 accepted=2 live=0 handled=2 Serve=joined listener=closed
+
+[E06 ResponseHeaderTimeout 所处阶段] PASS
+  handler_entered=true response_headers_sent=false budget=150ms error=发送/等待响应头: Get "http://127.0.0.1:2113/headers?gate=headers": net/http: timeout awaiting response headers server_ctx_canceled=true request_finished=joined
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=1 Serve=joined listener=closed
+
+[E07 Client.Timeout 包含 body 读取] PASS
+  Do status=200 err=nil -> ReadAll bytes=0 error=context deadline exceeded (Client.Timeout or context cancellation while reading body); Client.Timeout=180ms，header预算=1s
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=1 Serve=joined listener=closed
+
+[E08 Request.Context 覆盖 body 阶段] PASS
+  Do=200 -> owner.cancel -> Body.Read=context canceled -> handler_done; total Client.Timeout=3s 尚非触发源
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=1 Serve=joined listener=closed
+
+[E09 TCP connect 与 TLSHandshakeTimeout] PASS
+  normal: ConnectDone=true -> TLSHandshakeStart -> TLSHandshakeDone=true -> HTTP200；校验证书有效
+  closed loopback port: stage=dial error=发送/等待响应头: Get "http://127.0.0.1:2128": dial tcp 127.0.0.1:2128: connectex: No connection could be made because the target machine actively refused it.；Dialer.Timeout=500ms（本次是拒绝，不是OS拨号超时）
+  stall: TCP=true ClientHello_received=true TLS_started=true TLS_completed=false HTTP_first_byte=false budget=150ms error=发送/等待响应头: Get "https://127.0.0.1:2130": net/http: TLS handshake timeout
+  cleanup: TLS/raw peer finished与request finished分别独立join，两个自有listener=closed，body/request owner=0
+
+[E10 服务端 header/body 读预算] PASS
+  raw partial header -> EOF；handler_calls=0；ReadHeaderTimeout=250ms
+  raw partial body -> status=400 ledger=0；ReadTimeout=700ms（从请求读取开始，不是每次 Read 重置）
+  cleanup: bodies=0 owned_requests=0 accepted=2 live=0 handled=1 Serve=joined listener=closed
+
+[E11 服务端 WriteTimeout 与 Flush] PASS
+  WriteTimeout=100ms -> owner 在明确过期后 Release -> Flush=write tcp 127.0.0.1:2137->127.0.0.1:2138: i/o timeout；client=发送/等待响应头: Get "http://127.0.0.1:2137/write-stall?gate=write": EOF；handler 仍执行到 Done
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=1 Serve=joined listener=closed
+
+[E12 长流按段 Flush/写预算] PASS
+  client 实际读到 part=1 -> owner Release -> part=2 -> EOF -> Close；每段设置1s写 deadline；总大小限制1024
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=1 Serve=joined listener=closed
+
+[E13 IdleTimeout 与池限制边界] PASS
+  server IdleTimeout=500ms < client IdleConnTimeout=2s；body EOF/Close -> ConnState live=0 -> next.conn=2 reused=false accepted=2；池容量 != 业务并发限流
+  cleanup: bodies=0 owned_requests=0 accepted=2 live=0 handled=2 Serve=joined listener=closed
+
+[E14 已取消请求的独立收尾屏障] PASS
+  真实HTTP已进入handler -> work ctx=context canceled -> request result=发送/等待响应头: Get "http://127.0.0.1:2146/headers?gate=cleanup-proof": context canceled（结果已消费）
+  cleanup gate未释放：request_finished=false owner_returned=false owned_requests=1；owner在独立预算join等待
+  release cleanup -> events=[cleanup-finished owner-return] -> owned_requests=0；再次等待finished可立即完成，不二次接收result
+  cleanup: bodies=0 owned_requests=0 accepted=1 live=0 handled=1 Serve=joined listener=closed
+
+M17 ALL PASS: 14 个真实网络实验；所有 body/request owner 清零、loopback listener 关闭、Serve 已等待退出。

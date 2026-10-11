@@ -1,0 +1,6 @@
+break paymentcheck go-demo/lessons/m10_testing_debugging/internal/order.(*Store).ApplyPayment
+continue
+print payment
+stack
+continue
+exit

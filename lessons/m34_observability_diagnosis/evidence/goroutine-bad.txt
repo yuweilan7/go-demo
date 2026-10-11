@@ -1,0 +1,69 @@
+goroutine 50 [select]:
+net/http.(*persistConn).roundTrip(0x1d1d31e30640, 0x1d1d31e2ea50)
+	D:/Go/src/net/http/transport.go:3069 +0x84b
+net/http.(*Transport).roundTrip(0x1d1d31e42000, 0x1d1d31e30500)
+	D:/Go/src/net/http/transport.go:725 +0xada
+net/http.(*Transport).RoundTrip(0x1d1d31e30500?, 0x7ff6e83c90e0?)
+	D:/Go/src/net/http/roundtrip.go:33 +0x18
+net/http.send(0x1d1d31e30000, {0x7ff6e83c90e0, 0x1d1d31e42000}, {0x1d1d321890a0?, 0x7ff6e7beab46?, 0x7ff6e8439660?})
+	D:/Go/src/net/http/client.go:266 +0x654
+net/http.(*Client).send(0x1d1d31d07680, 0x1d1d31e30000, {0x7ff6e7bee5f7?, 0x1d1d32189148?, 0x7ff6e8439660?})
+	D:/Go/src/net/http/client.go:187 +0x250
+net/http.(*Client).do(0x1d1d31d07680, 0x1d1d31e30000)
+	D:/Go/src/net/http/client.go:745 +0x9f7
+net/http.(*Client).Do(...)
+	D:/Go/src/net/http/client.go:604
+go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).callDependency(0x1d1d31e364b0, {0x7ff6e83cc720, 0x1d1d320ce540}, {0x1d1d320ca0a0, 0xa}, {0x1d1d320d0074, 0x4})
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/service.go:406 +0x4bf
+go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).badCheckout(0x1d1d31e364b0, {0x7ff6e83cc720, 0x1d1d320ce540}, {0x1d1d320ca0a0, 0xa}, {0x1d1d320d0074, 0x4})
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/service.go:371 +0x21a
+go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout(0x1d1d31e364b0, {0x7ff6e83cc208, 0x1d1d3218c000}, 0x1d1d320d4280)
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/service.go:328 +0xd2f
+net/http.HandlerFunc.ServeHTTP(0x1d1d31e0a600?, {0x7ff6e83cc208?, 0x1d1d3218c000?}, 0x7ff6e7e5201a?)
+	D:/Go/src/net/http/server.go:2338 +0x29
+net/http.(*ServeMux).ServeHTTP(0x7ff6e7be5759?, {0x7ff6e83cc208, 0x1d1d3218c000}, 0x1d1d320d4280)
+	D:/Go/src/net/http/server.go:2903 +0x1cf
+net/http.serverHandler.ServeHTTP({0x1d1d320fe000?}, {0x7ff6e83cc208?, 0x1d1d3218c000?}, 0x1?)
+	D:/Go/src/net/http/server.go:3413 +0x8e
+net/http.(*conn).serve(0x1d1d32120000, {0x7ff6e83cc720, 0x1d1d31d98210})
+	D:/Go/src/net/http/server.go:2137 +0x6dc
+created by net/http.(*Server).Serve in goroutine 12
+	D:/Go/src/net/http/server.go:3581 +0x4fd
+
+goroutine 15 [select]:
+go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).downstream(0x1d1d31e364b0, {0x7ff6e83cc208, 0x1d1d3218c0f0}, 0x1d1d320d43c0)
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/service.go:230 +0x658
+net/http.HandlerFunc.ServeHTTP(0x1d1d31e0a540?, {0x7ff6e83cc208?, 0x1d1d3218c0f0?}, 0x7ff6e7e5201a?)
+	D:/Go/src/net/http/server.go:2338 +0x29
+net/http.(*ServeMux).ServeHTTP(0x7ff6e7be5759?, {0x7ff6e83cc208, 0x1d1d3218c0f0}, 0x1d1d320d43c0)
+	D:/Go/src/net/http/server.go:2903 +0x1cf
+net/http.serverHandler.ServeHTTP({0x1d1d320fe180?}, {0x7ff6e83cc208?, 0x1d1d3218c0f0?}, 0x1?)
+	D:/Go/src/net/http/server.go:3413 +0x8e
+net/http.(*conn).serve(0x1d1d31d9e1b0, {0x7ff6e83cc720, 0x1d1d31d98120})
+	D:/Go/src/net/http/server.go:2137 +0x6dc
+created by net/http.(*Server).Serve in goroutine 11
+	D:/Go/src/net/http/server.go:3581 +0x4fd
+
+goroutine 57 [sync.Mutex.Lock]:
+internal/sync.runtime_SemacquireMutex(0x1d1d31d80808?, 0x48?, 0x7ff6e7d0af73?)
+	D:/Go/src/runtime/sema.go:95 +0x25
+internal/sync.(*Mutex).lockSlow(0x1d1d31e36540)
+	D:/Go/src/internal/sync/mutex.go:149 +0x15a
+internal/sync.(*Mutex).Lock(...)
+	D:/Go/src/internal/sync/mutex.go:70
+sync.(*Mutex).Lock(...)
+	D:/Go/src/sync/mutex.go:46
+go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).badCheckout(0x1d1d31e364b0, {0x7ff6e83cc720, 0x1d1d31d988d0}, {0x1d1d31d90160, 0x8}, {0x1d1d32118134, 0x6})
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/service.go:366 +0x145
+go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).checkout(0x1d1d31e364b0, {0x7ff6e83cc208, 0x1d1d3218c1e0}, 0x1d1d320d4780)
+	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/service.go:328 +0xd2f
+net/http.HandlerFunc.ServeHTTP(0x1d1d31e0a600?, {0x7ff6e83cc208?, 0x1d1d3218c1e0?}, 0x7ff6e7e5201a?)
+	D:/Go/src/net/http/server.go:2338 +0x29
+net/http.(*ServeMux).ServeHTTP(0x7ff6e7be5759?, {0x7ff6e83cc208, 0x1d1d3218c1e0}, 0x1d1d320d4780)
+	D:/Go/src/net/http/server.go:2903 +0x1cf
+net/http.serverHandler.ServeHTTP({0x1d1d320fe300?}, {0x7ff6e83cc208?, 0x1d1d3218c1e0?}, 0x1?)
+	D:/Go/src/net/http/server.go:3413 +0x8e
+net/http.(*conn).serve(0x1d1d320d22d0, {0x7ff6e83cc720, 0x1d1d31d98210})
+	D:/Go/src/net/http/server.go:2137 +0x6dc
+created by net/http.(*Server).Serve in goroutine 12
+	D:/Go/src/net/http/server.go:3581 +0x4fd

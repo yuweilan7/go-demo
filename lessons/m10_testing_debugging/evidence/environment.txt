@@ -1,0 +1,14 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging env -json GOVERSION GOOS GOARCH CGO_ENABLED GOTOOLCHAIN GOMOD GOWORK CC
+exit_code=0
+expected_failure=False
+{
+	"CC": "D:\\IdeaProject\\go-demo\\.local\\toolchains\\winlibs-16.2.0posix-14.0.0-ucrt-r2\\mingw64\\bin\\gcc.exe",
+	"CGO_ENABLED": "1",
+	"GOARCH": "amd64",
+	"GOMOD": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m10\\go-demo\\lessons\\m10_testing_debugging\\go.mod",
+	"GOOS": "windows",
+	"GOTOOLCHAIN": "auto",
+	"GOVERSION": "go1.27.0",
+	"GOWORK": ""
+}

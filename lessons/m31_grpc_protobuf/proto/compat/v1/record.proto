@@ -1,0 +1,8 @@
+syntax = "proto3";
+package course.compat.v1;
+option go_package = "go-demo/lessons/m31_grpc_protobuf/gen/compatv1";
+message Record {
+  string sku = 1;
+  int32 quantity = 2;
+  string legacy_note = 3;
+}

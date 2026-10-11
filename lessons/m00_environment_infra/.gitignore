@@ -1,0 +1,3 @@
+.local/
+.secrets/
+__pycache__/

@@ -1,0 +1,19 @@
+Total: 1.56s
+ROUTINE ======================== go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).badCheckout in C:\Users\Lenovo\.codex\worktrees\go-course-m34\go-demo\lessons\m34_observability_diagnosis\internal\lab\service.go
+         0   373.76ms (flat, cum) 24.03% of Total
+         .          .    361:func (s *Service) badCheckout(ctx context.Context, id, mode string) (Reply, time.Duration, time.Duration, error) {
+         .          .    362:	started := time.Now()
+         .          .    363:	s.Metrics.queueBegin()
+         .          .    364:	s.signal(id + ":queue_entered")
+         .          .    365:	queueRegion := runtimetrace.StartRegion(ctx, "queue.global_mutex")
+         .   185.80ms    366:	s.orderMu.Lock() // goroutine snapshot 与 block profile 应定位到这一行。
+         .          .    367:	queueRegion.End()
+         .          .    368:	queue := time.Since(started)
+         .          .    369:	s.Metrics.queueEnd(queue)
+         .          .    370:	defer s.orderMu.Unlock() // mutex profile 记录造成争用的持锁者退出临界区的栈。
+         .   187.96ms    371:	reply, dependency, err := s.callDependency(ctx, id, mode)
+         .          .    372:	return reply, queue, dependency, err
+         .          .    373:}
+         .          .    374:
+         .          .    375:// fixedCheckout 修复“把网络当临界区”的误用。当前唯一共享业务状态在下游 storeMu
+         .          .    376:// 内按 map 写入短锁保护，两个不同请求没有跨 I/O 的共享不变量，因此不需要 orderMu。

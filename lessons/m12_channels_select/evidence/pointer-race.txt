@@ -1,0 +1,26 @@
+故障循环已结束 observed=2000000；数值没有保证，必须读取 race 报告
+==================
+修复: 发送值副本，或 sender 停止访问对象并等待 receiver 经 channel 回传所有权
+WARNING: DATA RACE
+Write at 0x00c00011a0b8 by goroutine 9:
+  main.pointerRace.func2()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select/cmd/fault/main.go:47 +0xaf
+
+Previous read at 0x00c00011a0b8 by goroutine 8:
+  main.pointerRace.func1()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select/cmd/fault/main.go:39 +0xf5
+
+Goroutine 9 (running) created at:
+  main.pointerRace()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select/cmd/fault/main.go:43 +0x348
+  main.main()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select/cmd/fault/main.go:19 +0x5f7
+
+Goroutine 8 (finished) created at:
+  main.pointerRace()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select/cmd/fault/main.go:33 +0x264
+  main.main()
+      C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select/cmd/fault/main.go:19 +0x5f7
+==================
+Found 1 data race(s)
+exit status 66

@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "observed_date": "2026-10-12",
+  "ssh_connection_source": "D:/IdeaProject/deephelp/infra/config/connections.env",
+  "ssh_host_check": "strict; existing infra/client/known_hosts and existing key",
+  "learning_root_proposed": "/srv/go-demo-learning",
+  "endpoints": [
+    {
+      "id": "redis",
+      "local_address": "127.0.0.1:16379",
+      "remote_address": "127.0.0.1:6379",
+      "owner": "DeepHelp; shared service; M00 read only",
+      "state": "registered; current protocol result is in STATUS.md",
+      "readonly_tcp": true,
+      "configuration_source": "DeepHelp infra/config/connections.env + existing protected secret file",
+      "expected_version_from_document": "8.2.8"
+    },
+    {
+      "id": "postgres",
+      "local_address": "127.0.0.1:15432",
+      "remote_address": "127.0.0.1:15432",
+      "owner": "DeepHelp; official facts; M00 metadata SELECT only",
+      "state": "registered; current protocol result is in STATUS.md",
+      "readonly_tcp": true,
+      "configuration_source": "D:/IdeaProject/deephelp/.local/m30/live-postgres.json",
+      "expected_version_from_document": "18.6"
+    },
+    {
+      "id": "mysql-retired",
+      "local_address": "",
+      "owner": "DeepHelp retained recovery source",
+      "state": "retired; old 13306/DSN/password are recovery material; never reuse as Go classroom DB",
+      "readonly_tcp": false
+    },
+    {
+      "id": "mysql-learning",
+      "local_address": "",
+      "state": "pending M20 installer inventory and isolated installation; no port reservation yet",
+      "readonly_tcp": false
+    },
+    {
+      "id": "rabbitmq-learning",
+      "local_address": "",
+      "state": "pending M28 installer inventory and isolated installation; no port reservation yet",
+      "readonly_tcp": false
+    },
+    {
+      "id": "kafka-learning",
+      "local_address": "",
+      "state": "pending M29 installer inventory and isolated KRaft installation; no port reservation yet",
+      "readonly_tcp": false
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+?   	go-demo/lessons/m34_observability_diagnosis/cmd/demo	[no test files]
+=== RUN   TestFixedOrderCompletesWhileOtherOrderStillInIO
+--- PASS: TestFixedOrderCompletesWhileOtherOrderStillInIO (0.02s)
+=== RUN   TestCancelBoundaryKeepsUnknownSeparate
+--- PASS: TestCancelBoundaryKeepsUnknownSeparate (0.00s)
+=== RUN   TestTraceParentAndAsyncLink
+--- PASS: TestTraceParentAndAsyncLink (0.00s)
+=== RUN   TestListenerOwnership
+--- PASS: TestListenerOwnership (0.00s)
+=== RUN   TestDigestAndReceiptCopies
+--- PASS: TestDigestAndReceiptCopies (0.01s)
+=== RUN   TestHistogramNoSampleAndFiniteLabels
+--- PASS: TestHistogramNoSampleAndFiniteLabels (0.00s)
+=== RUN   TestStructuredLogKeepsMissingObservationAndPanicStack
+--- PASS: TestStructuredLogKeepsMissingObservationAndPanicStack (0.00s)
+=== RUN   TestDriverOwnerWaitsAfterWorkDeadline
+--- PASS: TestDriverOwnerWaitsAfterWorkDeadline (0.02s)
+=== RUN   TestDriverCleanupTimeoutReportsIncomplete
+--- PASS: TestDriverCleanupTimeoutReportsIncomplete (0.02s)
+PASS
+ok  	go-demo/lessons/m34_observability_diagnosis/internal/lab	0.968s

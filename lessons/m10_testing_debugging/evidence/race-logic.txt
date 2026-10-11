@@ -1,0 +1,9 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging test -race -tags=faults -run=^TestWrongCommit -count=1 -timeout=30s ./faults
+exit_code=1
+expected_failure=True
+--- FAIL: TestWrongCommitMustNotMutateOnRejection (0.00s)
+    logic_test.go:30: rejected payment mutated business: {ID:order-42 ExpectedCents:1299 State:paid CreditedCents:0 CreditCount:0}; want pending, credit=0, count=0
+FAIL
+FAIL	go-demo/lessons/m10_testing_debugging/faults	0.160s
+FAIL

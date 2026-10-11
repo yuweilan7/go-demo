@@ -1,0 +1,20 @@
+File: demo.exe
+Build ID: C:\Users\Lenovo\AppData\Local\Temp\go-build2943311066\b001\exe\demo.exe2026-10-12 02:12:29.7328631 +0800 CST
+Type: inuse_space
+Time: 2026-10-12 02:12:31 CST
+Showing nodes accounting for 155.45kB, 88.41% of 175.83kB total
+Dropped 237 nodes (cum <= 0.88kB)
+Showing top 12 nodes out of 140
+      flat  flat%   sum%        cum   cum%
+   77.92kB 44.32% 44.32%    77.97kB 44.34%  runtime.mallocgc
+   26.95kB 15.33% 59.65%    26.95kB 15.33%  reflect.compiledTypelinks
+    8.69kB  4.94% 64.59%    43.41kB 24.69%  encoding/json/v2.makeStructFields.func3
+    8.34kB  4.75% 69.33%    52.44kB 29.82%  encoding/json/v2.makeStructFields
+       8kB  4.55% 73.88%        8kB  4.55%  hash/crc32.slicingMakeTable
+    5.09kB  2.89% 76.78%     5.12kB  2.91%  internal/syscall/windows/registry.Key.ReadSubKeyNames
+    5.09kB  2.89% 79.67%     5.09kB  2.89%  runtime/pprof.StartCPUProfile
+    4.47kB  2.54% 82.21%     7.09kB  4.03%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*captureProcessor).OnEnd
+    3.96kB  2.25% 84.46%     3.96kB  2.25%  encoding/json/v2.makeStructArshaler (inline)
+    2.34kB  1.33% 85.79%     2.34kB  1.33%  internal/sync.newIndirectNode[go.shape.interface {},go.shape.interface {}] (inline)
+    2.34kB  1.33% 87.12%     2.34kB  1.33%  net/textproto.initCommonHeader
+    2.26kB  1.28% 88.41%     2.26kB  1.28%  sync.(*Pool).pinSlow

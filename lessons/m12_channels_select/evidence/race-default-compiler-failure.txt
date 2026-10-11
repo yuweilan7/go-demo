@@ -1,0 +1,21 @@
+command: go test -race -count=3 ./...
+workdir: C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select
+Go: go1.27.0 windows/amd64
+CGO_ENABLED=1 CC=gcc
+resolved gcc: D:/MinGW/bin/gcc.exe
+gcc -dumpmachine: mingw32
+actual output:
+# runtime/cgo
+cc1.exe: sorry, unimplemented: 64-bit mode not compiled in
+FAIL go-demo/lessons/m12_channels_select/cmd/demo [build failed]
+FAIL go-demo/lessons/m12_channels_select/cmd/fault [build failed]
+FAIL go-demo/lessons/m12_channels_select/internal/course [build failed]
+FAIL
+exit: 1
+
+command: go run -race ./cmd/fault pointer-race
+actual output:
+# runtime/cgo
+cc1.exe: sorry, unimplemented: 64-bit mode not compiled in
+exit: 1
+scope: compile failed before experiments ran; neither normal race freedom nor intentional race was proved by these attempts.

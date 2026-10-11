@@ -1,0 +1,30 @@
+[E04] runtime=go1.27.0 正式encoding/json/v2 对照
+v1={"note":"","tags":null,"meta":null}
+v2默认={"quantity":0,"enabled":false,"tags":[],"meta":{}}
+v2+DefaultOptionsV1={"note":"","tags":null,"meta":null}
+raw={"quantity":1,"quantity":9}
+  v1 quantity=9 err=<nil>
+  v2 quantity=1 err=jsontext: duplicate object member name "quantity"
+  v2兼容 quantity=9 err=<nil>
+  v2拒未知 quantity=1 err=jsontext: duplicate object member name "quantity"
+raw={"QUANTITY":4}
+  v1 quantity=4 err=<nil>
+  v2 quantity=0 err=<nil>
+  v2兼容 quantity=4 err=<nil>
+  v2拒未知 quantity=0 err=json: unable to unmarshal JSON string into Go struct { Quantity int64 "json:\"quantity\"" }: unknown object member name "QUANTITY"
+raw={"quantitty":4}
+  v1 quantity=0 err=<nil>
+  v2 quantity=0 err=<nil>
+  v2兼容 quantity=0 err=<nil>
+  v2拒未知 quantity=0 err=json: unable to unmarshal JSON string into Go struct { Quantity int64 "json:\"quantity\"" }: unknown object member name "quantitty"
+raw={"quantity":1} {"quantity":2}
+  v1 quantity=0 err=invalid character '{' after top-level value
+  v2 quantity=1 err=jsontext: invalid character '{' after top-level value after offset 15
+  v2兼容 quantity=0 err=invalid character '{' after top-level value
+  v2拒未知 quantity=1 err=jsontext: invalid character '{' after top-level value after offset 15
+显式MatchCaseInsensitiveNames -> quantity=4；兼容选项后再禁重复 -> err=duplicate object member name
+已有quantity=7再解null -> v1=7 v2=0
+非法UTF8 -> v1文本="�" err=<nil>；v2 err=jsontext: invalid UTF-8 after offset 1
+Duration v1=1000000000（纳秒）v2默认err=json: unable to marshal from Go time.Duration: no default representation；v2兼容=1000000000
+两个字段同tag -> v1={} err=<nil>；v2 err=json: unable to marshal from Go struct { A int "json:\"amount\""; B int "json:\"amount\"" }: Go struct fields A and B conflict over JSON object name "amount"
+E04 完成：变更默认行为前，必须按 contract_version 验收字段形状和失败路径。

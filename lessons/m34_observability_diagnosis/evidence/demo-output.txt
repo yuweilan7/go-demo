@@ -1,0 +1,6 @@
+core variant=bad committed=2 in_flight=0 queue_waiters=0 proof=PASS
+core variant=fixed committed=2 in_flight=0 queue_waiters=0 proof=PASS
+outcomes business_error=1 dependency_error=1 canceled=1 unknown=1 internal_error=1 dependency_samples=3 unknown_authority_committed=true proof=PASS
+cpu same_checksum=true digest_calls=400000->1 response_header_ms=704.611->0.503 (sample only)
+trace exported_local=42 remote_parent_edges=18 linked_async_roots=6 proof=PASS
+artifacts=.local/latest cleanup=PASS

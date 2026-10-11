@@ -1,0 +1,188 @@
+
+=== states ===
+001 state        state_row            nil | receive=would block | send=would block | close=panic: close of nil channel
+002 state        state_row            open unbuffered empty | receive=would block | send=would block | close=closed successfully
+003 state        state_row            open buffered empty cap=1 | receive=would block | send=accepted | close=closed successfully
+004 state        state_row            open buffered zero partial | receive=value=0 ok=true | send=accepted | close=closed successfully
+005 state        state_row            open buffered zero full | receive=value=0 ok=true | send=would block | close=closed successfully
+006 state        state_row            closed buffered zero | receive=value=0 ok=true | send=panic: send on closed channel | close=panic: close of closed channel
+007 state        state_row            closed drained | receive=value=0 ok=false | send=panic: send on closed channel | close=panic: close of closed channel
+008 drain        receive              read=1 value=0 ok=true
+009 drain        receive              read=2 value=7 ok=true
+010 drain        receive              read=3 value=0 ok=false
+011 drain        receive              read=4 value=0 ok=false
+012 owner        no_receiver          没有接收者，send 尚不能完成
+013 consumer     handoff_received     value=42；现在消费方才开始业务处理
+014 sender       send_returned        无缓冲 send 返回：接收已参与会合，不证明业务处理完成
+015 owner        reverse_sync         consumerState=77 写在 receive 前，sender 在 send 返回后安全读到 77
+016 range-reader range_value          收到合法零值 0
+017 owner        range_still_open     来源已返回且值已收，range 仍不能结束；现在由已知无后续发送的 owner 修复 close
+018 range-reader range_returned       只有 close 且排空才使 range 自然结束
+PASS states
+
+=== select ===
+019 select       default_spin         empty 未改变，仍跑完 100000 次 default；修复是阻塞等待
+020 select-reader blocking_receive     没有 default，真正等到 value=9
+021 select       closed_spin          closed/drained 立刻返回 ok=false 100000 次
+022 select       merge_value          right=22
+023 select       merge_value          left=11
+024 select       disable_right        right=nil，下一轮此 case 永远不 ready
+025 select       disable_left         left=nil，下一轮此 case 永远不 ready
+026 select       both_ready           left=2063 right=2033；只能断言总次数=4096
+027 select       cancel_not_priority  已 cancel 后仍选发送=2025，选取消=2071；不是固定比例或严格停止承诺
+PASS select
+
+=== failures ===
+028 bad-consumer consumer_left        只接收 ID=O-01，业务上已离开
+029 owner        send_cannot_finish   消费者已退出，第二次 send 不能完成；随后由夹具救援
+030 rescuer      rescue_receive       补上接收 ID=O-02，使裸 send 有机会结束
+031 bad-producer second_send_returned 救援接收后才继续，扩大 buffer 只会推迟相同问题
+032 owner        bad_example_cleaned  producerExited=true
+033 bad-consumer receiver_close       收到 O-01 后擅自 close(out)，发送者仍未完成
+034 bad-sender   panic_recovered      send on closed channel；recover 在发生 panic 的同一 goroutine
+PASS failures
+
+=== pipeline ===
+035 owner        scenario_start       normal
+036 feeder       job_accepted         ID=O-01 已交给 worker 或进入 jobs 缓冲
+037 feeder       job_accepted         ID=O-02 已交给 worker 或进入 jobs 缓冲
+038 worker-2     result_accepted      ID=O-02 err=<nil>；不代表 consumer 已完成处理
+039 worker-0     result_accepted      ID=O-01 err=<nil>；不代表 consumer 已完成处理
+040 consumer     business_done        ID=O-01 第 1 条已纳入报告 err=<nil>
+041 consumer     business_done        ID=O-02 第 2 条已纳入报告 err=<nil>
+042 feeder       job_accepted         ID=O-03 已交给 worker 或进入 jobs 缓冲
+043 feeder       job_accepted         ID=O-04 已交给 worker 或进入 jobs 缓冲
+044 feeder       job_accepted         ID=O-05 已交给 worker 或进入 jobs 缓冲
+045 feeder       job_accepted         ID=O-06 已交给 worker 或进入 jobs 缓冲
+046 feeder       jobs_closed          唯一发送者结束，produced=6 err=<nil>
+047 worker-1     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+048 worker-2     result_accepted      ID=O-04 err=<nil>；不代表 consumer 已完成处理
+049 worker-2     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+050 consumer     business_done        ID=O-04 第 3 条已纳入报告 err=<nil>
+051 consumer     business_done        ID=O-05 第 4 条已纳入报告 err=<nil>
+052 worker-1     result_accepted      ID=O-03 err=订单 O-03 amount=0: 订单金额必须大于 0；不代表 consumer 已完成处理
+053 worker-1     jobs_drained         没有更多订单
+054 worker-1     worker_exit          校验次数=1；已不再发送 results
+055 worker-0     result_accepted      ID=O-05 err=<nil>；不代表 consumer 已完成处理
+056 worker-0     jobs_drained         没有更多订单
+057 worker-0     worker_exit          校验次数=2；已不再发送 results
+058 worker-2     result_accepted      ID=O-06 err=<nil>；不代表 consumer 已完成处理
+059 worker-2     jobs_drained         没有更多订单
+060 worker-2     worker_exit          校验次数=3；已不再发送 results
+061 closer       results_closed       全部 3 个 worker 已退出，唯一一次 close(results)
+062 closer       all_joined           produced=6 validated=6 sourceErr=<nil> canceled=false
+063 consumer     business_done        ID=O-03 第 5 条已纳入报告 err=订单 O-03 amount=0: 订单金额必须大于 0
+064 consumer     business_done        ID=O-06 第 6 条已纳入报告 err=<nil>
+065 consumer     results_drained      关闭且排空，结束接收
+066 owner        wait_returned        consumed=6 workersExited=3 err=<nil>
+067 owner        scenario_result      normal consumed=6 produced=6 validated=6 workersExited=3 err=<nil>
+068 owner        scenario_start       empty
+069 feeder       jobs_closed          唯一发送者结束，produced=0 err=<nil>
+070 worker-2     jobs_drained         没有更多订单
+071 worker-2     worker_exit          校验次数=0；已不再发送 results
+072 worker-1     jobs_drained         没有更多订单
+073 worker-1     worker_exit          校验次数=0；已不再发送 results
+074 worker-0     jobs_drained         没有更多订单
+075 worker-0     worker_exit          校验次数=0；已不再发送 results
+076 closer       results_closed       全部 3 个 worker 已退出，唯一一次 close(results)
+077 consumer     results_drained      关闭且排空，结束接收
+078 closer       all_joined           produced=0 validated=0 sourceErr=<nil> canceled=false
+079 owner        wait_returned        consumed=0 workersExited=3 err=<nil>
+080 owner        scenario_result      empty consumed=0 produced=0 validated=0 workersExited=3 err=<nil>
+081 owner        scenario_start       early-stop
+082 feeder       job_accepted         ID=O-01 已交给 worker 或进入 jobs 缓冲
+083 consumer     business_done        ID=O-01 第 1 条已纳入报告 err=<nil>
+084 feeder       job_accepted         ID=O-02 已交给 worker 或进入 jobs 缓冲
+085 feeder       job_accepted         ID=O-03 已交给 worker 或进入 jobs 缓冲
+086 feeder       job_accepted         ID=O-04 已交给 worker 或进入 jobs 缓冲
+087 feeder       send_wait            jobs 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+088 worker-1     result_accepted      ID=O-01 err=<nil>；不代表 consumer 已完成处理
+089 worker-1     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+090 feeder       job_accepted         ID=O-05 已交给 worker 或进入 jobs 缓冲
+091 feeder       send_wait            jobs 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+092 worker-2     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+093 worker-0     result_accepted      ID=O-03 err=订单 O-03 amount=0: 订单金额必须大于 0；不代表 consumer 已完成处理
+094 worker-0     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+095 consumer     business_done        ID=O-03 第 2 条已纳入报告 err=订单 O-03 amount=0: 订单金额必须大于 0
+096 consumer     cancel_requested     已消费 2 条；停止读取 results 并发出取消
+097 feeder       job_accepted         ID=O-06 已交给 worker 或进入 jobs 缓冲
+098 feeder       jobs_closed          唯一发送者结束，produced=6 err=<nil>
+099 worker-1     send_canceled        results 发送等待观察到 context canceled
+100 worker-1     result_abandoned     ID=O-04 未交付: context canceled
+101 worker-1     worker_exit          校验次数=2；已不再发送 results
+102 worker-2     send_canceled        results 发送等待观察到 context canceled
+103 worker-2     result_abandoned     ID=O-02 未交付: context canceled
+104 worker-2     worker_exit          校验次数=1；已不再发送 results
+105 worker-0     send_canceled        results 发送等待观察到 context canceled
+106 worker-0     result_abandoned     ID=O-05 未交付: context canceled
+107 worker-0     worker_exit          校验次数=2；已不再发送 results
+108 closer       results_closed       全部 3 个 worker 已退出，唯一一次 close(results)
+109 closer       all_joined           produced=6 validated=5 sourceErr=<nil> canceled=true
+110 owner        wait_returned        consumed=2 workersExited=3 err=消费者主动提前停止
+111 owner        scenario_result      early-stop consumed=2 produced=6 validated=5 workersExited=3 err=消费者主动提前停止
+112 owner        scenario_start       source-error
+113 feeder       job_accepted         ID=O-01 已交给 worker 或进入 jobs 缓冲
+114 feeder       job_accepted         ID=O-02 已交给 worker 或进入 jobs 缓冲
+115 worker-2     result_accepted      ID=O-02 err=<nil>；不代表 consumer 已完成处理
+116 feeder       job_accepted         ID=O-03 已交给 worker 或进入 jobs 缓冲
+117 consumer     business_done        ID=O-01 第 1 条已纳入报告 err=<nil>
+118 consumer     business_done        ID=O-02 第 2 条已纳入报告 err=<nil>
+119 worker-1     result_accepted      ID=O-01 err=<nil>；不代表 consumer 已完成处理
+120 worker-0     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+121 worker-0     result_accepted      ID=O-03 err=订单 O-03 amount=0: 订单金额必须大于 0；不代表 consumer 已完成处理
+122 feeder       source_error         source index=3: 合成订单来源解析失败；关闭 jobs，让先前值继续排空
+123 feeder       jobs_closed          唯一发送者结束，produced=3 err=source index=3: 合成订单来源解析失败
+124 worker-0     jobs_drained         没有更多订单
+125 worker-0     worker_exit          校验次数=1；已不再发送 results
+126 consumer     business_done        ID=O-03 第 3 条已纳入报告 err=订单 O-03 amount=0: 订单金额必须大于 0
+127 worker-1     jobs_drained         没有更多订单
+128 worker-1     worker_exit          校验次数=1；已不再发送 results
+129 worker-2     jobs_drained         没有更多订单
+130 worker-2     worker_exit          校验次数=1；已不再发送 results
+131 closer       results_closed       全部 3 个 worker 已退出，唯一一次 close(results)
+132 consumer     results_drained      关闭且排空，结束接收
+133 closer       all_joined           produced=3 validated=3 sourceErr=source index=3: 合成订单来源解析失败 canceled=false
+134 owner        wait_returned        consumed=3 workersExited=3 err=source index=3: 合成订单来源解析失败
+135 owner        scenario_result      source-error consumed=3 produced=3 validated=3 workersExited=3 err=source index=3: 合成订单来源解析失败
+136 owner        scenario_start       saturation
+137 feeder       job_accepted         ID=O-01 已交给 worker 或进入 jobs 缓冲
+138 feeder       job_accepted         ID=O-02 已交给 worker 或进入 jobs 缓冲
+139 feeder       send_wait            jobs 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+140 worker-0     result_accepted      ID=O-01 err=<nil>；不代表 consumer 已完成处理
+141 worker-0     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+142 owner        queues_saturated     jobs=1/1 results=1/1 produced=3；worker 的 results 发送和 feeder 后续 jobs 发送均无法完成
+143 consumer     business_done        ID=O-01 第 1 条已纳入报告 err=<nil>
+144 consumer     business_done        ID=O-02 第 2 条已纳入报告 err=<nil>
+145 feeder       job_accepted         ID=O-03 已交给 worker 或进入 jobs 缓冲
+146 feeder       send_wait            jobs 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+147 worker-0     result_accepted      ID=O-02 err=<nil>；不代表 consumer 已完成处理
+148 feeder       job_accepted         ID=O-04 已交给 worker 或进入 jobs 缓冲
+149 feeder       send_wait            jobs 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+150 worker-0     result_accepted      ID=O-03 err=订单 O-03 amount=0: 订单金额必须大于 0；不代表 consumer 已完成处理
+151 worker-0     result_accepted      ID=O-04 err=<nil>；不代表 consumer 已完成处理
+152 worker-0     send_wait            results 暂时不能发送；接下来同时等待发送机会和 ctx.Done
+153 consumer     business_done        ID=O-03 第 3 条已纳入报告 err=订单 O-03 amount=0: 订单金额必须大于 0
+154 consumer     business_done        ID=O-04 第 4 条已纳入报告 err=<nil>
+155 feeder       job_accepted         ID=O-05 已交给 worker 或进入 jobs 缓冲
+156 feeder       job_accepted         ID=O-06 已交给 worker 或进入 jobs 缓冲
+157 feeder       jobs_closed          唯一发送者结束，produced=6 err=<nil>
+158 worker-0     result_accepted      ID=O-05 err=<nil>；不代表 consumer 已完成处理
+159 consumer     business_done        ID=O-05 第 5 条已纳入报告 err=<nil>
+160 consumer     business_done        ID=O-06 第 6 条已纳入报告 err=<nil>
+161 worker-0     result_accepted      ID=O-06 err=<nil>；不代表 consumer 已完成处理
+162 worker-0     jobs_drained         没有更多订单
+163 worker-0     worker_exit          校验次数=6；已不再发送 results
+164 closer       results_closed       全部 1 个 worker 已退出，唯一一次 close(results)
+165 consumer     results_drained      关闭且排空，结束接收
+166 closer       all_joined           produced=6 validated=6 sourceErr=<nil> canceled=false
+167 owner        wait_returned        consumed=6 workersExited=1 err=<nil>
+168 owner        scenario_result      saturation consumed=6 produced=6 validated=6 workersExited=1 err=<nil>
+PASS pipeline
+
+=== memory ===
+169 memory       value_copy           收到 amount=100，原变量后来改成 9
+170 memory       pointer_returned     同一个地址已回传，owner 此时再读 amount=200
+171 memory       close_visibility     收到关闭通知后读 finalCount=6；goroutine 自然退出本身没有此同步保证
+172 memory       final_publish_joined 独立清理已收到 finished，finalCount=6；保留业务错误=<nil>
+PASS memory
+PASS M12：全部选中实验的协议断言通过，owner 已完成对应清理

@@ -1,0 +1,10 @@
+captured_at=2026-10-12 01:15:16 +08:00
+go version go1.27.0 windows/amd64
+go_env_values_in_order=GOVERSION,GOTOOLCHAIN,GOMOD,GOOS,GOARCH,CGO_ENABLED,GOROOT
+go1.27.0
+auto
+C:\Users\Lenovo\.codex\worktrees\go-course-m06\go-demo\lessons\m06_defer_resources\go.mod
+windows
+amd64
+1
+D:\Go

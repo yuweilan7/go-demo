@@ -1,0 +1,10 @@
+Total: 8.17MB
+ROUTINE ======================== go-demo/lessons/m34_observability_diagnosis/internal/lab.retainBad in C:\Users\Lenovo\.codex\worktrees\go-course-m34\go-demo\lessons\m34_observability_diagnosis\internal\lab\profiles.go
+       8MB        8MB (flat, cum) 97.92% of Total
+         .          .     58:func retainBad() []byte {
+       8MB        8MB     59:	data := make([]byte, retainedBytes)
+         .          .     60:	for i := range data {
+         .          .     61:		data[i] = byte(i % 251)
+         .          .     62:	}
+         .          .     63:	return data[:16]
+         .          .     64:}

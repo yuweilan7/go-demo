@@ -1,0 +1,17 @@
+Type: delay
+Showing nodes accounting for 2491.22ms, 100% of 2491.22ms total
+Dropped 22 nodes (cum <= 12.46ms)
+Showing top 12 nodes out of 18
+      flat  flat%   sum%        cum   cum%
+ 2491.22ms   100%   100%  2491.22ms   100%  internal/poll.(*FD).execIO
+         0     0%   100%  1176.69ms 47.23%  bufio.(*Reader).Peek
+         0     0%   100%     1177ms 47.25%  bufio.(*Reader).fill
+         0     0%   100%   716.54ms 28.76%  go-demo/lessons/m34_observability_diagnosis/internal/lab.(*Service).startServer.func2
+         0     0%   100%   716.54ms 28.76%  internal/poll.(*FD).Accept
+         0     0%   100%  1774.59ms 71.23%  internal/poll.(*FD).Read
+         0     0%   100%   716.54ms 28.76%  internal/poll.(*FD).acceptOne
+         0     0%   100%   716.54ms 28.76%  net.(*TCPListener).Accept
+         0     0%   100%   716.54ms 28.76%  net.(*TCPListener).accept
+         0     0%   100%  1774.59ms 71.23%  net.(*conn).Read
+         0     0%   100%  1774.59ms 71.23%  net.(*netFD).Read
+         0     0%   100%   716.54ms 28.76%  net.(*netFD).accept

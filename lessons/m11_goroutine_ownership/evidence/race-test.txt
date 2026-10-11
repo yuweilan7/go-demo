@@ -1,0 +1,2 @@
+?   	go-demo/lessons/m11_goroutine_ownership/cmd/demo	[no test files]
+ok  	go-demo/lessons/m11_goroutine_ownership/internal/lesson	9.733s

@@ -1,0 +1,103 @@
+[E01] 注册实参、函数值、闭包、指针与 LIFO
+[E01.eval] 实参表达式现在执行 value=10
+[E01.body] defer1 已注册
+[E01.body] defer2 已注册
+[E01.body] defer3 已注册
+[E01.body] value=20，fn 已替换；函数体结束
+[E01.defer3] 通过已保存指针读取 *p=20
+[E01.defer2] 闭包执行时读取 value=20
+[E01.defer1] 旧函数收到注册时保存的实参=10
+[E01.receiver.body] 旧对象 name=A*，current 改指 B
+[E01.receiver.closure] 闭包晚读 current=B
+[E01.receiver.value] 接收者副本的字段=A
+[E01.receiver.pointer] 旧对象的当前字段=A*
+[E01.caller] arg=10 closure=20 pointer=20 replaced_called=false order=[3 2 1]
+[E02] return 求值、结果赋值、defer 修改、最后返回
+[E02.named.return_expr] 表达式求得 10
+[E02.named.defer] 退出时 result=10 local=10，result+=5
+[E02.anonymous.return_expr] 表达式求得 10
+[E02.anonymous.defer] local 改为 15；已确定的 int 结果没有改变
+[E02.named_local.return_expr] 表达式求得 10
+[E02.named_local.defer] local=15 result=10；只改 local
+[E02.caller] named=15 anonymous=10 named_local=10
+[E02.early.body] 注册时 err=nil，现在 err=业务错误
+[E02.early.cleanup] 观察到 err_non_nil=false
+[E02.late.body] 闭包已注册，现在 err=业务错误
+[E02.late.cleanup] 观察到 err_non_nil=true
+[E02.shadow.body] 内层 err 是业务错误，只打印后离开 if
+[E02.shadow.cleanup] 观察到 err_non_nil=false
+[E02.fixed.body] 内层失败通过 return err 赋给具名结果
+[E02.fixed.cleanup] 观察到 err_non_nil=true
+[E02.caller] early(return_err=true cleanup_err=false) late(return_err=true cleanup_err=true)
+[E02.caller] shadow(return_err=false cleanup_err=false) fixed(return_err=true cleanup_err=true)
+[E03] 真实文件、立即注册、循环延迟与每轮释放
+[E03.bad] 获取 1 live=1
+[E03.bad] 第 1 轮结束 live=1；尚未退出 batchBad
+[E03.bad] 获取 2 live=2
+[E03.bad] 第 2 轮结束 live=2；尚未退出 batchBad
+[E03.bad] 获取 3 被预算拒绝 live=2
+[E03.bad] 准备错误返回，返回前 live=2
+[E03.bad] 关闭 2 live=1
+[E03.bad] 关闭 1 live=0
+[E03.bad.caller] opened=2 closed=2 peak=2 live=0 budget_err=true
+[E03.bad.content] 真实文件记录核验=2
+[E03.scoped] 获取 1 live=1
+[E03.scoped] 关闭 1 live=0
+[E03.scoped] 第 1 轮完成，小函数已返回 live=0
+[E03.scoped] 获取 2 live=1
+[E03.scoped] 关闭 2 live=0
+[E03.scoped] 第 2 轮完成，小函数已返回 live=0
+[E03.scoped] 获取 3 live=1
+[E03.scoped] 关闭 3 live=0
+[E03.scoped] 第 3 轮完成，小函数已返回 live=0
+[E03.scoped] 获取 4 live=1
+[E03.scoped] 关闭 4 live=0
+[E03.scoped] 第 4 轮完成，小函数已返回 live=0
+[E03.scoped.caller] opened=4 closed=4 peak=1 live=0 budget_err=false
+[E03.scoped.content] 真实文件记录核验=4
+[E03.explicit] 获取 1 live=1
+[E03.explicit] 关闭 1 live=0
+[E03.explicit] 第 1 轮显式关闭后 live=0
+[E03.explicit] 获取 2 live=1
+[E03.explicit] 关闭 2 live=0
+[E03.explicit] 第 2 轮显式关闭后 live=0
+[E03.explicit] 获取 3 live=1
+[E03.explicit] 关闭 3 live=0
+[E03.explicit] 第 3 轮显式关闭后 live=0
+[E03.explicit] 获取 4 live=1
+[E03.explicit] 关闭 4 live=0
+[E03.explicit] 第 4 轮显式关闭后 live=0
+[E03.explicit.caller] opened=4 closed=4 peak=1 live=0 budget_err=false
+[E03.explicit.content] 真实文件记录核验=4
+[E03.acquire_failure] 源文件获取成功并注册 Close
+[E03.acquire_failure] 目标获取失败，源文件清理由已注册 defer 负责
+[E03.acquire_failure] 源文件退出关闭 close_ok=true
+[E03.acquire_failure.caller] target_failed=true source_closed=true
+[E03.receiver.body] 登记后 current 从 A 改指 B
+[E03.receiver.caller] old_closed=true new_closed=false；外层随后兜底关闭残留
+[E03.closure.body] 登记后 current 从 A 改指 B
+[E03.closure.caller] old_closed=false new_closed=true；外层随后兜底关闭残留
+[E03.receiver-fixed.body] 登记后 current 从 A 改指 B
+[E03.receiver-fixed.caller] old_closed=true new_closed=true；外层随后兜底关闭残留
+[E03.owner] 临时目录删除=true
+[E04] 缓冲写出、Close 顺序与主/清理错误保留
+[E04.bad.body] 错误地提前记成功 buffered=22；尚未 Flush
+[E04.bad.defer] Close 先执行 ok=true
+[E04.bad.defer] Flush 后执行 failed=true closed_cause=true（故意未传播）
+[E04.bad.caller] err_nil=true bytes=0 success=false business_cause=false closed_cause=false flush_failed=true close_failed=false
+[E04.fixed.body] Write 只进入缓冲 buffered=22；此时不记最终成功
+[E04.fixed.defer] 先 Flush failed=false
+[E04.fixed.defer] 后 Close failed=false
+[E04.fixed.caller] err_nil=true bytes=22 success=true business_cause=false closed_cause=false flush_failed=false close_failed=false
+[E04.close-failure.body] Write 只进入缓冲 buffered=22；此时不记最终成功
+[E04.close-failure.fault] 故意提前 Flush/Close，退出 Close 将是重复关闭
+[E04.close-failure.defer] 先 Flush failed=false
+[E04.close-failure.defer] 后 Close failed=true
+[E04.close-failure.caller] err_nil=false bytes=22 success=false business_cause=false closed_cause=true flush_failed=false close_failed=true
+[E04.business-and-cleanup.body] Write 只进入缓冲 buffered=22；此时不记最终成功
+[E04.business-and-cleanup.fault] 故意提前 Close 并返回业务错误
+[E04.business-and-cleanup.defer] 先 Flush failed=true
+[E04.business-and-cleanup.defer] 后 Close failed=true
+[E04.business-and-cleanup.caller] err_nil=false bytes=0 success=false business_cause=true closed_cause=true flush_failed=true close_failed=true
+[E04.owner] 临时目录删除=true
+[DONE] 所选实验完成；真实临时目录均已清理

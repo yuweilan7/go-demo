@@ -1,0 +1,35 @@
+?   	go-demo/lessons/m17_net_http/cmd/demo	[no test files]
+=== RUN   TestConcurrentIdempotency
+--- PASS: TestConcurrentIdempotency (0.00s)
+=== RUN   TestUnsafeDuplicateHasTwoEffects
+--- PASS: TestUnsafeDuplicateHasTwoEffects (0.00s)
+=== RUN   TestLostOrderIsCommittedWithoutAutomaticReplay
+--- PASS: TestLostOrderIsCommittedWithoutAutomaticReplay (0.00s)
+=== RUN   TestBodyLimitAndEarlyEOF
+--- PASS: TestBodyLimitAndEarlyEOF (0.00s)
+=== RUN   TestHTTP200IsNotCommit
+--- PASS: TestHTTP200IsNotCommit (0.00s)
+=== RUN   TestPoolWaitDoesNotReachServer
+--- PASS: TestPoolWaitDoesNotReachServer (0.10s)
+=== RUN   TestCancellationSideEffectWindow
+=== RUN   TestCancellationSideEffectWindow//cancel-order
+=== RUN   TestCancellationSideEffectWindow//cooperative-order
+--- PASS: TestCancellationSideEffectWindow (0.00s)
+    --- PASS: TestCancellationSideEffectWindow//cancel-order (0.00s)
+    --- PASS: TestCancellationSideEffectWindow//cooperative-order (0.00s)
+=== RUN   TestInputRejectionAndProxyBoundary
+--- PASS: TestInputRejectionAndProxyBoundary (0.00s)
+=== RUN   TestPhaseExperiments
+--- PASS: TestPhaseExperiments (2.16s)
+=== RUN   TestHeaderTimeoutIsNetError
+--- PASS: TestHeaderTimeoutIsNetError (0.08s)
+=== RUN   TestCanceledRequestMustFinishCleanup
+--- PASS: TestCanceledRequestMustFinishCleanup (0.00s)
+=== RUN   TestResultWaitCancellationIsNotJoin
+--- PASS: TestResultWaitCancellationIsNotJoin (0.00s)
+=== RUN   TestEarlyCanceledCallerStillJoins
+--- PASS: TestEarlyCanceledCallerStillJoins (0.00s)
+=== RUN   TestCleanupAndMainErrorsAreBothPreserved
+--- PASS: TestCleanupAndMainErrorsAreBothPreserved (0.00s)
+PASS
+ok  	go-demo/lessons/m17_net_http/internal/lab	3.221s

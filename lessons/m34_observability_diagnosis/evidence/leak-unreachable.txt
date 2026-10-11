@@ -1,0 +1,8 @@
+kind=unreachable runtime=go1.27.0 live_wait_stack=true detected_target=true leak_count=1 debug=1
+--- goroutineleak actual text ---
+goroutineleak profile: total 1
+1 @ 0x7ff6e7be896a 0x7ff6e7b75dae 0x7ff6e7b758d2 0x7ff6e7f1b505 0x7ff6e7bf0121
+#	0x7ff6e7f1b504	go-demo/lessons/m34_observability_diagnosis/internal/lab.unreachableWaiter+0x44	C:/Users/Lenovo/.codex/worktrees/go-course-m34/go-demo/lessons/m34_observability_diagnosis/internal/lab/profiles.go:143
+
+
+unreachable child exits; no parent-owned goroutine or listener remains

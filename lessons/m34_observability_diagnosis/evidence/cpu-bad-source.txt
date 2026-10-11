@@ -1,0 +1,10 @@
+Total: 690ms
+ROUTINE ======================== go-demo/lessons/m34_observability_diagnosis/internal/lab.digestOnce in C:\Users\Lenovo\.codex\worktrees\go-course-m34\go-demo\lessons\m34_observability_diagnosis\internal\lab\profiles.go
+         0      690ms (flat, cum)   100% of Total
+         .          .     45:func digestOnce(payload []byte) uint64 {
+         .      690ms     46:	hash := sha256.Sum256(payload)
+         .          .     47:	return binary.LittleEndian.Uint64(hash[:8])
+         .          .     48:}
+         .          .     49:
+         .          .     50:// Retainer 模拟只想缓存“订单凭证前 16 字节”的对象，Data 是 slice header 值。
+         .          .     51:// 它的 Data 指向底层数组；len 小不代表原始数组剩下的空间可以被 GC 单独回收。

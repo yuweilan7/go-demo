@@ -1,0 +1,3 @@
+package encoding/json/v2: build constraints exclude all Go files in D:\Go\src\encoding\json\v2
+expected_list_exit=1
+core_exit=0

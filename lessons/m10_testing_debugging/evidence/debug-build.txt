@@ -1,0 +1,4 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=go -C C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging build -gcflags=all=-N -l -o C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging\.local\m10-demo.exe ./cmd/demo
+exit_code=0
+expected_failure=False

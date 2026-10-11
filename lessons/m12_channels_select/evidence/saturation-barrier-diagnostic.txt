@@ -1,0 +1,8 @@
+command: go -C . test ./...
+workdir: C:/Users/Lenovo/.codex/worktrees/go-course-m12/go-demo/lessons/m12_channels_select
+result before repair:
+--- FAIL: TestSaturationCancelAtSend (0.00s)
+    course_test.go:193: 消费者冻结时未饱和: jobs=0 results=1
+FAIL
+cause: historical jobs send-failed observation may be stale; source may not have enqueued the third order yet.
+repair: in addition to results cannot send and jobs send-failed observation, wait for feeder's successful Produced=3 notification; frozen consumer then guarantees O-01 buffered result + O-02 held by worker + O-03 buffered jobs.

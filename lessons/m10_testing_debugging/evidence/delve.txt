@@ -1,0 +1,37 @@
+workdir=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging
+command=dlv exec C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging\.local\m10-demo.exe --allow-non-terminal-interactive=true --init=C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging\scripts\delve.commands -- -experiment=logic
+exit_code=0
+expected_failure=False
+Type 'help' for list of commands.
+Breakpoint paymentcheck set at 0x7ff60271cdd6 for go-demo/lessons/m10_testing_debugging/internal/order.(*Store).ApplyPayment() C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/internal/order/store.go:54
+E02 错误提交与修复: 订单应收 1299 分，本次支付 1300 分
+wrong err=支付金额与订单金额不符: got=1300 want=1299; state=paid credited=0 count=0
+> [paymentcheck] go-demo/lessons/m10_testing_debugging/internal/order.(*Store).ApplyPayment() C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/internal/order/store.go:54 (hits goroutine(1):1 total:1) (PC: 0x7ff60271cdd6)
+    49:		return value, nil
+    50:	}
+    51:
+    52:	// ApplyPayment 由真实 HTTP handler 和业务单测调用。金额核验通过后才修改状态和入账。
+    53:	// 同一个订单重复支付相同金额返回现有结果，CreditCount 不再增加；本规则不是通用支付幂等协议。
+=>  54:	func (s *Store) ApplyPayment(payment Payment) (Snapshot, error) {
+    55:		s.mu.Lock() // 可能在这里等别的请求释放锁；锁和 defer 的作用范围覆盖全部判断及修改。
+    56:		defer s.mu.Unlock()
+    57:		value, ok := s.orders[payment.ID] // map 取出的 Snapshot 是副本，改变 value 不会自动改变 map。
+    58:		if !ok {
+    59:			return Snapshot{}, fmt.Errorf("%w: %s", ErrNotFound, payment.ID)
+go-demo/lessons/m10_testing_debugging/internal/order.Payment {
+	ID: "order-42",
+	Cents: 1300,}
+0  0x00007ff60271cdd6 in go-demo/lessons/m10_testing_debugging/internal/order.(*Store).ApplyPayment
+   at C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/internal/order/store.go:54
+1  0x00007ff6027200c5 in main.runLogic
+   at C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:84
+2  0x00007ff60271f5e5 in main.run
+   at C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:38
+3  0x00007ff60271edb2 in main.main
+   at C:/Users/Lenovo/.codex/worktrees/go-course-m10/go-demo/lessons/m10_testing_debugging/cmd/demo/main.go:28
+4  0x00007ff60228a7b5 in runtime.main
+   at D:/Go/src/runtime/proc.go:302
+5  0x00007ff6022c7721 in runtime.goexit
+   at D:/Go/src/runtime/asm_amd64.s:1264
+fixed err=支付金额与订单金额不符: got=1300 want=1299; state=pending credited=0 count=0
+C:\Users\Lenovo\.codex\worktrees\go-course-m10\go-demo\lessons\m10_testing_debugging\scripts\delve.commands:5: Process 724444 has exited with status 0

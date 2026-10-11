@@ -1,0 +1,45 @@
+# TYPE m34_errors_total counter
+m34_errors_total{variant="fixed",operation="checkout"} 3
+# TYPE m34_cancellations_total counter
+m34_cancellations_total{variant="fixed",operation="checkout"} 1
+# TYPE m34_unknown_total counter
+m34_unknown_total{variant="fixed",operation="checkout"} 1
+# HELP m34_requests_total Completed checkout handlers classified by known business boundary.
+# TYPE m34_requests_total counter
+m34_requests_total{variant="fixed",operation="checkout",outcome="success"} 0
+m34_requests_total{variant="fixed",operation="checkout",outcome="business_error"} 1
+m34_requests_total{variant="fixed",operation="checkout",outcome="canceled"} 1
+m34_requests_total{variant="fixed",operation="checkout",outcome="unknown"} 1
+m34_requests_total{variant="fixed",operation="checkout",outcome="dependency_error"} 1
+m34_requests_total{variant="fixed",operation="checkout",outcome="internal_error"} 1
+# TYPE m34_in_flight gauge
+m34_in_flight{variant="fixed",operation="checkout"} 0
+# TYPE m34_queue_waiters gauge
+m34_queue_waiters{variant="fixed",operation="checkout"} 0
+# TYPE m34_dependency_seconds histogram
+m34_dependency_seconds_bucket{variant="fixed",operation="checkout",le="0.001"} 2
+m34_dependency_seconds_bucket{variant="fixed",operation="checkout",le="0.01"} 3
+m34_dependency_seconds_bucket{variant="fixed",operation="checkout",le="0.05"} 3
+m34_dependency_seconds_bucket{variant="fixed",operation="checkout",le="0.25"} 3
+m34_dependency_seconds_bucket{variant="fixed",operation="checkout",le="1"} 3
+m34_dependency_seconds_bucket{variant="fixed",operation="checkout",le="+Inf"} 3
+m34_dependency_seconds_sum{variant="fixed",operation="checkout"} 0.002331100
+m34_dependency_seconds_count{variant="fixed",operation="checkout"} 3
+# TYPE m34_queue_wait_seconds histogram
+m34_queue_wait_seconds_bucket{variant="fixed",operation="checkout",le="0.001"} 4
+m34_queue_wait_seconds_bucket{variant="fixed",operation="checkout",le="0.01"} 4
+m34_queue_wait_seconds_bucket{variant="fixed",operation="checkout",le="0.05"} 4
+m34_queue_wait_seconds_bucket{variant="fixed",operation="checkout",le="0.25"} 4
+m34_queue_wait_seconds_bucket{variant="fixed",operation="checkout",le="1"} 4
+m34_queue_wait_seconds_bucket{variant="fixed",operation="checkout",le="+Inf"} 4
+m34_queue_wait_seconds_sum{variant="fixed",operation="checkout"} 0.000000000
+m34_queue_wait_seconds_count{variant="fixed",operation="checkout"} 4
+# TYPE m34_request_seconds histogram
+m34_request_seconds_bucket{variant="fixed",operation="checkout",le="0.001"} 3
+m34_request_seconds_bucket{variant="fixed",operation="checkout",le="0.01"} 5
+m34_request_seconds_bucket{variant="fixed",operation="checkout",le="0.05"} 5
+m34_request_seconds_bucket{variant="fixed",operation="checkout",le="0.25"} 5
+m34_request_seconds_bucket{variant="fixed",operation="checkout",le="1"} 5
+m34_request_seconds_bucket{variant="fixed",operation="checkout",le="+Inf"} 5
+m34_request_seconds_sum{variant="fixed",operation="checkout"} 0.003607400
+m34_request_seconds_count{variant="fixed",operation="checkout"} 5
