@@ -1,0 +1,57 @@
+M28 run=golearn.m28.r1791744878782787500 Go=go1.27.0 client=amqp091-go/v1.15.0 registered_server=4.3.6
+BEGIN golearn.m28.r1791744878782787500.confirm.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+CONFIRM ready=2 consumer_not_started effects=0 => broker接受不等于业务完成
+DELIVER tag=1 ready=1 business_effects=0 prefetch=1 => 第一条仍待处理/ack
+COMMIT id=golearn.m28.r1791744878782787500.confirm.work.q:confirm-A tag=1 redelivered=false applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.confirm.work.q:confirm-A tag=1 multiple=false broker_barrier=ok effects=1
+COMMIT id=golearn.m28.r1791744878782787500.confirm.work.q:confirm-B tag=2 redelivered=false applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.confirm.work.q:confirm-B tag=2 multiple=false broker_barrier=ok effects=1
+PASS confirm   broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.return.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+RETURN code=312 message_id=golearn.m28.r1791744878782787500.return.work.q:unroutable broker_confirm=ack ready=0 effects=0
+PASS return    broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.cancel.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+CANCEL before_call error=context.Canceled publish_seq_unchanged ready=0
+CANCEL during_Write ctx_done=true Publish_still_blocked=true; release真实socket写屏障
+CANCEL in_flight Publish_return=nil ctx_still_canceled=true separate_confirm_owner=ACK
+COMMIT id=golearn.m28.r1791744878782787500.cancel.work.q:inflight-canceled tag=1 redelivered=false applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.cancel.work.q:inflight-canceled tag=1 multiple=false broker_barrier=ok effects=1
+CANCEL after_send real_delivery=inflight-canceled effects=1 => 停止等待不会撤回消息
+PASS cancel    broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.recovery.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+EARLY_ACK connection_closed ready=0 effects=0 => 业务未处理且broker不会再投
+COMMIT_WITHOUT_ACK id=golearn.m28.r1791744878782787500.recovery.work.q:commit-before-disconnect tag=1 effects=1 next=close-own-socket
+COMMIT id=golearn.m28.r1791744878782787500.recovery.work.q:commit-before-disconnect tag=1 redelivered=true applied=false effects=1
+ACK id=golearn.m28.r1791744878782787500.recovery.work.q:commit-before-disconnect tag=1 multiple=false broker_barrier=ok effects=1
+RECOVERY old_tag=1 new_tag=1 redelivered=true effects=1 topology+Qos+consumer_recreated
+COMMIT id=golearn.m28.r1791744878782787500.recovery.work.q:after-reconnect tag=2 redelivered=false applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.recovery.work.q:after-reconnect tag=2 multiple=false broker_barrier=ok effects=1
+PASS recovery  broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.duplicate.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+COMMIT id=golearn.m28.r1791744878782787500.duplicate.work.q:duplicate-id tag=1 redelivered=false applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.duplicate.work.q:duplicate-id tag=1 multiple=false broker_barrier=ok effects=1
+COMMIT id=golearn.m28.r1791744878782787500.duplicate.work.q:duplicate-id tag=2 redelivered=false applied=false effects=1
+ACK id=golearn.m28.r1791744878782787500.duplicate.work.q:duplicate-id tag=2 multiple=false broker_barrier=ok effects=1
+DUPLICATE broker_deliveries=2 business_effects=1 => message_id是属性，幂等是业务约束
+PASS duplicate broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.retry.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+TRANSIENT attempt=1 nack(requeue=true)；本run只允许一次立即requeue
+COMMIT id=golearn.m28.r1791744878782787500.retry.work.q:transient tag=2 redelivered=true applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.retry.work.q:transient tag=2 multiple=false broker_barrier=ok effects=1
+POISON attempt=0 business_failed effects=0
+POISON attempt=1 business_failed effects=0
+POISON attempt=2 business_failed effects=0
+DLQ message_id=golearn.m28.r1791744878782787500.retry.work.q:poison poison_attempts=3 x-death_present=true effects=0 transient_effects=1
+PASS retry     broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.multiple.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+MULTIPLE_BAD ack_tag=2 multiple=true earlier_tag=1 ready_after_close=0 A_effects=0 B_effects=1
+COMMIT id=golearn.m28.r1791744878782787500.multiple.work.q:fixed-slow-A tag=1 redelivered=true applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.multiple.work.q:fixed-slow-A tag=1 multiple=false broker_barrier=ok effects=1
+MULTIPLE_FIXED ack(false) A_redelivered=true A_effects=1 B_effects=1
+PASS multiple  broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+BEGIN golearn.m28.r1791744878782787500.tag.work.q broker_version=4.3.6 durable=true persistent=2 manual_ack=true max_length=32
+TAG_FOREIGN Ack_return=nil NotifyClose_code=406 owning_channel_still_open=true effects=0
+COMMIT id=golearn.m28.r1791744878782787500.tag.work.q:channel-owned-tag tag=1 redelivered=false applied=true effects=1
+ACK id=golearn.m28.r1791744878782787500.tag.work.q:channel-owned-tag tag=1 multiple=false broker_barrier=ok effects=1
+PASS tag       broker assertion + independent business assertion; deleted=3 queues/3 exchanges
+M28 ALL SELECTED PASS; sessions closed, cancellation watchers joined, owned topology removed

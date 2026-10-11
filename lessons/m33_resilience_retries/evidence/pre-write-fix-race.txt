@@ -1,0 +1,23 @@
+?   	go-demo/lessons/m33_resilience_retries/cmd/demo	[no test files]
+=== RUN   TestAllScenarios
+--- PASS: TestAllScenarios (1.77s)
+=== RUN   TestTotalDeadlineAndAttemptLimit
+--- PASS: TestTotalDeadlineAndAttemptLimit (0.10s)
+=== RUN   TestCancelAndEarlyReturn
+--- PASS: TestCancelAndEarlyReturn (0.00s)
+=== RUN   TestResultIsNotDone
+--- PASS: TestResultIsNotDone (0.00s)
+=== RUN   TestUnknownWriteReconciliation
+--- PASS: TestUnknownWriteReconciliation (0.00s)
+=== RUN   TestConcurrentIdempotency
+--- PASS: TestConcurrentIdempotency (0.00s)
+=== RUN   TestBodyReplayAndRetryAfter
+--- PASS: TestBodyReplayAndRetryAfter (1.00s)
+=== RUN   TestHalfOpenFailureAndWindow
+--- PASS: TestHalfOpenFailureAndWindow (0.12s)
+=== RUN   TestAlreadyCanceledAndBusinessRejection
+--- PASS: TestAlreadyCanceledAndBusinessRejection (0.00s)
+=== RUN   TestDocumentationEntry
+--- PASS: TestDocumentationEntry (1.51s)
+PASS
+ok  	go-demo/lessons/m33_resilience_retries/internal/lab	6.524s

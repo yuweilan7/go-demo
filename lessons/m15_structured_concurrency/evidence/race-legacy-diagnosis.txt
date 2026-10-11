@@ -1,0 +1,8 @@
+=== RUN   TestActualLegacyPool
+    lesson_test.go:70: 原Pool child: exit status 1
+        legacy source sha256=059c9a280d9f012566e44c4831f93490bef348f80e156871bac26adf058ec0d8 race=true build-and-run=13.58s child=6.352s child-ctx=context deadline exceeded
+--- FAIL: TestActualLegacyPool (13.59s)
+FAIL
+FAIL	go-demo/lessons/m15_structured_concurrency	14.596s
+?   	go-demo/lessons/m15_structured_concurrency/cmd/demo	[no test files]
+FAIL

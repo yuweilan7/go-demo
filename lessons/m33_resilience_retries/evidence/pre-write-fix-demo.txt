@@ -1,0 +1,189 @@
++0000ms owner            === core ===
++0002ms HTTP-owner       真实动态 listener=http://127.0.0.1:5174
++0002ms handler          /flaky #1 method=GET
++0003ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0003ms backoff          wait=9.280192ms（Retry-After与jitter取较大值）
++0013ms handler          /flaky #2 method=GET
++0013ms retry            attempt=2 HTTP=503 remaining=1.988s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0013ms backoff          wait=13.798966ms（Retry-After与jitter取较大值）
++0028ms handler          /flaky #3 method=GET
++0028ms retry            attempt=3 HTTP=200 remaining=1.974s err=<nil>
++0028ms handler          /always503 #1 method=GET
++0028ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0028ms backoff          wait=9.280192ms（Retry-After与jitter取较大值）
++0039ms handler          /always503 #2 method=GET
++0039ms retry            attempt=2 HTTP=503 remaining=1.989s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0039ms backoff          wait=13.798966ms（Retry-After与jitter取较大值）
++0054ms handler          /always503 #3 method=GET
++0054ms retry            attempt=3 HTTP=503 remaining=1.974s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0055ms handler          /reject #1 method=GET
++0055ms retry            attempt=1 HTTP=422 remaining=1.999s err=HTTP=422 code=OUT_OF_STOCK Retry-After=0s
++0055ms handler          /body-fault #1 method=GET
++0056ms handler          /body-fault #2 method=GET
++0056ms body-owner       共享Reader反例server bodies=["stock-query" ""]；修复每attempt新Reader
++0056ms handler          /replay #1 method=GET
++0056ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0056ms backoff          wait=9.280192ms（Retry-After与jitter取较大值）
++0066ms handler          /replay #2 method=GET
++0066ms retry            attempt=2 HTTP=200 remaining=1.989s err=<nil>
++0067ms handler          /replay #3 method=GET
++0067ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++0067ms backoff          wait=9.280192ms（Retry-After与jitter取较大值）
++0077ms handler          /retry-after #1 method=GET
++0077ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=BUSY Retry-After=1s
++0077ms backoff          wait=1s（Retry-After与jitter取较大值）
++1078ms handler          /retry-after #2 method=GET
++1078ms retry            attempt=2 HTTP=200 remaining=998ms err=<nil>
++1079ms handler          /retry-after-long #1 method=GET
++1079ms retry            attempt=1 HTTP=503 remaining=79ms err=HTTP=503 code=BUSY Retry-After=1s
++1079ms backoff          wait=1s（Retry-After与jitter取较大值）
++1159ms handler          /always503 #4 method=GET
++1159ms retry            attempt=1 HTTP=503 remaining=149ms err=HTTP=503 code=TEMPORARY Retry-After=0s
++1159ms backoff          wait=74.24153ms（Retry-After与jitter取较大值）
++1234ms handler          /always503 #5 method=GET
++1234ms retry            attempt=2 HTTP=503 remaining=74ms err=HTTP=503 code=TEMPORARY Retry-After=0s
++1235ms backoff          wait=110.391727ms（Retry-After与jitter取较大值）
++1309ms budget-owner     total=150ms attempts=2 max=10 deadline共同继承
++1309ms handler          /slow #1 method=GET
++1379ms retry            attempt=1 HTTP=0 remaining=120ms err=Get "http://127.0.0.1:5174/slow?gate=slow-budget": context deadline exceeded
++1379ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1381ms handler          /slow #2 method=GET
++1451ms retry            attempt=2 HTTP=0 remaining=48ms err=Get "http://127.0.0.1:5174/slow?gate=slow-budget": context deadline exceeded
++1451ms backoff          wait=689.948µs（Retry-After与jitter取较大值）
++1453ms handler          /slow #3 method=GET
++1499ms retry            attempt=3 HTTP=0 remaining=0s err=Get "http://127.0.0.1:5174/slow?gate=slow-budget": context deadline exceeded
++1499ms core-owner       GET次数上限、jitter、body replay、Retry-After、slow/total deadline PASS
++1499ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1499ms client-owner     bodies=0 err=<nil>
++1499ms HTTP-owner       真实动态 listener=http://127.0.0.1:5195
++1499ms handler          /lost-order #1 method=POST
++1499ms ledger           id=1 duplicate=false rows=1
++1500ms retry            attempt=1 HTTP=0 remaining=999ms err=UNKNOWN: Post "http://127.0.0.1:5195/lost-order": EOF
++1500ms handler          /orders #1 method=POST
++1500ms ledger           id=2 duplicate=false rows=2
++1500ms retry            attempt=1 HTTP=201 remaining=1s err=<nil>
++1500ms order-owner      危险对照：client UNKNOWN后换请求，无key导致rows=2
++1500ms handler          /lost-order #2 method=POST
++1500ms ledger           id=3 duplicate=false rows=3
++1500ms retry            attempt=1 HTTP=0 remaining=1s err=UNKNOWN: Post "http://127.0.0.1:5195/lost-order": EOF
++1501ms handler          /status #1 method=GET
++1501ms retry            attempt=1 HTTP=200 remaining=999ms err=<nil>
++1502ms handler          /orders #2 method=POST
++1502ms ledger           id=3 duplicate=true rows=3
++1502ms retry            attempt=1 HTTP=201 remaining=999ms err=<nil>
++1502ms handler          /orders #3 method=POST
++1502ms retry            attempt=1 HTTP=409 remaining=1s err=HTTP=409 code=KEY_PAYLOAD_CONFLICT Retry-After=0s
++1502ms order-owner      修复对照：UNKNOWN -> GET receipt=3 -> 同key duplicate=true -> conflict409，rows=3
++1502ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1502ms client-owner     bodies=0 err=<nil>
++1502ms HTTP-owner       真实动态 listener=http://127.0.0.1:5202
++1502ms handler          /always503 #1 method=GET
++1502ms retry            attempt=1 HTTP=503 remaining=2s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1502ms backoff          wait=928.019124ms（Retry-After与jitter取较大值）
++1502ms cancel-owner     result=HTTP=503 code=TEMPORARY Retry-After=0s
+context canceled attempts=1 handler=1 Done=true
++1503ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1503ms client-owner     bodies=0 err=<nil>
++1503ms owner            PASS core owned_tasks=0
++1503ms owner            === amplify ===
++1503ms HTTP-owner       真实动态 listener=http://127.0.0.1:5204
++1503ms handler          /gateway #1 method=GET
++1503ms handler          /always503 #1 method=GET
++1503ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1503ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1505ms handler          /always503 #2 method=GET
++1505ms retry            attempt=2 HTTP=503 remaining=1.998s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1505ms retry            attempt=1 HTTP=503 remaining=1.998s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1505ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1506ms handler          /gateway #2 method=GET
++1507ms handler          /always503 #3 method=GET
++1507ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1507ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1508ms handler          /always503 #4 method=GET
++1508ms retry            attempt=2 HTTP=503 remaining=1.998s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1508ms retry            attempt=2 HTTP=503 remaining=1.994s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1509ms backoff          wait=689.948µs（Retry-After与jitter取较大值）
++1510ms handler          /gateway #3 method=GET
++1510ms handler          /always503 #5 method=GET
++1510ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1510ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1512ms handler          /always503 #6 method=GET
++1512ms retry            attempt=2 HTTP=503 remaining=1.998s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1512ms retry            attempt=3 HTTP=503 remaining=1.991s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1512ms handler          /gateway #4 method=GET
++1513ms handler          /always503 #7 method=GET
++1513ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1513ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1514ms handler          /always503 #8 method=GET
++1514ms retry            attempt=2 HTTP=503 remaining=1.998s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1515ms retry            attempt=1 HTTP=503 remaining=1.997s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1515ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1516ms handler          /gateway #5 method=GET
++1516ms handler          /always503 #9 method=GET
++1516ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1516ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1517ms handler          /always503 #10 method=GET
++1517ms retry            attempt=2 HTTP=503 remaining=1.998s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1517ms retry            attempt=2 HTTP=503 remaining=1.994s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1517ms backoff          wait=689.948µs（Retry-After与jitter取较大值）
++1519ms handler          /gateway #6 method=GET
++1519ms handler          /always503 #11 method=GET
++1519ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1519ms backoff          wait=928.019µs（Retry-After与jitter取较大值）
++1521ms handler          /always503 #12 method=GET
++1521ms retry            attempt=2 HTTP=503 remaining=1.998s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1521ms retry            attempt=3 HTTP=503 remaining=1.991s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1521ms amplify-owner    fixed=false app=2 sdk=3 server=2 gateway=6 leaf=12
++1521ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1521ms client-owner     bodies=0 err=<nil>
++1521ms HTTP-owner       真实动态 listener=http://127.0.0.1:5223
++1521ms handler          /gateway #1 method=GET
++1522ms handler          /always503 #1 method=GET
++1522ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1522ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1523ms handler          /gateway #2 method=GET
++1523ms handler          /always503 #2 method=GET
++1523ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1523ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=DOWNSTREAM_FAILED Retry-After=0s
++1523ms amplify-owner    fixed=true app=2 sdk=1 server=1 gateway=2 leaf=2
++1523ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1523ms client-owner     bodies=0 err=<nil>
++1523ms owner            PASS amplify owned_tasks=0
++1523ms owner            === breaker ===
++1523ms HTTP-owner       真实动态 listener=http://127.0.0.1:5228
++1524ms handler          /always503 #1 method=GET
++1524ms retry            attempt=1 HTTP=503 remaining=1.999s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1524ms handler          /always503 #2 method=GET
++1524ms retry            attempt=1 HTTP=503 remaining=2s err=HTTP=503 code=TEMPORARY Retry-After=0s
++1524ms breaker          inventory-m33 closed -> open
++1634ms breaker          inventory-m33 open -> half-open
++1635ms handler          /probe #1 method=GET
++1635ms retry            attempt=1 HTTP=200 remaining=1.999s err=<nil>
++1635ms breaker          inventory-m33 half-open -> closed
++1635ms handler          /healthy #1 method=GET
++1635ms retry            attempt=1 HTTP=200 remaining=1.999s err=<nil>
++1635ms breaker-owner    真实probe=1，第二probe拒绝，恢复closed healthy=1
++1635ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1635ms client-owner     bodies=0 err=<nil>
++1635ms owner            PASS breaker owned_tasks=0
++1635ms owner            === isolation ===
++1636ms HTTP-owner       真实动态 listener=http://127.0.0.1:5233
++1636ms handler          /slow #1 method=GET
++1637ms handler          /healthy #1 method=GET
++1637ms retry            attempt=1 HTTP=200 remaining=999ms err=<nil>
++1637ms retry            attempt=1 HTTP=0 remaining=1.999s err=Get "http://127.0.0.1:5233/slow?gate=isolated-slow": context canceled
++1637ms isolation-owner  slow=1 healthy=1 active=0 queue=0，工作取消后分别join
++1637ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1637ms client-owner     bodies=0 err=<nil>
++1637ms owner            PASS isolation owned_tasks=0
++1637ms owner            === limits ===
++1637ms HTTP-owner       真实动态 listener=http://127.0.0.1:5236
++1637ms handler          /healthy #1 method=GET
++1637ms retry            attempt=1 HTTP=200 remaining=999ms err=<nil>
++1748ms handler          /healthy #2 method=GET
++1748ms retry            attempt=1 HTTP=200 remaining=999ms err=<nil>
++1748ms rate-owner       第一次成功，第二次入口拒绝，窗口后第三次成功，HTTP calls=2
++1748ms HTTP-owner       清理 active=0 conns=0 Serve=joined listener=closed err=<nil>
++1748ms client-owner     bodies=0 err=<nil>
++1748ms owner            PASS limits owned_tasks=0
+M33 PASS：真实调用、副作用与各 owner 的清理断言全部完成

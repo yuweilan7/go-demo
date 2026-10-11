@@ -1,0 +1,9 @@
+?   	go-demo/lessons/m28_rabbitmq_delivery/cmd/demo	[no test files]
+=== RUN   TestLedgerConcurrentCommit
+--- PASS: TestLedgerConcurrentCommit (0.00s)
+=== RUN   TestTaskJoinAfterCleanup
+--- PASS: TestTaskJoinAfterCleanup (0.00s)
+=== RUN   TestIntegration
+--- PASS: TestIntegration (30.39s)
+PASS
+ok  	go-demo/lessons/m28_rabbitmq_delivery/internal/lab	32.355s

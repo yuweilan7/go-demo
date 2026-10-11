@@ -2,7 +2,7 @@
 
 面向熟练 Java 工程师、Go 初学者。每课有详细中文 README、透彻注释的源码、直接交付的反例/修复、真实可运行实验与必要独立断言，不布置额外 exercise。共同规范见 [TEACHING_STYLE](../learning_prompts/TEACHING_STYLE.md)。
 
-第 0 层 19 课已完成主 agent 独立验收并汇总；剩余 20 课仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
+第 0、1 层共 26 课已完成主 agent 独立验收并汇总；剩余 13 课仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
 
 各课是独立 Go module；根 `go test ./...` 不覆盖它们。先读该课 README 的参数/资源/实际范围，再执行例如：
 
@@ -42,13 +42,13 @@ go -C lessons/m17_net_http vet ./...
 
 | 模块 | 内容 | 硬前置 | 交付状态 |
 | --- | --- | --- | --- |
-| [M15](../learning_prompts/M15_structured_concurrency.md) | 组合并发：errgroup、worker pool、限流和部分失败 | M11、M12、M13、M14 | 待交付 |
-| [M18](../learning_prompts/M18_gin_middleware.md) | Gin 路由、middleware、绑定与请求作用域 | M17 | 待交付 |
-| [M20](../learning_prompts/M20_sql_pools.md) | database/sql、真实 MySQL 与连接池生命周期 | M00 | 待交付 |
-| [M25](../learning_prompts/M25_redis_client.md) | 真实 Redis、go-redis、TTL 与命令原子边界 | M00 | 待交付 |
-| [M28](../learning_prompts/M28_rabbitmq_delivery.md) | RabbitMQ：ack、confirm、重连与毒消息 | M00 | 待交付 |
-| [M29](../learning_prompts/M29_kafka_offsets.md) | Kafka：分区、offset、rebalance 与至少一次处理 | M00 | 待交付 |
-| [M33](../learning_prompts/M33_resilience_retries.md) | 超时、重试、熔断、限流和资源隔离 | M13、M17 | 待交付 |
+| [M15](m15_structured_concurrency/README.md) | 组合并发：errgroup、worker pool、限流和部分失败 | M11、M12、M13、M14 | 已验收 |
+| [M18](m18_gin_middleware/README.md) | Gin 路由、middleware、绑定与请求作用域 | M17 | 已验收 |
+| [M20](m20_sql_pools/README.md) | database/sql、真实 MySQL 与连接池生命周期 | M00 | 已验收 |
+| [M25](m25_redis_client/README.md) | 真实 Redis、go-redis、TTL 与命令原子边界 | M00 | 已验收 |
+| [M28](m28_rabbitmq_delivery/README.md) | RabbitMQ：ack、confirm、重连与毒消息 | M00 | 已验收 |
+| [M29](m29_kafka_offsets/README.md) | Kafka：分区、offset、rebalance 与至少一次处理 | M00 | 已验收 |
+| [M33](m33_resilience_retries/README.md) | 超时、重试、熔断、限流和资源隔离 | M13、M17 | 已验收 |
 
 ## 第 2 层
 

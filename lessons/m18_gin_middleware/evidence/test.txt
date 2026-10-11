@@ -1,0 +1,60 @@
+?   	go-demo/lessons/m18_gin_middleware/cmd/demo	[no test files]
+?   	go-demo/lessons/m18_gin_middleware/cmd/fault	[no test files]
+=== RUN   TestM17ContractConcurrentIdempotency
+--- PASS: TestM17ContractConcurrentIdempotency (0.01s)
+=== RUN   TestNextAndGroupOrdering
+--- PASS: TestNextAndGroupOrdering (0.00s)
+=== RUN   TestAbortReturnAndBindResponse
+--- PASS: TestAbortReturnAndBindResponse (0.00s)
+=== RUN   TestRejectedInputsHaveNoEffects
+=== RUN   TestRejectedInputsHaveNoEffects/auth
+=== RUN   TestRejectedInputsHaveNoEffects/json
+=== RUN   TestRejectedInputsHaveNoEffects/unknown
+=== RUN   TestRejectedInputsHaveNoEffects/trailing
+=== RUN   TestRejectedInputsHaveNoEffects/large
+=== RUN   TestRejectedInputsHaveNoEffects/missing
+=== RUN   TestRejectedInputsHaveNoEffects/negative
+=== RUN   TestRejectedInputsHaveNoEffects/sku
+=== RUN   TestRejectedInputsHaveNoEffects/key
+=== RUN   TestRejectedInputsHaveNoEffects/content
+--- PASS: TestRejectedInputsHaveNoEffects (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/auth (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/json (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/unknown (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/trailing (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/large (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/missing (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/negative (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/sku (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/key (0.00s)
+    --- PASS: TestRejectedInputsHaveNoEffects/content (0.00s)
+=== RUN   TestBusinessValidationAndBodyReuse
+--- PASS: TestBusinessValidationAndBodyReuse (0.00s)
+=== RUN   TestAuthenticationOwnershipProxyAndLogs
+--- PASS: TestAuthenticationOwnershipProxyAndLogs (0.00s)
+=== RUN   TestExplicitTrustedProxy
+--- PASS: TestExplicitTrustedProxy (0.00s)
+=== RUN   TestRecoveryAndAlreadyCommitted
+--- PASS: TestRecoveryAndAlreadyCommitted (0.00s)
+=== RUN   TestContextCopyAndExplicitBackgroundOwner
+--- PASS: TestContextCopyAndExplicitBackgroundOwner (0.00s)
+=== RUN   TestRealDependencyCancellationAndTimeout
+=== RUN   TestRealDependencyCancellationAndTimeout/detached
+=== RUN   TestRealDependencyCancellationAndTimeout/gin-context
+=== RUN   TestRealDependencyCancellationAndTimeout/forward
+=== RUN   TestRealDependencyCancellationAndTimeout/timeout
+--- PASS: TestRealDependencyCancellationAndTimeout (0.16s)
+    --- PASS: TestRealDependencyCancellationAndTimeout/detached (0.00s)
+    --- PASS: TestRealDependencyCancellationAndTimeout/gin-context (0.00s)
+    --- PASS: TestRealDependencyCancellationAndTimeout/forward (0.00s)
+    --- PASS: TestRealDependencyCancellationAndTimeout/timeout (0.15s)
+=== RUN   TestCanceledWorkAndResultAreNotJoin
+--- PASS: TestCanceledWorkAndResultAreNotJoin (0.00s)
+=== RUN   TestEarlyObservationFailureStillJoins
+--- PASS: TestEarlyObservationFailureStillJoins (0.00s)
+=== RUN   TestCleanupErrorPreservesPrimary
+--- PASS: TestCleanupErrorPreservesPrimary (0.00s)
+=== RUN   TestFaultProcesses
+--- PASS: TestFaultProcesses (1.81s)
+PASS
+ok  	go-demo/lessons/m18_gin_middleware/internal/lab	4.147s

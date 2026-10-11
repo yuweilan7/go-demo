@@ -1,0 +1,58 @@
+
+== E01 M17订单协议/Next洋葱/幂等冲突 ==
+Next=[A.before B.before H B.after A.after]
+first={"code":"OK","committed":true,"order_id":1} repeat={"code":"OK","committed":true,"order_id":1} conflict=409/{"code":"CONFLICT","committed":false} rows=1
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E01 M17订单协议/Next洋葱/幂等冲突
+
+== E02 Abort漏return/修复 ==
+bad=401/{"code":"AUTH","committed":false}{"code":"OK","committed":true,"order_id":1} objects=2 rows=1 trace=[A.before bad.current-handler-write A.after]
+fixed=401/{"code":"AUTH","committed":false} rows=1
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E02 Abort漏return/修复
+
+== E03 Bind自动响应/ShouldBind/业务校验 ==
+Bind bad=400 content_type="text/plain; charset=utf-8" body={"code":"INPUT","committed":false}{"code":"OK","committed":true,"order_id":1} objects=2
+ShouldBind fixed=400/{"code":"INPUT","committed":false}; qty=-1 bad=201 fixed=422/{"code":"ORDER_INVALID","committed":false} rows=2
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E03 Bind自动响应/ShouldBind/业务校验
+
+== E04 body重复读取/缓存修复 ==
+network-reread=400/{"code":"BODY_ALREADY_READ","committed":false} rows=0; bounded-cache=201/{"code":"OK","committed":true,"order_id":1} rows=1
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E04 body重复读取/缓存修复
+
+== E05 Context.Copy/后台owner/结果非完成 ==
+request-derived: handler返回 -> request ctx canceled -> worker result=Canceled effects=0 -> cleanup/join
+owned: request canceled -> snapshot={User:alice Request:2 Route:/api/lifecycle/:mode} effects=1 result=nil finished=false owner_returned=false
+owned: cleanup gate opened -> worker finished -> owner joined; Copy same_request=true writer=nil shallow_pointer=true Gin.Done=nil
+sync.Pool observation: sequential_requests=16 address_reused=6; 当前身份每次重设，复用次数不是契约
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E05 Context.Copy/后台owner/结果非完成
+
+== E06 Recovery当前栈/提交不回滚/worker修复 ==
+same-goroutine before=500/{"code":"PANIC","committed":false} rows=0; after-submit=500/{"code":"PANIC","committed":false} rows=1; guarded-worker=后台任务panic已在自身goroutine入口隔离 finished=true active=0
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E06 Recovery当前栈/提交不回滚/worker修复
+
+== E07 认证归属/IP/敏感日志 ==
+Bob+伪造X-User=alice -> 403/{"code":"FORBIDDEN","committed":false}; safe_audit={"Request":"2","Method":"GET","Route":"/api/orders/:id","User":"bob","Peer":"127.0.0.1","Status":403,"Code":"FORBIDDEN"} rows=1
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E07 认证归属/IP/敏感日志
+
+== E08 真实依赖取消链/危险版/修复/超时 ==
+mode=detached client_err=真实HTTP请求: Post "http://127.0.0.1:9171/api/slow-orders?gate=cancel-detached&mode=detached": context canceled HTTP=0 body= rows=0->1 dependency_canceled=false dependency=joined app=joined call=joined
+mode=gin-context client_err=真实HTTP请求: Post "http://127.0.0.1:9171/api/slow-orders?gate=cancel-gin-context&mode=gin-context": context canceled HTTP=0 body= rows=1->1 dependency_canceled=false dependency=joined app=joined call=joined
+mode=forward client_err=真实HTTP请求: Post "http://127.0.0.1:9171/api/slow-orders?gate=cancel-forward&mode=forward": context canceled HTTP=0 body= rows=1->1 dependency_canceled=true dependency=joined app=joined call=joined
+mode=timeout client_err=<nil> HTTP=504 body={"code":"DEPENDENCY_TIMEOUT","committed":false} rows=1->1 dependency_canceled=true dependency=joined app=joined call=joined
+cleanup bodies=0 calls=0 jobs=0 app_live=0 dependency_live=0 app_handlers=0 dependency_handlers=0 Serve=joined
+PASS E08 真实依赖取消链/危险版/修复/超时
+
+== E09 可信代理显式配置 ==
+trusted_proxies=[127.0.0.1] proxy_forwarded={"code":"OK","committed":false,"peer":"203.0.113.9","user":"alice"} identity=alice (IP不作为身份)
+PASS E09 可信代理显式配置
+
+== E10 有界故障子进程 ==
+child mode=goroutine-panic exit=2 panic_marker=true process=joined
+child mode=copy-write exit=2 panic_marker=true process=joined
+PASS E10 有界故障子进程；整轮10项完成

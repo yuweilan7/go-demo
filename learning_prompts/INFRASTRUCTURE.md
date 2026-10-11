@@ -1,10 +1,27 @@
 # 真实基础设施与并行实验约定
 
-这份文件由需要中间件或服务器实验的模块读取，普通语法课不需要全量读。用户已明确授权：需要 MySQL 或消息队列时直接在现有学习服务器安装独立实例；可以在服务器运行课程代码。这些工作用于准备和验证真实实验，按实际需要执行。安装是相关模块执行时的工作，本次 prompt 修订没有安装或改动服务。
+这份文件由需要中间件或服务器实验的模块读取，普通语法课不需要全量读。用户已明确授权：需要 MySQL 或消息队列时直接在现有学习服务器安装独立实例；可以在服务器运行课程代码。这些工作用于准备和验证真实实验，按实际需要执行。最初修订 prompt 时没有安装；第 1 层实施时已由主 agent 完成真实安装和验收，以下记录区分当前实证与原配置基线。
+
+## 第 1 层已核验的学习入口
+
+2026-10-12，主 agent 实际登录授权服务器盘点、持锁安装并做真实写读及课程实例重启持久性核验。权威私有索引为主目录 `.local/course-orchestrator/infra-services.json`，其四个服务均为 READY；凭据从各自 `credential_file` 读取，不复制或打印。课程专属 SSH 隧道由主 agent 持有，消费模块只使用登记端点，不另建隧道或控制容器。
+
+| 服务 | 实际版本与本机入口 | 归属、实证与当前限制 |
+| --- | --- | --- |
+| Redis | 8.2.8，`127.0.0.1:16389` | 复用既有 DeepHelp Redis，M25 实际 AUTH/键值/TTL/并发/响应失败验收；不得停机、改全局配置或 broad delete。 |
+| MySQL | 8.4.11，`127.0.0.1:13306` | 新容器 `golearn-course-mysql`、新 volume `golearn-course-mysql-data`；512MiB、1CPU、max_connections=32、InnoDB128MiB。课程账号只在 `golearn_m20` 有权限；后课可用本库的独占模块/run 表，不复用 M20 数据。真实重启写读保持，M20 已验收。 |
+| RabbitMQ | 4.3.6，`127.0.0.1:15673` | 新容器/volume，512MiB、1CPU、独占 vhost `/golearn_m28`；M28 已验收真实 confirm、投递、重投、DLQ、业务效果和精确清理，安装者已核验重启持久读回。 |
+| Apache Kafka | 4.3.1，`127.0.0.1:19192` | 新单节点 KRaft 容器/volume，768MiB、1CPU、heap256MiB；metadata 返回同一 loopback 地址。当前为课程专用 PLAINTEXT，M29 已验收分区/offset/rebalance/真实 stop/start 恢复；非多节点或生产鉴权证明。 |
+
+学习根为 `/srv/go-demo-learning`，Compose project=`golearn-course`，容器和 named volume 的 owner labels 已实际核对。镜像 tag/digest、资源配置、安装失败/修复、运行锁竞争/超时与持久性报告保存在主目录 `.local/course-orchestrator/`。初选 `mysql:8.4.12` 的 manifest 实际不存在，已保留失败并改用可拉取的 8.4.11，不能把运行版本写成 8.4.12。
+
+固定 inode 的安装锁已实跑：竞争者返回75，超时 owner 返回124且所属子进程结束，后续 owner 正常取得锁；所有变更仍由主 agent 唯一持锁。日志轮转限制为每容器5MiB×2，合成数据/retention 有界，但 named volume **没有硬磁盘 quota**。实测三课程实例 Running、OOMKilled=false；安装前17个 DeepHelp 容器的名称、镜像 tag、State、既有健康状态及 StartedAt 早于安装基线均已复核，退役 MySQL 仍退出。原盘点未记录容器 ID/digest，不能据此宣称前后 ID/digest 比对。
+
+后续并行实库模块按自己的表/键/topic 命名空间隔离；建议单课最多4个活跃数据库连接，跨课总量必须低于32并留恢复余量。只读索引一次即可，不重复完整安装验收；版本、归属或端点变化后再核验受影响部分。模块不得停课程实例做并发故障；需要真实进程故障时向主 agent 请求独占窗口，由它核对所有使用者、唯一 stop/start 并恢复协议。
 
 ## 当前可依据的事实
 
-2026-10-12 读取的是 DeepHelp 当前仓库文档、Compose 与本机接入索引；**本次没有登录服务器或做实时健康/容量检查**。下表是配置基线，每次执行需核对现状。
+最初 prompt 编排时读取的是 DeepHelp 仓库文档、Compose 与本机接入索引，当时没有登录服务器。下表保留原配置基线；当前课程端点以以上实际验收与私有索引为准。
 
 | 组件 | 现行材料事实 | Go 课程怎样使用 |
 | --- | --- | --- |

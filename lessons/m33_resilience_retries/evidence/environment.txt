@@ -1,0 +1,90 @@
+2026-10-12 02:46:26 +08:00
+go version go1.27.0 windows/amd64
+go1.27.0
+D:\Go
+windows
+amd64
+auto
+https://goproxy.cn,direct
+1
+gcc
+{
+	"Path": "go-demo/lessons/m33_resilience_retries",
+	"Main": true,
+	"Dir": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m33\\go-demo\\lessons\\m33_resilience_retries",
+	"GoMod": "C:\\Users\\Lenovo\\.codex\\worktrees\\go-course-m33\\go-demo\\lessons\\m33_resilience_retries\\go.mod",
+	"GoVersion": "1.27.0"
+}
+{
+	"Path": "github.com/davecgh/go-spew",
+	"Version": "v1.1.1",
+	"Time": "2018-02-21T23:26:28Z",
+	"Indirect": true,
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\davecgh\\go-spew@v1.1.1",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\davecgh\\go-spew\\@v\\v1.1.1.mod",
+	"Sum": "h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=",
+	"GoModSum": "h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38="
+}
+{
+	"Path": "github.com/pmezard/go-difflib",
+	"Version": "v1.0.0",
+	"Time": "2016-01-10T10:55:54Z",
+	"Indirect": true,
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\pmezard\\go-difflib@v1.0.0",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\pmezard\\go-difflib\\@v\\v1.0.0.mod",
+	"Sum": "h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=",
+	"GoModSum": "h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4="
+}
+{
+	"Path": "github.com/sony/gobreaker/v2",
+	"Version": "v2.4.0",
+	"Time": "2026-01-01T00:47:18Z",
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\sony\\gobreaker\\v2@v2.4.0",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\sony\\gobreaker\\v2\\@v\\v2.4.0.mod",
+	"GoVersion": "1.22.0",
+	"Sum": "h1:g2KJRW1Ubty3+ZOcSEUN7K+REQJdN6yo6XvaML+jptg=",
+	"GoModSum": "h1:pTyFJgcZ3h2tdQVLZZruK2C0eoFL1fb/G83wK1ZQl+s="
+}
+{
+	"Path": "github.com/stretchr/testify",
+	"Version": "v1.8.4",
+	"Time": "2023-05-30T09:38:40Z",
+	"Indirect": true,
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\stretchr\\testify@v1.8.4",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\stretchr\\testify\\@v\\v1.8.4.mod",
+	"GoVersion": "1.20",
+	"Sum": "h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=",
+	"GoModSum": "h1:sz/lmYIOXD/1dqDmKjjqLyZ2RngseejIcXlSw2iwfAo="
+}
+{
+	"Path": "gopkg.in/yaml.v3",
+	"Version": "v3.0.1",
+	"Time": "2022-05-27T08:35:30Z",
+	"Indirect": true,
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\gopkg.in\\yaml.v3@v3.0.1",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\gopkg.in\\yaml.v3\\@v\\v3.0.1.mod",
+	"Sum": "h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=",
+	"GoModSum": "h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM="
+}
+all modules verified
+race_cc=D:\IdeaProject\go-demo\.local\toolchains\winlibs-16.2.0posix-14.0.0-ucrt-r2\mingw64\bin\gcc.exe
+x86_64-w64-mingw32
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+Copyright (C) 2026 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+D:/Go/src/net/http/request.go:1561:func (r *Request) isReplayable() bool {
+D:/Go/src/net/http/transport.go:844:func (pc *persistConn) shouldRetryRequest(req *Request, err error) bool {
+83:type Settings struct {
+217:func (cb *CircuitBreaker[T]) Execute(req func() (T, error)) (T, error) {
+237:func (cb *CircuitBreaker[T]) beforeRequest() (uint64, uint64, error) {
+304:func (cb *CircuitBreaker[T]) currentState(now time.Time) (State, uint64, uint64) {
+{
+	"Path": "github.com/cloudwego/kitex",
+	"Version": "v0.16.4",
+	"Time": "2026-09-22T11:28:10Z",
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\cloudwego\\kitex@v0.16.4",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\cloudwego\\kitex\\@v\\v0.16.4.mod",
+	"GoVersion": "1.20"
+}

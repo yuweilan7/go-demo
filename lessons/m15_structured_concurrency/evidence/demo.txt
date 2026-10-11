@@ -1,0 +1,49 @@
+E01 原Pool持读锁的实际反例（原文件不修改）
+legacy source sha256=059c9a280d9f012566e44c4831f93490bef348f80e156871bac26adf058ec0d8 race=false build-and-run=1.43s child=502ms child-ctx=<nil>
+LEGACY full: queue=1 submitted=true writer-pending=true Submit=false Close=false
+LEGACY full rescued: gate released -> queue drained -> RUnlock -> Lock -> workers joined
+LEGACY recursive: worker waits Submit(inner), Close waits writer, no worker can receive
+LEGACY recursive rescued: fixture received inner; outer and all workers joined
+E02 核心：同一Catalog顺序→有界真实HTTP→允许部分业务失败
+sequential id=SKU-A price=12500 err=<nil>
+sequential id=SKU-B price=1800 err=<nil>
+sequential id=SKU-C price=0 err=SKU-C: SKU 暂无价格
+sequential id=SKU-D price=4200 err=<nil>
+parallel-stable-ID id=SKU-A price=12500 err=<nil>
+parallel-stable-ID id=SKU-B price=1800 err=<nil>
+parallel-stable-ID id=SKU-C price=0 err=SKU-C: SKU 暂无价格
+parallel-stable-ID id=SKU-D price=4200 err=<nil>
+HTTP completion=[SKU-B SKU-C SKU-D SKU-A] active/max/finished=0/2/4
+E03 errgroup Go接纳取消与首错Wait
+Go-admission-still-blocked=true Wait-before-cleanup=true first=价格服务故障 counts={Active:0 Max:2 Units:0 MaxUnits:2 Started:2 Finished:2}
+E04 semaphore在go前Acquire，加权接纳可取消
+weighted id=SKU-A price=0 err=context canceled
+weighted id=SKU-B price=0 err=context canceled
+weighted id=SKU-D price=0 err=任务尚未派发
+weighted counts={Active:0 Max:2 Units:0 MaxUnits:3 Started:2 Finished:2} expected-batch-error=SKU SKU-B: context canceled
+SKU SKU-D 接纳: context canceled
+等待 weighted group: context canceled
+E05 修复Pool：关闭/提交取消/panic部分失败/首错/消费者停止/递归修复
+close id=SKU-A price=12500 err=<nil>
+close id=SKU-B price=1800 err=<nil>
+pool close rejected=pool 已停止接纳 aggregate=<nil> blocked=true counts={Active:0 Max:1 Units:0 MaxUnits:1 Started:2 Finished:2}
+cancel-submit id=SKU-A price=12500 err=<nil>
+cancel-submit id=SKU-B price=1800 err=<nil>
+pool cancel-submit rejected=context canceled aggregate=<nil> blocked=false counts={Active:0 Max:1 Units:0 MaxUnits:1 Started:2 Finished:2}
+partial id=SKU-A price=0 err=任务 panic: 价格解码错误
+partial id=SKU-C price=0 err=SKU 暂无价格
+partial id=SKU-D price=4200 err=<nil>
+pool partial rejected=<nil> aggregate=SKU-A: 任务 panic: 价格解码错误
+SKU-C: SKU 暂无价格 blocked=false counts={Active:0 Max:1 Units:0 MaxUnits:1 Started:3 Finished:3}
+first-error id=SKU-A price=0 err=价格服务故障
+first-error id=SKU-B price=0 err=context canceled
+first-error id=SKU-D price=0 err=SKU SKU-A 首错: 价格服务故障
+pool first-error rejected=<nil> aggregate=SKU SKU-A 首错: 价格服务故障 blocked=true counts={Active:0 Max:2 Units:0 MaxUnits:2 Started:2 Finished:2}
+consumer-exit id=SKU-A price=0 err=context canceled
+consumer-exit id=SKU-B price=0 err=context canceled
+pool consumer-exit rejected=<nil> aggregate=<nil> blocked=false counts={Active:0 Max:1 Units:0 MaxUnits:1 Started:1 Finished:1}
+recursive-fix id=SKU-A price=12500 err=<nil>
+recursive-fix id=SKU-B price=1800 err=<nil>
+recursive-fix id=SKU-D price=4200 err=<nil>
+pool recursive-fix rejected=pool 暂无接纳位置 aggregate=<nil> blocked=false counts={Active:0 Max:1 Units:0 MaxUnits:1 Started:3 Finished:3}
+M15 PASS: accepted tickets terminal; actual workers joined; HTTP listener/Body/Transport closed

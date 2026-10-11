@@ -1,0 +1,11 @@
+=== RUN   TestActualLegacyPool
+    lesson_test.go:77: legacy source sha256=059c9a280d9f012566e44c4831f93490bef348f80e156871bac26adf058ec0d8 race=true build-and-run=13.706s child=6.432s child-ctx=<nil>
+        LEGACY full: queue=1 submitted=true writer-pending=true Submit=false Close=false
+        LEGACY full rescued: gate released -> queue drained -> RUnlock -> Lock -> workers joined
+        LEGACY recursive: worker waits Submit(inner), Close waits writer, no worker can receive
+        LEGACY recursive rescued: fixture received inner; outer and all workers joined
+
+--- PASS: TestActualLegacyPool (13.71s)
+PASS
+ok  	go-demo/lessons/m15_structured_concurrency	15.731s
+?   	go-demo/lessons/m15_structured_concurrency/cmd/demo	[no test files]

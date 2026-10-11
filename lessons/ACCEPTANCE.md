@@ -1,8 +1,8 @@
 # 课程主验收记录
 
-2026-10-12（Asia/Shanghai），第 0 层的 19 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；本层 395 个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看本层中文提交。
+2026-10-12（Asia/Shanghai），第 0、1 层共 26 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
 
-当前真实交付为 **19/39**。后续 20 个模块尚未验收，MySQL/RabbitMQ/Kafka 的课程实验尚未在本层完成。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
+当前真实交付为 **26/39**。后续13个模块尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互课程已实际验证，事务、缓存一致性和 outbox 的后续组合仍需分别交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
 
 ## 第 0 层实际验收
 
@@ -28,6 +28,20 @@
 | [M34](m34_observability_diagnosis/README.md) | bad-fast 约 190ms，其中 queue 约 188ms、自己的 dependency 约 1ms；真实栈与 block/mutex 追到 badCheckout 的跨 I/O 锁。fixed 在 holder 仍等待时提交，最终两订单不丢。主 agent 直接解析 exporter 的 42 个 span/18 条 remote edge/6 条新根 Link；CPU/heap、goroutineleak 1/0 盲区与 runtime trace/sync/net profile 均实际解析。所有 driver 的 Done 收尾与清理超时由确定性断言验证；9 项测试/vet/race 通过。 |
 | [M35](m35_performance_runtime/README.md) | 32MiB slice 引用保留与 Clone，真实 interface/闭包分配/逃逸/objdump/GC 软预算、Pool 所有权；相同订单键协议只改算法。主 agent 串行 CPU=1 五样本：Fmt 74.85–75.93ns、32B/2alloc，Append 20.79–21.32ns、24B/1alloc；这是固定当前环境样本。正确性、vet、race 通过。 |
 
+## 第 1 层实际验收
+
+| 模块 | 主验收的关键事实与独立复验范围 |
+| --- | --- |
+| [M15](m15_structured_concurrency/README.md) | 真实HTTP库存批处理保存SKU对应、并发上限和部分失败；128项批量结果一致。原协程池的锁内阻塞发送与worker递归发送两种死锁有界复现，修复有独立接纳/结果/Done所有权。pool、errgroup failfast、弃读结果、weighted admission均等待真实收尾。补严响应4097字节边界和HTTP pre-handler连接收尾；正常run、真实race、vet通过。 |
+| [M18](m18_gin_middleware/README.md) | Gin1.12.0真实Next顺序、Abort忘return导致401后多JSON与错误写入；ShouldBind、业务校验、body缓存与严格边界。8个同key请求只1订单；Copy浅拷贝/借用生命周期、同goroutine Recovery与两个真实panic子进程、认证/资源归属/代理、取消后晚写与504均直接观察。正常run、14项真实race测试、vet通过，handler/连接/body/job归零且Serve joined。 |
+| [M20](m20_sql_pools/README.md) | MySQL8.4.11/driver1.10.1真实参数写读、NULL/空串、DECIMAL分、UTC微秒、ErrNoRows和Scan错误；Rows未关闭/Tx再借DB导致MaxOpen1真实排队deadline。PROCESSLIST先见UPDATE、已借连接WaitCount0，取消回滚并等服务端连接消失后SELECT仍101、池恢复。主审返工拆Result/Finished，确定性清理gate阻止提前join。修复版全run/5项真实integration race/vet通过；每run表DROP后查询remaining0，DB全0。 |
+| [M25](m25_redis_client/README.md) | Redis8.2.8/go-redis9.23真实46条语义断言：TTL -1/-2、丢更新与INCR、Pipeline/MULTI运行时错误/Lua不回滚、INCR→EXPIRE窗口与Lua修复、连接池与ctx取消预算差别。独占真实连接延迟响应时INCR已成功而客户端超时，未盲重放。6项真实race测试通过；独立RESP检查23个精确键全部不存在，任务18/18加入、10个socket归零；warmup错误链已修复。 |
+| [M28](m28_rabbitmq_delivery/README.md) | Rabbit4.3.6/amqp091-go1.15真实8组：confirm不等于业务完成、mandatory return312仍可publisher ACK、PublishWithContext取消I/O边界、提前ACK丢业务、提交未ACK断连重投与继续新消息、同ID效果1、有限TTL retry/DLQ与x-death、多条ACK误确认、foreign channel真实406。root全run/3项真实race/vet通过，两轮各删24队列/24exchange；独立rabbitmqctl检查队列/exchange为空、课程用户连接0。 |
+| [M29](m29_kafka_offsets/README.md) | Kafka4.3.1/franz1.22.1真实key/value原始字节/partition/offset读回、next位置、业务前commit丢处理、业务后未commit重投、乱序commit跳过低任务与watermark修复。broker确认Stable成员1→2→1，旧generation取消且Done后才交接，迟到效果0。root全core/真实race/vet通过，两份实际JSONL均16尝试/15效果；另一个只读admin确认课程topic/group为空。真实独占stop/start后before/after原始ACK一致、next1/2；B协调超时清理及C提前读marker的时间偏差诚实保留，没有把marker当broker实证。 |
+| [M33](m33_resilience_retries/README.md) | 真实HTTP总预算/单次预算、次数、Retry-After、Reader重放、三层12→2倍增、gobreaker半开成功/失败、有限排队与健康路径隔离。主审返工：实际已commit后坏JSON/超限/缺或错201回执均UNKNOWN，返回caller原key GET对账，每例rows1/POST1；空body写不能绕过key规则，可信提交前422仍确定失败。root五组run/13项真实race及6个新子例/vet通过；Result后cleanup gate仍未开放时owner不能提前完成。 |
+
+课程新MySQL/RabbitMQ/Kafka均是独立容器与新named volume，安装者已实际写入、独占重启、读回并精确删除合成对象；Redis保持共享服务运行，故障使用课程独占连接。运行安装锁的竞争/超时/后续取得与稳定inode已有实证。固定镜像digest、资源限额、真实协议和失败修复记录在忽略的安装报告中；公开使用规则见[INFRASTRUCTURE](../learning_prompts/INFRASTRUCTURE.md)。保护的17个DeepHelp容器实际复核名称/镜像tag/State/原健康状态及StartedAt早于安装基线通过，退役MySQL仍退出。当前学习volume无硬磁盘quota，不把retention/日志轮转冒充quota。
+
 ## 验证和资源边界
 
 每课 README 的命令都以独立 module 为工作目录。并发课实际使用兼容 Windows/amd64 的便携 GCC 16.2.0 进行 race；CC/CXX/CGO/PATH 只设置在命令进程，没有改变系统设置。默认 mingw32 的构建失败保留为历史诊断，不算检测器已执行。必要故障入口用 build tag、显式命令或有界子进程隔离；正常入口和正向断言保持可运行。
@@ -36,8 +50,8 @@
 
 取消通知、结果可读、handler 退出、清理完成和 owner join 分别核对。M07/M12/M17/M34 的失败路径曾有收尾缺口，已经返工或主修正并独立复验；没有用自然结束、自报 PASS、HTTP 200、编译成功或全进程 goroutine 数量替代验收。正常验证进程、故障子进程、课程独占 listener、HTTP/RPC Body/连接、任务和临时隧道已收尾。性能 profile/调试产物与原始无秘密诊断在忽略目录保留以便追查，不随课程源文件提交。
 
-本层的业务账本/库存多数为独占内存或实际临时文件。真实 HTTP/gRPC/Redis/PG 证据不能外推到尚未执行的 MySQL 事务、持久化幂等、消息交付、云观测后端、生产 SLA 或长期稳定性。第 1 层之后将另做真实数据库/消息队列实验，仍使用独占数据、真实驱动与业务结果断言。
+基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，但各自进程内幂等不等于跨进程数据库唯一约束。第 1 层的基础协议、失败窗口、资源收尾证据不能外推到后续事务/缓存/outbox组合、云观测后端、生产SLA或长期稳定性。Kafka单副本确认与同进程文件Sync也不证明多节点容灾或外部exactly-once。
 
 ## 后续层
 
-第 1 层为 M15/M18/M20/M25/M28/M29/M33；第 2 层为 M16/M19/M21/M24/M27；第 3 层为 M22/M23/M26/M30/M32；随后依次 M37、M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是 39 课全部验收、层提交与实验资源收尾，而不是当前第 0 层完成。
+第 0、1 层均已验收。第 2 层为 M16/M19/M21/M24/M27；第 3 层为 M22/M23/M26/M30/M32；随后依次 M37、M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。

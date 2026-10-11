@@ -1,0 +1,63 @@
+=== RUN   TestActualLegacyPool
+    lesson_test.go:81: legacy source sha256=059c9a280d9f012566e44c4831f93490bef348f80e156871bac26adf058ec0d8 race=true build-and-run=13.197s child=5.848s child-ctx=<nil>
+        LEGACY full: queue=1 submitted=true writer-pending=true Submit=false Close=false
+        LEGACY full rescued: gate released -> queue drained -> RUnlock -> Lock -> workers joined
+        LEGACY recursive: worker waits Submit(inner), Close waits writer, no worker can receive
+        LEGACY recursive rescued: fixture received inner; outer and all workers joined
+
+--- PASS: TestActualLegacyPool (13.21s)
+=== RUN   TestRealHTTPBatch
+--- PASS: TestRealHTTPBatch (0.02s)
+=== RUN   TestRealHTTPCancel
+--- PASS: TestRealHTTPCancel (0.00s)
+=== RUN   TestRealHTTPResponseBoundary
+=== RUN   TestRealHTTPResponseBoundary/valid
+=== RUN   TestRealHTTPResponseBoundary/exact4096
+=== RUN   TestRealHTTPResponseBoundary/overflowSpace
+=== RUN   TestRealHTTPResponseBoundary/overflowGarbage
+=== RUN   TestRealHTTPResponseBoundary/secondObject
+--- PASS: TestRealHTTPResponseBoundary (0.01s)
+    --- PASS: TestRealHTTPResponseBoundary/valid (0.00s)
+    --- PASS: TestRealHTTPResponseBoundary/exact4096 (0.00s)
+    --- PASS: TestRealHTTPResponseBoundary/overflowSpace (0.00s)
+    --- PASS: TestRealHTTPResponseBoundary/overflowGarbage (0.00s)
+    --- PASS: TestRealHTTPResponseBoundary/secondObject (0.00s)
+=== RUN   TestHTTPShutdownBeforeHandler
+--- PASS: TestHTTPShutdownBeforeHandler (2.00s)
+=== RUN   TestErrgroupWaitAndAdmission
+--- PASS: TestErrgroupWaitAndAdmission (0.00s)
+=== RUN   TestWeightedAdmission
+--- PASS: TestWeightedAdmission (0.00s)
+=== RUN   TestBoundedFanOutBusinessInvariant
+=== RUN   TestBoundedFanOutBusinessInvariant/1
+=== RUN   TestBoundedFanOutBusinessInvariant/3
+=== RUN   TestBoundedFanOutBusinessInvariant/8
+--- PASS: TestBoundedFanOutBusinessInvariant (0.00s)
+    --- PASS: TestBoundedFanOutBusinessInvariant/1 (0.00s)
+    --- PASS: TestBoundedFanOutBusinessInvariant/3 (0.00s)
+    --- PASS: TestBoundedFanOutBusinessInvariant/8 (0.00s)
+=== RUN   TestPoolProtocols
+=== RUN   TestPoolProtocols/close
+=== RUN   TestPoolProtocols/cancel
+=== RUN   TestPoolProtocols/partial
+=== RUN   TestPoolProtocols/first
+=== RUN   TestPoolProtocols/consumer
+=== RUN   TestPoolProtocols/recursive
+--- PASS: TestPoolProtocols (0.00s)
+    --- PASS: TestPoolProtocols/close (0.00s)
+    --- PASS: TestPoolProtocols/cancel (0.00s)
+    --- PASS: TestPoolProtocols/partial (0.00s)
+    --- PASS: TestPoolProtocols/first (0.00s)
+    --- PASS: TestPoolProtocols/consumer (0.00s)
+    --- PASS: TestPoolProtocols/recursive (0.00s)
+=== RUN   TestCleanupPreservesPrimaryAndJoins
+--- PASS: TestCleanupPreservesPrimaryAndJoins (0.00s)
+=== RUN   TestCleanupPreservesTimeout
+--- PASS: TestCleanupPreservesTimeout (2.00s)
+=== RUN   TestGroupAPIContracts
+--- PASS: TestGroupAPIContracts (0.00s)
+=== RUN   TestInvalidInputs
+--- PASS: TestInvalidInputs (0.00s)
+PASS
+ok  	go-demo/lessons/m15_structured_concurrency	19.321s
+?   	go-demo/lessons/m15_structured_concurrency/cmd/demo	[no test files]

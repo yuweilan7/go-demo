@@ -1,0 +1,102 @@
+lessons/m18_gin_middleware/internal/lab\fault.go:21:func RunChild(mode string) (err error) {
+lessons/m18_gin_middleware/internal/lab\fault.go:57:type FaultResult struct {
+lessons/m18_gin_middleware/internal/lab\fault.go:66:func Faults(parent context.Context) (results []FaultResult, err error) {
+lessons/m18_gin_middleware/internal/lab\experiments.go:18:func Run(ctx context.Context, out io.Writer) error {
+lessons/m18_gin_middleware/internal/lab\experiments.go:58:func runOne(ctx context.Context, out io.Writer, fn func(context.Context, *Rig, *Client, io.Writer) error) (err error) {
+lessons/m18_gin_middleware/internal/lab\experiments.go:76:func request(ctx context.Context, r *Rig, c *Client, path, body, token, key, id string) (Reply, error) {
+lessons/m18_gin_middleware/internal/lab\experiments.go:86:func protocolExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) error {
+lessons/m18_gin_middleware/internal/lab\experiments.go:131:func abortExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) error {
+lessons/m18_gin_middleware/internal/lab\experiments.go:163:func bindingExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) error {
+lessons/m18_gin_middleware/internal/lab\experiments.go:205:func bodyExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) error {
+lessons/m18_gin_middleware/internal/lab\experiments.go:232:func lifecycleExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) (err error) {
+lessons/m18_gin_middleware/internal/lab\experiments.go:331:func recoveryExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) (err error) {
+lessons/m18_gin_middleware/internal/lab\experiments.go:367:func securityExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) error {
+lessons/m18_gin_middleware/internal/lab\experiments.go:400:func bytesContains(data []byte, value string) bool {
+lessons/m18_gin_middleware/internal/lab\experiments.go:406:func cancellationExperiment(ctx context.Context, r *Rig, c *Client, out io.Writer) (err error) {
+lessons/m18_gin_middleware/internal/lab\experiments.go:490:func proxyExperiment(ctx context.Context, out io.Writer) (err error) {
+lessons/m18_gin_middleware/internal/lab\client.go:16:type Client struct {
+lessons/m18_gin_middleware/internal/lab\client.go:22:type Reply struct {
+lessons/m18_gin_middleware/internal/lab\client.go:30:func NewClient() *Client {
+lessons/m18_gin_middleware/internal/lab\client.go:35:func (c *Client) Close() { c.transport.CloseIdleConnections() }
+lessons/m18_gin_middleware/internal/lab\client.go:40:func (c *Client) Request(ctx context.Context, method, url, body, token, key, id string, headers map[string]string) (reply Reply, err error) {
+lessons/m18_gin_middleware/internal/lab\client.go:74:type OwnedCall struct {
+lessons/m18_gin_middleware/internal/lab\client.go:81:func (c *Client) StartRequest(ctx context.Context, url, id string, afterResult func() error) *OwnedCall {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:18:func testRig(t *testing.T, trusted []string) (context.Context, *Rig, *Client) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:45:func ownJob(t *testing.T, job *Job, unblock func()) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:56:func decode(t *testing.T, reply Reply, status int, code string, committed bool) Envelope {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:70:func mustRequest(t *testing.T, ctx context.Context, r *Rig, c *Client, path, body, token, key, id string) Reply {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:81:func TestM17ContractConcurrentIdempotency(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:125:func TestNextAndGroupOrdering(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:145:func TestAbortReturnAndBindResponse(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:174:func TestRejectedInputsHaveNoEffects(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:207:func TestBusinessValidationAndBodyReuse(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:242:func TestAuthenticationOwnershipProxyAndLogs(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:268:func TestExplicitTrustedProxy(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:282:func TestRecoveryAndAlreadyCommitted(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:309:func TestContextCopyAndExplicitBackgroundOwner(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:353:func TestRealDependencyCancellationAndTimeout(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:433:func TestCanceledWorkAndResultAreNotJoin(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:491:func TestEarlyObservationFailureStillJoins(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:511:func TestCleanupErrorPreservesPrimary(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\lab_test.go:536:func TestFaultProcesses(t *testing.T) {
+lessons/m18_gin_middleware/internal/lab\owner.go:14:type Signal struct {
+lessons/m18_gin_middleware/internal/lab\owner.go:19:func newSignal() *Signal { return &Signal{C: make(chan struct{})} }
+lessons/m18_gin_middleware/internal/lab\owner.go:20:func (s *Signal) Open()  { s.once.Do(func() { close(s.C) }) }
+lessons/m18_gin_middleware/internal/lab\owner.go:24:func wait(ctx context.Context, signal <-chan struct{}, label string) error {
+lessons/m18_gin_middleware/internal/lab\owner.go:37:type Job struct {
+lessons/m18_gin_middleware/internal/lab\owner.go:50:func guardedWork(ctx context.Context, work func(context.Context) error) (err error) {
+lessons/m18_gin_middleware/internal/lab\owner.go:61:func startJob(parent context.Context, budget time.Duration, active *atomic.Int64, work func(context.Context) error, cleanup func() error) *Job {
+lessons/m18_gin_middleware/internal/lab\owner.go:82:func (j *Job) Result(ctx context.Context) (error, error) {
+lessons/m18_gin_middleware/internal/lab\owner.go:91:func (j *Job) Cancel()                   { j.cancel() }
+lessons/m18_gin_middleware/internal/lab\owner.go:92:func (j *Job) Finished() <-chan struct{} { return j.finished }
+lessons/m18_gin_middleware/internal/lab\owner.go:97:func (j *Job) StopAndJoin(unblock func()) error {
+lessons/m18_gin_middleware/internal/lab\owner.go:118:func joinInto(err *error, j *Job, unblock func()) {
+lessons/m18_gin_middleware/internal/lab\protocol.go:23:type Envelope struct {
+lessons/m18_gin_middleware/internal/lab\protocol.go:33:type Order struct {
+lessons/m18_gin_middleware/internal/lab\protocol.go:42:type storedOrder struct {
+lessons/m18_gin_middleware/internal/lab\protocol.go:51:type Ledger struct {
+lessons/m18_gin_middleware/internal/lab\protocol.go:59:func (l *Ledger) Commit(owner, key string, order Order) (int, error) {
+lessons/m18_gin_middleware/internal/lab\protocol.go:81:func (l *Ledger) Lookup(owner string, id int) (storedOrder, error) {
+lessons/m18_gin_middleware/internal/lab\protocol.go:95:func (l *Ledger) Count() int { l.mu.Lock(); defer l.mu.Unlock(); return len(l.rows) }
+lessons/m18_gin_middleware/internal/lab\protocol.go:100:func bindOrder(c *gin.Context) (Order, bool) {
+lessons/m18_gin_middleware/internal/lab\protocol.go:142:func strictOrderJSON(data []byte) error {
+lessons/m18_gin_middleware/internal/lab\protocol.go:162:func reject(c *gin.Context, status int, code string) {
+lessons/m18_gin_middleware/internal/lab\protocol.go:169:func (r *Rig) commitReply(c *gin.Context, order Order, key string) {
+lessons/m18_gin_middleware/internal/lab\protocol.go:186:func identity(header string) string {
+lessons/m18_gin_middleware/internal/lab\protocol.go:199:func assertEnvelope(reply Reply, status int, code string, committed bool) error {
+lessons/m18_gin_middleware/internal/lab\router.go:20:func (r *Rig) router(trusted []string) (*gin.Engine, error) {
+lessons/m18_gin_middleware/internal/lab\router.go:64:func (r *Rig) onion(label string) gin.HandlerFunc {
+lessons/m18_gin_middleware/internal/lab\router.go:89:func authentication(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:101:func (r *Rig) createOrder(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:117:func (r *Rig) getOrder(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:138:func (r *Rig) abortBad(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:150:func (r *Rig) bindBad(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:162:func (r *Rig) validationBad(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:174:func (r *Rig) preview(cache bool) gin.HandlerFunc {
+lessons/m18_gin_middleware/internal/lab\router.go:205:func (r *Rig) bodyAgain(cache bool) gin.HandlerFunc {
+lessons/m18_gin_middleware/internal/lab\router.go:244:func (r *Rig) slowOrder(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:297:func (r *Rig) reserve(ctx context.Context, gate string) (err error) {
+lessons/m18_gin_middleware/internal/lab\router.go:329:func (r *Rig) lifecycle(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:385:func (r *Rig) poolProbe(c *gin.Context) {
+lessons/m18_gin_middleware/internal/lab\router.go:398:func joinedJSONCount(body []byte) (int, error) {
+lessons/m18_gin_middleware/internal/lab\fixture.go:20:type Endpoint struct {
+lessons/m18_gin_middleware/internal/lab\fixture.go:34:func newEndpoint(root context.Context, handler http.Handler) (*Endpoint, error) {
+lessons/m18_gin_middleware/internal/lab\fixture.go:73:func (e *Endpoint) Live() int { e.mu.Lock(); defer e.mu.Unlock(); return e.live }
+lessons/m18_gin_middleware/internal/lab\fixture.go:77:func (e *Endpoint) Close() error {
+lessons/m18_gin_middleware/internal/lab\fixture.go:104:type DependencyGate struct {
+lessons/m18_gin_middleware/internal/lab\fixture.go:109:func newDependencyGate() *DependencyGate {
+lessons/m18_gin_middleware/internal/lab\fixture.go:114:func (g *DependencyGate) Open() { g.Release.Open(); g.Cleanup.Open() }
+lessons/m18_gin_middleware/internal/lab\fixture.go:118:type Audit struct {
+lessons/m18_gin_middleware/internal/lab\fixture.go:129:type Snapshot struct{ User, Request, Route string }
+lessons/m18_gin_middleware/internal/lab\fixture.go:131:type Life struct {
+lessons/m18_gin_middleware/internal/lab\fixture.go:141:func (l *Life) Effects() int { l.mu.Lock(); defer l.mu.Unlock(); return l.effects }
+lessons/m18_gin_middleware/internal/lab\fixture.go:145:type Rig struct {
+lessons/m18_gin_middleware/internal/lab\fixture.go:167:func NewRig(trusted []string) (*Rig, error) {
+lessons/m18_gin_middleware/internal/lab\fixture.go:191:func (r *Rig) Gate(name string) *DependencyGate {
+lessons/m18_gin_middleware/internal/lab\fixture.go:199:func (r *Rig) gate(name string) *DependencyGate {
+lessons/m18_gin_middleware/internal/lab\fixture.go:204:func (r *Rig) Life(name string) *Life { r.mu.Lock(); defer r.mu.Unlock(); return r.lives[name] }
+lessons/m18_gin_middleware/internal/lab\fixture.go:208:func (r *Rig) trace(id, event string) {
+lessons/m18_gin_middleware/internal/lab\fixture.go:213:func (r *Rig) Trace(id string) []string {
+lessons/m18_gin_middleware/internal/lab\fixture.go:221:func (r *Rig) WaitAudit(ctx context.Context, id string) (Audit, error) {
+lessons/m18_gin_middleware/internal/lab\fixture.go:237:func (r *Rig) Close() error {
+lessons/m18_gin_middleware/internal/lab\fixture.go:275:func (r *Rig) dependencyHandler(w http.ResponseWriter, req *http.Request) {

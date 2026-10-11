@@ -1,0 +1,26 @@
+=== RUN   TestUnknownWriteReconciliation
+--- PASS: TestUnknownWriteReconciliation (0.00s)
+=== RUN   TestUntrustedSuccessfulWriteResponses
+=== RUN   TestUntrustedSuccessfulWriteResponses//corrupt-order
+=== RUN   TestUntrustedSuccessfulWriteResponses//large-order
+=== RUN   TestUntrustedSuccessfulWriteResponses//no-receipt-order
+=== RUN   TestUntrustedSuccessfulWriteResponses//mismatched-order
+--- PASS: TestUntrustedSuccessfulWriteResponses (0.00s)
+    --- PASS: TestUntrustedSuccessfulWriteResponses//corrupt-order (0.00s)
+    --- PASS: TestUntrustedSuccessfulWriteResponses//large-order (0.00s)
+    --- PASS: TestUntrustedSuccessfulWriteResponses//no-receipt-order (0.00s)
+    --- PASS: TestUntrustedSuccessfulWriteResponses//mismatched-order (0.00s)
+=== RUN   TestEmptyBodyWriteCannotBypassKey
+=== RUN   TestEmptyBodyWriteCannotBypassKey/key=
+=== RUN   TestEmptyBodyWriteCannotBypassKey/key=empty-stable
+--- PASS: TestEmptyBodyWriteCannotBypassKey (0.00s)
+    --- PASS: TestEmptyBodyWriteCannotBypassKey/key= (0.00s)
+    --- PASS: TestEmptyBodyWriteCannotBypassKey/key=empty-stable (0.00s)
+=== RUN   TestKnownWriteRejectionsStayDefinite
+--- PASS: TestKnownWriteRejectionsStayDefinite (0.00s)
+=== RUN   TestConcurrentIdempotency
+--- PASS: TestConcurrentIdempotency (0.00s)
+=== RUN   TestAlreadyCanceledAndBusinessRejection
+--- PASS: TestAlreadyCanceledAndBusinessRejection (0.00s)
+PASS
+ok  	go-demo/lessons/m33_resilience_retries/internal/lab	0.924s

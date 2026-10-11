@@ -1,0 +1,83 @@
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\recovery.go:40:func CustomRecovery(handle RecoveryFunc) HandlerFunc {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\recovery.go:53:func CustomRecoveryWithWriter(out io.Writer, handle RecoveryFunc) HandlerFunc {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\recovery.go:98:func secureRequestDump(r *http.Request) string {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:65:func (group *RouterGroup) Use(middleware ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:72:func (group *RouterGroup) Group(relativePath string, handlers ...HandlerFunc) *RouterGroup {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:82:func (group *RouterGroup) BasePath() string {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:86:func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:103:func (group *RouterGroup) Handle(httpMethod, relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:111:func (group *RouterGroup) POST(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:116:func (group *RouterGroup) GET(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:121:func (group *RouterGroup) DELETE(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:126:func (group *RouterGroup) PATCH(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:131:func (group *RouterGroup) PUT(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:136:func (group *RouterGroup) OPTIONS(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:141:func (group *RouterGroup) HEAD(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:147:func (group *RouterGroup) Any(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:156:func (group *RouterGroup) Match(methods []string, relativePath string, handlers ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:166:func (group *RouterGroup) StaticFile(relativePath, filepath string) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:175:func (group *RouterGroup) StaticFileFS(relativePath, filepath string, fs http.FileSystem) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:181:func (group *RouterGroup) staticFileHandler(relativePath string, handler HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:197:func (group *RouterGroup) Static(relativePath, root string) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:203:func (group *RouterGroup) StaticFS(relativePath string, fs http.FileSystem) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:216:func (group *RouterGroup) createStaticHandler(relativePath string, fs http.FileSystem) HandlerFunc {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:241:func (group *RouterGroup) combineHandlers(handlers HandlersChain) HandlersChain {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:250:func (group *RouterGroup) calculateAbsolutePath(relativePath string) string {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\routergroup.go:254:func (group *RouterGroup) returnObj() IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\gin.go:340:func (engine *Engine) Use(middleware ...HandlerFunc) IRoutes {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\gin.go:451:func (engine *Engine) SetTrustedProxies(trustedProxies []string) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\gin.go:662:func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\gin.go:690:func (engine *Engine) handleHTTPRequest(c *Context) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:103:func (c *Context) reset() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:122:func (c *Context) Copy() *Context {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:188:func (c *Context) Next() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:199:func (c *Context) IsAborted() bool {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:207:func (c *Context) Abort() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:213:func (c *Context) AbortWithStatus(code int) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:222:func (c *Context) AbortWithStatusPureJSON(code int, jsonObj any) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:230:func (c *Context) AbortWithStatusJSON(code int, jsonObj any) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:238:func (c *Context) AbortWithError(code int, err error) *Error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:252:func (c *Context) Error(err error) *Error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:391:func (c *Context) GetError(key any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:461:func (c *Context) GetErrorSlice(key any) []error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:757:func (c *Context) Bind(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:763:func (c *Context) BindJSON(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:768:func (c *Context) BindXML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:773:func (c *Context) BindQuery(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:778:func (c *Context) BindYAML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:783:func (c *Context) BindTOML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:788:func (c *Context) BindPlain(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:793:func (c *Context) BindHeader(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:799:func (c *Context) BindUri(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:810:func (c *Context) MustBindWith(obj any, b binding.Binding) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:838:func (c *Context) ShouldBind(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:867:func (c *Context) ShouldBindJSON(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:873:func (c *Context) ShouldBindXML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:879:func (c *Context) ShouldBindQuery(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:885:func (c *Context) ShouldBindYAML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:891:func (c *Context) ShouldBindTOML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:897:func (c *Context) ShouldBindPlain(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:903:func (c *Context) ShouldBindHeader(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:909:func (c *Context) ShouldBindUri(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:919:func (c *Context) ShouldBindWith(obj any, b binding.Binding) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:928:func (c *Context) ShouldBindBodyWith(obj any, bb binding.BindingBody) (err error) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:946:func (c *Context) ShouldBindBodyWithJSON(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:951:func (c *Context) ShouldBindBodyWithXML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:956:func (c *Context) ShouldBindBodyWithYAML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:961:func (c *Context) ShouldBindBodyWithTOML(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:966:func (c *Context) ShouldBindBodyWithPlain(obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:975:func (c *Context) ClientIP() string {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1449:func (c *Context) Done() <-chan struct{} {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1457:func (c *Context) Err() error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\binding\json.go:44:func decodeJSON(r io.Reader, obj any) error {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\response_writer.go:57:func (w *responseWriter) Unwrap() http.ResponseWriter {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\response_writer.go:77:func (w *responseWriter) WriteHeaderNow() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\response_writer.go:84:func (w *responseWriter) Write(data []byte) (n int, err error) {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1433:// hasRequestContext returns whether c.Request has Context and fallback.
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1434:func (c *Context) hasRequestContext() bool {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1436:	hasRequestContext := c.Request != nil && c.Request.Context() != nil
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1437:	return hasFallback && hasRequestContext
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1442:	if !c.hasRequestContext() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1450:	if !c.hasRequestContext() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1458:	if !c.hasRequestContext() {
+C:\Users\Lenovo\go\pkg\mod\github.com\gin-gonic\gin@v1.12.0\context.go:1479:	if !c.hasRequestContext() {

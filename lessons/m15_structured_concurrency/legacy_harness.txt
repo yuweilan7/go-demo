@@ -1,0 +1,201 @@
+package main
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"os"
+	"runtime"
+	"sync"
+	"time"
+)
+
+// main只运行原Pool的两个受控坏路径；超时不是成功，父进程另有20秒监督上限并回收进程。
+func main() {
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	defer cancel()
+	if err := fullQueue(ctx); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	if err := recursive(ctx); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+// await只管理本harness的观察预算；返回超时不会替代defer里的解除门和真正join。
+func await(ctx context.Context, done <-chan struct{}) error {
+	select {
+	case <-done:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+// spin观察原Task的atomic标志或RWMutex.TryRLock状态，不用sleep猜goroutine调度。
+// Gosched只是让出当前P；成功条件必须来自线程安全的真实状态，deadline是故障上限。
+func spin(ctx context.Context, condition func() bool) error {
+	for !condition() {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+		runtime.Gosched()
+	}
+	return nil
+}
+
+// fullQueue由main调用：一个worker卡在gate，一项排队，第三个Submit确实持RLock等待发送。
+// submitted由原Submit在RLock内CAS为true；队列满+worker不动+Submit未返回定位这个等待。
+func fullQueue(ctx context.Context) (resultErr error) {
+	p, err := NewPool(1, 1)
+	if err != nil {
+		return err
+	} // 构造失败时没有pool资源，直接把原错误交给main。
+	gate, started := make(chan struct{}), make(chan struct{})
+	var release sync.Once
+	unblock := func() { release.Do(func() { close(gate) }) }
+	var owners sync.WaitGroup
+	joined := make(chan struct{})
+	first := NewTask("held", func() error { close(started); <-gate; return nil })
+	// 先注册收尾，再做任何可能失败的观察；CloseAndWait也必须由外部owner调用。
+	defer func() {
+		unblock()
+		// 业务ctx可能已取消；清理拥有独立预算，finish真正Wait后才发布done。
+		var finish sync.WaitGroup
+		done := make(chan struct{})
+		finish.Go(func() { p.CloseAndWait(); owners.Wait(); close(done) })
+		clean, stop := context.WithTimeout(context.Background(), 2*time.Second)
+		defer stop()
+		if err := await(clean, done); err != nil {
+			resultErr = errors.Join(resultErr, fmt.Errorf("full清理: %w", err))
+			return
+		}
+		finish.Wait()
+	}()
+	if err := p.Submit(first); err != nil {
+		return err
+	}
+	if err := await(ctx, started); err != nil {
+		return err
+	}
+	if err := p.Submit(NewTask("queued", func() error { return nil })); err != nil {
+		return err
+	}
+	third := NewTask("blocked", func() error { return nil })
+	submitDone := make(chan struct{})
+	var submitErr error
+	owners.Go(func() { submitErr = p.Submit(third); close(submitDone) })
+	if err := spin(ctx, third.submitted.Load); err != nil {
+		return err
+	}
+	owners.Go(func() { p.CloseAndWait(); close(joined) })
+	// 原RWMutex契约：写者等待后，新reader不能取得RLock。TryRLock=false证明writer已挂起。
+	if err := spin(ctx, func() bool {
+		if p.stateMu.TryRLock() {
+			p.stateMu.RUnlock()
+			return false
+		}
+		return true
+	}); err != nil {
+		return err
+	}
+	select {
+	case <-submitDone:
+		return errors.New("满队列Submit意外返回")
+	default:
+	}
+	select {
+	case <-joined:
+		return errors.New("持RLock时Close意外完成")
+	default:
+	}
+	fmt.Println("LEGACY full: queue=1 submitted=true writer-pending=true Submit=false Close=false")
+	unblock() // 测试救援，不是Pool本身提供的取消能力；任务永远不放行就没有这条退出路径。
+	if err := await(ctx, joined); err != nil {
+		return err
+	}
+	owners.Wait()
+	if submitErr != nil {
+		return fmt.Errorf("原第三项Submit: %w", submitErr)
+	}
+	fmt.Println("LEGACY full rescued: gate released -> queue drained -> RUnlock -> Lock -> workers joined")
+	return nil
+}
+
+// recursive复现原Pool(1,0)：唯一worker在任务中同步Submit子任务，接收者恰好就是自己。
+// owner救援时额外接收一次jobs，仅用于让坏程序可回收；生产修复必须改任务组合/接纳协议。
+func recursive(ctx context.Context) (resultErr error) {
+	p, err := NewPool(1, 0)
+	if err != nil {
+		return err
+	}
+	inner := NewTask("inner", func() error { return nil })
+	entered := make(chan struct{})
+	outer := NewTask("outer", func() error { close(entered); return p.Submit(inner) })
+	var closers sync.WaitGroup
+	joined := make(chan struct{})
+	rescued := false
+	defer func() {
+		clean, stop := context.WithTimeout(context.Background(), 2*time.Second)
+		defer stop()
+		// 原Pool没有取消提交API。即使观察失败，也用独立预算接收以解除递归send。
+		if !rescued {
+			select {
+			case task := <-p.jobs:
+				task.execute()
+				rescued = true
+			case <-clean.Done():
+				resultErr = errors.Join(resultErr, fmt.Errorf("recursive解除send: %w", clean.Err()))
+				return
+			}
+		}
+		var finish sync.WaitGroup
+		done := make(chan struct{})
+		finish.Go(func() { p.CloseAndWait(); closers.Wait(); close(done) })
+		if err := await(clean, done); err != nil {
+			resultErr = errors.Join(resultErr, fmt.Errorf("recursive清理: %w", err))
+			return
+		}
+		finish.Wait()
+	}()
+	if err := p.Submit(outer); err != nil {
+		return err
+	}
+	if err := await(ctx, entered); err != nil {
+		return err
+	}
+	if err := spin(ctx, inner.submitted.Load); err != nil {
+		return err
+	}
+	closers.Go(func() { p.CloseAndWait(); close(joined) })
+	if err := spin(ctx, func() bool {
+		if p.stateMu.TryRLock() {
+			p.stateMu.RUnlock()
+			return false
+		}
+		return true
+	}); err != nil {
+		return err
+	}
+	select {
+	case <-joined:
+		return errors.New("递归提交未救援却结束")
+	default:
+	}
+	fmt.Println("LEGACY recursive: worker waits Submit(inner), Close waits writer, no worker can receive")
+	select {
+	case task := <-p.jobs:
+		task.execute()
+		rescued = true
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+	if err := await(ctx, joined); err != nil {
+		return err
+	}
+	closers.Wait()
+	fmt.Println("LEGACY recursive rescued: fixture received inner; outer and all workers joined")
+	return nil
+}

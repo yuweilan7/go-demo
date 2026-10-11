@@ -1,0 +1,5 @@
+command: go vet ./...
+workdir: C:/Users/Lenovo/.codex/worktrees/go-course-m33/go-demo/lessons/m33_resilience_retries
+observed exit: 0
+stdout/stderr: empty (no diagnostics)
+scope: final source after write response UNKNOWN/key-guard repair, 2026-10-12
