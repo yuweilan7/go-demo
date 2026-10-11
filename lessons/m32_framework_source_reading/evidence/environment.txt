@@ -1,0 +1,9 @@
+go version go1.27.0 windows/amd64
+go1.27.0
+windows
+amd64
+C:\Users\Lenovo\.codex\worktrees\go-course-m32\go-demo\lessons\m32_framework_source_reading\go.mod
+auto
+1
+gcc
+g++

@@ -1,0 +1,10 @@
+2026/10/12 04:16:47 INFO [HTTP] server listening addr=127.0.0.1:10926
+2026/10/12 04:16:47 INFO [gRPC] server listening addr=127.0.0.1:10927
+001 [root] beforeStop.sealed-and-canceled
+2026/10/12 04:17:02 INFO [HTTP] server stopping
+2026/10/12 04:17:02 INFO [gRPC] server stopping
+002 [root] App.Run.return
+真实gRPC未Ready: context deadline exceeded
+003 [root] repository.closed
+004 [root] Close.joined-and-closed
+exit status 1

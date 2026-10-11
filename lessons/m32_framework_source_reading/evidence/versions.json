@@ -1,0 +1,30 @@
+{
+	"Path": "github.com/go-kratos/kratos/v3",
+	"Version": "v3.0.0",
+	"Time": "2026-06-26T12:57:23Z",
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\go-kratos\\kratos\\v3@v3.0.0",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\go-kratos\\kratos\\v3\\@v\\v3.0.0.mod",
+	"GoVersion": "1.25.0",
+	"Sum": "h1:dCXqKoeo2Bo9jgC72YfuwJ3g7bPCkHeVeNGyZQ51bLE=",
+	"GoModSum": "h1:8l+0M5UPlm/5hWLvS+wzxHRVRv6sHMG6Lgb4+rw1KIs="
+}
+{
+	"Path": "google.golang.org/grpc",
+	"Version": "v1.84.0",
+	"Time": "2026-09-17T20:03:25Z",
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\google.golang.org\\grpc@v1.84.0",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\google.golang.org\\grpc\\@v\\v1.84.0.mod",
+	"GoVersion": "1.25.0",
+	"Sum": "h1:soMyaPJ8pAak5PIQ0DGBUir0XRo2fRoMqhNWMLlLxO0=",
+	"GoModSum": "h1:ljCht0DrxQrXBDRTZp52Qxh3Ffk8CdYm2sj4O2QN2C0="
+}
+{
+	"Path": "google.golang.org/protobuf",
+	"Version": "v1.36.12",
+	"Time": "2026-08-10T13:29:45Z",
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\google.golang.org\\protobuf@v1.36.12",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\google.golang.org\\protobuf\\@v\\v1.36.12.mod",
+	"GoVersion": "1.23",
+	"Sum": "h1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=",
+	"GoModSum": "h1:HTf+CrKn2C3g5S8VImy6tdcUvCska2kB7j23XfzDpco="
+}

@@ -1,0 +1,40 @@
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+?   	go-demo/lessons/m32_framework_source_reading/cmd/demo	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/gen/inventoryv1	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/app	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/biz	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/data	[no test files]
+=== RUN   TestCompleteRealFramework
+2026/10/12 04:19:58 INFO [gRPC] server listening addr=127.0.0.1:4037
+2026/10/12 04:19:58 INFO [HTTP] server listening addr=127.0.0.1:4036
+2026/10/12 04:19:59 INFO [HTTP] server stopping
+2026/10/12 04:19:59 INFO [gRPC] server stopping
+2026/10/12 04:19:59 INFO [gRPC] server listening addr=127.0.0.1:4042
+2026/10/12 04:19:59 INFO [HTTP] server listening addr=127.0.0.1:4041
+2026/10/12 04:19:59 INFO [HTTP] server stopping
+2026/10/12 04:19:59 INFO [gRPC] server stopping
+2026/10/12 04:19:59 WARN [HTTP] server couldn't stop gracefully in time, doing force stop
+--- PASS: TestCompleteRealFramework (0.73s)
+=== RUN   TestConcurrentStockCannotOverdraw
+2026/10/12 04:19:59 INFO [HTTP] server listening addr=127.0.0.1:4046
+2026/10/12 04:19:59 INFO [gRPC] server listening addr=127.0.0.1:4047
+2026/10/12 04:19:59 INFO [HTTP] server stopping
+2026/10/12 04:19:59 INFO [gRPC] server stopping
+--- PASS: TestConcurrentStockCannotOverdraw (0.01s)
+=== RUN   TestCanceledOwnerStillClosesResources
+2026/10/12 04:19:59 INFO [HTTP] server listening addr=127.0.0.1:4049
+2026/10/12 04:19:59 INFO [gRPC] server listening addr=127.0.0.1:4050
+2026/10/12 04:19:59 INFO [gRPC] server stopping
+2026/10/12 04:19:59 INFO [HTTP] server stopping
+--- PASS: TestCanceledOwnerStillClosesResources (0.00s)
+=== RUN   TestUnstartedRootOwnsListeners
+2026/10/12 04:19:59 INFO [HTTP] server stopping
+2026/10/12 04:19:59 INFO [gRPC] server stopping
+--- PASS: TestUnstartedRootOwnsListeners (0.00s)
+=== RUN   TestTaskResultIsNotDone
+--- PASS: TestTaskResultIsNotDone (0.00s)
+PASS
+ok  	go-demo/lessons/m32_framework_source_reading/internal/lab	2.992s
+?   	go-demo/lessons/m32_framework_source_reading/internal/service	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/trace	[no test files]

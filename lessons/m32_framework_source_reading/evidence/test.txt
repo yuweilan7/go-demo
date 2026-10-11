@@ -1,0 +1,38 @@
+?   	go-demo/lessons/m32_framework_source_reading/cmd/demo	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/gen/inventoryv1	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/app	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/biz	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/data	[no test files]
+=== RUN   TestCompleteRealFramework
+2026/10/12 04:25:22 INFO [HTTP] server listening addr=127.0.0.1:5150
+2026/10/12 04:25:22 INFO [gRPC] server listening addr=127.0.0.1:5151
+2026/10/12 04:25:23 INFO [HTTP] server stopping
+2026/10/12 04:25:23 INFO [gRPC] server stopping
+2026/10/12 04:25:23 INFO [gRPC] server listening addr=127.0.0.1:5160
+2026/10/12 04:25:23 INFO [HTTP] server listening addr=127.0.0.1:5159
+2026/10/12 04:25:23 INFO [HTTP] server stopping
+2026/10/12 04:25:23 INFO [gRPC] server stopping
+2026/10/12 04:25:23 WARN [HTTP] server couldn't stop gracefully in time, doing force stop
+--- PASS: TestCompleteRealFramework (0.72s)
+=== RUN   TestConcurrentStockCannotOverdraw
+2026/10/12 04:25:23 INFO [gRPC] server listening addr=127.0.0.1:5165
+2026/10/12 04:25:23 INFO [HTTP] server listening addr=127.0.0.1:5164
+2026/10/12 04:25:23 INFO [gRPC] server stopping
+2026/10/12 04:25:23 INFO [HTTP] server stopping
+--- PASS: TestConcurrentStockCannotOverdraw (0.00s)
+=== RUN   TestCanceledOwnerStillClosesResources
+2026/10/12 04:25:23 INFO [HTTP] server listening addr=127.0.0.1:5167
+2026/10/12 04:25:23 INFO [HTTP] server stopping
+2026/10/12 04:25:23 INFO [gRPC] server stopping
+2026/10/12 04:25:23 INFO [gRPC] server listening addr=127.0.0.1:5168
+--- PASS: TestCanceledOwnerStillClosesResources (0.00s)
+=== RUN   TestUnstartedRootOwnsListeners
+2026/10/12 04:25:23 INFO [HTTP] server stopping
+2026/10/12 04:25:23 INFO [gRPC] server stopping
+--- PASS: TestUnstartedRootOwnsListeners (0.00s)
+=== RUN   TestTaskResultIsNotDone
+--- PASS: TestTaskResultIsNotDone (0.00s)
+PASS
+ok  	go-demo/lessons/m32_framework_source_reading/internal/lab	1.832s
+?   	go-demo/lessons/m32_framework_source_reading/internal/service	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/trace	[no test files]

@@ -1,0 +1,246 @@
+ENV_CHECK_BEGIN pid=930320 powershell=7.6.5 go=D:\Go\bin\go.exe
+protoc-gen-go.exe v1.36.12
+protoc-gen-go-grpc 1.6.2
+libprotoc 36.2
+GENERATION_IDENTICAL: pb/grpc/http 三个生成文件逐字节相同；所有工具已 Wait/Dispose
+ENV_RESTORED label=generate-success-ABSENT name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-ABSENT name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-ABSENT name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-ABSENT name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-ABSENT name=GOTOOLCHAIN state=NONEMPTY length=4 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-ABSENT name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True
+protoc-gen-go.exe v1.36.12
+protoc-gen-go-grpc 1.6.2
+libprotoc 36.2
+GENERATION_IDENTICAL: pb/grpc/http 三个生成文件逐字节相同；所有工具已 Wait/Dispose
+ENV_RESTORED label=generate-success-EMPTY name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-EMPTY name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-EMPTY name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-EMPTY name=GOBIN state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-EMPTY name=GOTOOLCHAIN state=NONEMPTY length=4 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-EMPTY name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True
+protoc-gen-go.exe v1.36.12
+protoc-gen-go-grpc 1.6.2
+libprotoc 36.2
+GENERATION_IDENTICAL: pb/grpc/http 三个生成文件逐字节相同；所有工具已 Wait/Dispose
+ENV_RESTORED label=generate-success-NONEMPTY name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-NONEMPTY name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-NONEMPTY name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-NONEMPTY name=GOBIN state=NONEMPTY length=122 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-NONEMPTY name=GOTOOLCHAIN state=NONEMPTY length=4 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-success-NONEMPTY name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+?   	go-demo/lessons/m32_framework_source_reading/cmd/demo	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/gen/inventoryv1	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/app	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/biz	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/data	[no test files]
+=== RUN   TestCompleteRealFramework
+2026/10/12 04:37:49 INFO [HTTP] server listening addr=127.0.0.1:4467
+2026/10/12 04:37:49 INFO [gRPC] server listening addr=127.0.0.1:4470
+2026/10/12 04:37:50 INFO [HTTP] server stopping
+2026/10/12 04:37:50 INFO [gRPC] server stopping
+2026/10/12 04:37:50 INFO [HTTP] server listening addr=127.0.0.1:4476
+2026/10/12 04:37:50 INFO [gRPC] server listening addr=127.0.0.1:4477
+2026/10/12 04:37:50 INFO [HTTP] server stopping
+2026/10/12 04:37:50 INFO [gRPC] server stopping
+2026/10/12 04:37:50 WARN [HTTP] server couldn't stop gracefully in time, doing force stop
+--- PASS: TestCompleteRealFramework (0.73s)
+=== RUN   TestConcurrentStockCannotOverdraw
+2026/10/12 04:37:50 INFO [HTTP] server listening addr=127.0.0.1:4481
+2026/10/12 04:37:50 INFO [gRPC] server listening addr=127.0.0.1:4482
+2026/10/12 04:37:50 INFO [HTTP] server stopping
+2026/10/12 04:37:50 INFO [gRPC] server stopping
+--- PASS: TestConcurrentStockCannotOverdraw (0.01s)
+=== RUN   TestCanceledOwnerStillClosesResources
+2026/10/12 04:37:50 INFO [HTTP] server stopping
+2026/10/12 04:37:50 INFO [HTTP] server listening addr=127.0.0.1:4484
+2026/10/12 04:37:50 INFO [gRPC] server stopping
+2026/10/12 04:37:50 INFO [gRPC] server listening addr=127.0.0.1:4485
+--- PASS: TestCanceledOwnerStillClosesResources (0.00s)
+=== RUN   TestUnstartedRootOwnsListeners
+2026/10/12 04:37:50 INFO [HTTP] server stopping
+2026/10/12 04:37:50 INFO [gRPC] server stopping
+--- PASS: TestUnstartedRootOwnsListeners (0.00s)
+=== RUN   TestTaskResultIsNotDone
+--- PASS: TestTaskResultIsNotDone (0.00s)
+PASS
+ok  	go-demo/lessons/m32_framework_source_reading/internal/lab	1.968s
+?   	go-demo/lessons/m32_framework_source_reading/internal/service	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/trace	[no test files]
+ENV_RESTORED label=race-success-ABSENT name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-ABSENT name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-ABSENT name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-ABSENT name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-ABSENT name=GOTOOLCHAIN state=NONEMPTY length=4 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-ABSENT name=PATH state=ABSENT length=0 presence_equal=True value_equal=True
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+?   	go-demo/lessons/m32_framework_source_reading/cmd/demo	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/gen/inventoryv1	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/app	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/biz	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/data	[no test files]
+=== RUN   TestCompleteRealFramework
+2026/10/12 04:37:54 INFO [gRPC] server listening addr=127.0.0.1:4498
+2026/10/12 04:37:54 INFO [HTTP] server listening addr=127.0.0.1:4497
+2026/10/12 04:37:54 INFO [HTTP] server stopping
+2026/10/12 04:37:54 INFO [gRPC] server stopping
+2026/10/12 04:37:54 INFO [gRPC] server listening addr=127.0.0.1:4505
+2026/10/12 04:37:54 INFO [HTTP] server listening addr=127.0.0.1:4504
+2026/10/12 04:37:54 INFO [HTTP] server stopping
+2026/10/12 04:37:54 INFO [gRPC] server stopping
+2026/10/12 04:37:54 WARN [HTTP] server couldn't stop gracefully in time, doing force stop
+--- PASS: TestCompleteRealFramework (0.73s)
+=== RUN   TestConcurrentStockCannotOverdraw
+2026/10/12 04:37:54 INFO [HTTP] server listening addr=127.0.0.1:4509
+2026/10/12 04:37:54 INFO [gRPC] server listening addr=127.0.0.1:4510
+2026/10/12 04:37:54 INFO [HTTP] server stopping
+2026/10/12 04:37:54 INFO [gRPC] server stopping
+--- PASS: TestConcurrentStockCannotOverdraw (0.01s)
+=== RUN   TestCanceledOwnerStillClosesResources
+2026/10/12 04:37:54 INFO [HTTP] server listening addr=127.0.0.1:4512
+2026/10/12 04:37:54 INFO [gRPC] server listening addr=127.0.0.1:4513
+2026/10/12 04:37:54 INFO [HTTP] server stopping
+2026/10/12 04:37:54 INFO [gRPC] server stopping
+--- PASS: TestCanceledOwnerStillClosesResources (0.00s)
+=== RUN   TestUnstartedRootOwnsListeners
+2026/10/12 04:37:54 INFO [HTTP] server stopping
+2026/10/12 04:37:54 INFO [gRPC] server stopping
+--- PASS: TestUnstartedRootOwnsListeners (0.00s)
+=== RUN   TestTaskResultIsNotDone
+--- PASS: TestTaskResultIsNotDone (0.00s)
+PASS
+ok  	go-demo/lessons/m32_framework_source_reading/internal/lab	2.033s
+?   	go-demo/lessons/m32_framework_source_reading/internal/service	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/trace	[no test files]
+ENV_RESTORED label=race-success-EMPTY name=CC state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-EMPTY name=CGO_ENABLED state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-EMPTY name=CXX state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-EMPTY name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-EMPTY name=GOTOOLCHAIN state=NONEMPTY length=4 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-EMPTY name=PATH state=EMPTY length=0 presence_equal=True value_equal=True
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+?   	go-demo/lessons/m32_framework_source_reading/cmd/demo	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/gen/inventoryv1	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/app	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/biz	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/data	[no test files]
+=== RUN   TestCompleteRealFramework
+2026/10/12 04:37:58 INFO [HTTP] server listening addr=127.0.0.1:4520
+2026/10/12 04:37:58 INFO [gRPC] server listening addr=127.0.0.1:4521
+2026/10/12 04:37:59 INFO [HTTP] server stopping
+2026/10/12 04:37:59 INFO [gRPC] server stopping
+2026/10/12 04:37:59 INFO [HTTP] server listening addr=127.0.0.1:4525
+2026/10/12 04:37:59 INFO [gRPC] server listening addr=127.0.0.1:4526
+2026/10/12 04:37:59 INFO [gRPC] server stopping
+2026/10/12 04:37:59 INFO [HTTP] server stopping
+2026/10/12 04:37:59 WARN [HTTP] server couldn't stop gracefully in time, doing force stop
+--- PASS: TestCompleteRealFramework (0.73s)
+=== RUN   TestConcurrentStockCannotOverdraw
+2026/10/12 04:37:59 INFO [gRPC] server listening addr=127.0.0.1:4531
+2026/10/12 04:37:59 INFO [HTTP] server listening addr=127.0.0.1:4530
+2026/10/12 04:37:59 INFO [HTTP] server stopping
+2026/10/12 04:37:59 INFO [gRPC] server stopping
+--- PASS: TestConcurrentStockCannotOverdraw (0.01s)
+=== RUN   TestCanceledOwnerStillClosesResources
+2026/10/12 04:37:59 INFO [HTTP] server stopping
+2026/10/12 04:37:59 INFO [gRPC] server listening addr=127.0.0.1:4534
+2026/10/12 04:37:59 INFO [HTTP] server listening addr=127.0.0.1:4533
+2026/10/12 04:37:59 INFO [gRPC] server stopping
+--- PASS: TestCanceledOwnerStillClosesResources (0.00s)
+=== RUN   TestUnstartedRootOwnsListeners
+2026/10/12 04:37:59 INFO [HTTP] server stopping
+2026/10/12 04:37:59 INFO [gRPC] server stopping
+--- PASS: TestUnstartedRootOwnsListeners (0.00s)
+=== RUN   TestTaskResultIsNotDone
+--- PASS: TestTaskResultIsNotDone (0.00s)
+PASS
+ok  	go-demo/lessons/m32_framework_source_reading/internal/lab	2.015s
+?   	go-demo/lessons/m32_framework_source_reading/internal/service	[no test files]
+?   	go-demo/lessons/m32_framework_source_reading/internal/trace	[no test files]
+ENV_RESTORED label=race-success-NONEMPTY name=CC state=NONEMPTY length=15 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-NONEMPTY name=CGO_ENABLED state=NONEMPTY length=24 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-NONEMPTY name=CXX state=NONEMPTY length=16 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-NONEMPTY name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-NONEMPTY name=GOTOOLCHAIN state=NONEMPTY length=4 presence_equal=True value_equal=True
+ENV_RESTORED label=race-success-NONEMPTY name=PATH state=NONEMPTY length=17 presence_equal=True value_equal=True
+go: invalid GOTOOLCHAIN "m32-invalid"
+EXPECTED_FAILURE label=generate-failure-ABSENT error=工具退出 1: D:\Go\bin\go.exe
+ENV_RESTORED label=generate-failure-ABSENT name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-ABSENT name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-ABSENT name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-ABSENT name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-ABSENT name=GOTOOLCHAIN state=NONEMPTY length=11 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-ABSENT name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+go: invalid GOTOOLCHAIN "m32-invalid"
+EXPECTED_FAILURE label=race-failure-ABSENT error=race退出 1
+ENV_RESTORED label=race-failure-ABSENT name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-ABSENT name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-ABSENT name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-ABSENT name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-ABSENT name=GOTOOLCHAIN state=NONEMPTY length=11 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-ABSENT name=PATH state=ABSENT length=0 presence_equal=True value_equal=True
+go: invalid GOTOOLCHAIN "m32-invalid"
+EXPECTED_FAILURE label=generate-failure-EMPTY error=工具退出 1: D:\Go\bin\go.exe
+ENV_RESTORED label=generate-failure-EMPTY name=CC state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-EMPTY name=CGO_ENABLED state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-EMPTY name=CXX state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-EMPTY name=GOBIN state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-EMPTY name=GOTOOLCHAIN state=NONEMPTY length=11 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-EMPTY name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+go: invalid GOTOOLCHAIN "m32-invalid"
+EXPECTED_FAILURE label=race-failure-EMPTY error=race退出 1
+ENV_RESTORED label=race-failure-EMPTY name=CC state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-EMPTY name=CGO_ENABLED state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-EMPTY name=CXX state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-EMPTY name=GOBIN state=EMPTY length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-EMPTY name=GOTOOLCHAIN state=NONEMPTY length=11 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-EMPTY name=PATH state=EMPTY length=0 presence_equal=True value_equal=True
+go: invalid GOTOOLCHAIN "m32-invalid"
+EXPECTED_FAILURE label=generate-failure-NONEMPTY error=工具退出 1: D:\Go\bin\go.exe
+ENV_RESTORED label=generate-failure-NONEMPTY name=CC state=NONEMPTY length=15 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-NONEMPTY name=CGO_ENABLED state=NONEMPTY length=24 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-NONEMPTY name=CXX state=NONEMPTY length=16 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-NONEMPTY name=GOBIN state=NONEMPTY length=122 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-NONEMPTY name=GOTOOLCHAIN state=NONEMPTY length=11 presence_equal=True value_equal=True
+ENV_RESTORED label=generate-failure-NONEMPTY name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True
+gcc.exe (MinGW-W64 x86_64-ucrt-posix-seh, built by Brecht Sanders, r2) 16.2.0
+x86_64-w64-mingw32
+go: invalid GOTOOLCHAIN "m32-invalid"
+EXPECTED_FAILURE label=race-failure-NONEMPTY error=race退出 1
+ENV_RESTORED label=race-failure-NONEMPTY name=CC state=NONEMPTY length=15 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-NONEMPTY name=CGO_ENABLED state=NONEMPTY length=24 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-NONEMPTY name=CXX state=NONEMPTY length=16 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-NONEMPTY name=GOBIN state=NONEMPTY length=122 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-NONEMPTY name=GOTOOLCHAIN state=NONEMPTY length=11 presence_equal=True value_equal=True
+ENV_RESTORED label=race-failure-NONEMPTY name=PATH state=NONEMPTY length=17 presence_equal=True value_equal=True
+RUNTIME_IDENTICAL file=cmd\demo\main.go sha256=6B67A05DE4AD8398106D436D661236B9EC8EF5F9782ECEFF6C61556244A53452
+RUNTIME_IDENTICAL file=gen\inventoryv1\inventory_grpc.pb.go sha256=9A648C316BA72FFA3537EC404ECB3774921CAC5228C2AC4015867825822DC872
+RUNTIME_IDENTICAL file=gen\inventoryv1\inventory_http.pb.go sha256=6FBAD40C4EFA58457D7556BFD554E2DE050B9CC93761BBBB40DD67EFC8892638
+RUNTIME_IDENTICAL file=gen\inventoryv1\inventory.pb.go sha256=2DF33DFBC5C07E721BE3A7AFEBECB1E97DEF2071E768B944DECF10DE9F5AD2DC
+RUNTIME_IDENTICAL file=go.mod sha256=8D1F38FE337D09C1775B737F9B57A28CE8C00673F4734ED92233FA5831243009
+RUNTIME_IDENTICAL file=go.sum sha256=7DB421B65CD947EF9DEAA2776B669E4D60FDC4C1E31CCDE126D6EBB9C458B87B
+RUNTIME_IDENTICAL file=internal\app\app.go sha256=24AE1DCFBB95ABFD854A9113EC915C26F609137663DFECE4BEBEFC278A689D40
+RUNTIME_IDENTICAL file=internal\app\ownership.go sha256=48A93AD5E2DEC9321EAF5CB455F207883003CC324EDF69B56B571EEB4D9D99EE
+RUNTIME_IDENTICAL file=internal\biz\inventory.go sha256=0D00988FCDF0CE67CDF252A6F39F78980BB97B20D3451D3008A7096519A426CD
+RUNTIME_IDENTICAL file=internal\data\memory.go sha256=6C2EA2ACB134FDB11D457427C6B46537E686872F7B7ED51FB8E006A39D29FCEE
+RUNTIME_IDENTICAL file=internal\lab\client.go sha256=AC52BB1A04379D2A8631348ACC42BCBD7B938C0BCEFAA10386314BF212ADBE5D
+RUNTIME_IDENTICAL file=internal\lab\scenarios_test.go sha256=81DC55BCF30D68085EFDC9FF4409D17E74968761A2C8B31146A4FA8983F2D8C8
+RUNTIME_IDENTICAL file=internal\lab\scenarios.go sha256=914098CEE07C82E917E87CE5258FCB43F8AE5FF93BA3ACBAA1777745EF38A65A
+RUNTIME_IDENTICAL file=internal\service\inventory.go sha256=055388B72627DC540E7203995B227762322889ECDFDD25DA876EED0931698114
+RUNTIME_IDENTICAL file=internal\trace\journal.go sha256=2B159F7C7F6E7B193F5826672CFB1B5BA6DECD5767DB3AD9C5688442D5A9F5EF
+RUNTIME_IDENTICAL file=proto\inventory\v1\inventory.proto sha256=1F81709FFE6C5F2A688A7260E324C2546C3F7CCA257283FC60EE4325C96B4743
+ENV_CHECK_PASS generate_success=3 race_success=3 generate_expected_failure=3 race_expected_failure=3 runtime_files_identical=16
+ENV_RESTORED label=check-script-caller-finally name=CC state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=check-script-caller-finally name=CGO_ENABLED state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=check-script-caller-finally name=CXX state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=check-script-caller-finally name=GOBIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=check-script-caller-finally name=GOTOOLCHAIN state=ABSENT length=0 presence_equal=True value_equal=True
+ENV_RESTORED label=check-script-caller-finally name=PATH state=NONEMPTY length=2200 presence_equal=True value_equal=True

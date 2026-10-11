@@ -1,8 +1,8 @@
 # 课程主验收记录
 
-2026-10-12（Asia/Shanghai），第 0～2 层共 31 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
+2026-10-12（Asia/Shanghai），第 0～3 层共 36 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个、第 3 层97个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
 
-当前真实交付为 **31/39**。后续8个模块尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互，以及事务、schema演进、Redis租约与SQL拒旧写组合已实际验证；隔离/ORM、缓存一致性、outbox、微服务框架和综合项目仍需分别交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
+当前真实交付为 **36/39**。后续 M37、M38、M39 尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证；综合业务、综合故障恢复和接手审查仍需分别交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
 
 ## 第 0 层实际验收
 
@@ -54,6 +54,18 @@
 
 主 agent 另用独立只读连接核对本层正常/真实race日志中的25张精确M21/M24/M27表全部不存在，并用独立Redis Client查询M27真实race登记的13个精确键不存在。该核对只查指定名字，没有扫描/删除其他数据；它证明实验后的目标收尾，不代替实验运行中库存、订单、迁移或拒旧写的实际断言。
 
+## 第 3 层实际验收
+
+| 模块 | 主验收的关键事实与独立复验范围 |
+| --- | --- |
+| [M22](m22_mysql_locks_isolation/README.md) | 真 MySQL 超卖、原子条件更新/行锁/CAS守恒，RC/RR快照与当前读，实际索引计划及范围/扫描锁、1213整事务重试、1205仅语句失败后的显式回滚。HTTP内外事务等待的实库后果均核对。主审返工后 root 全run、8项enabled race、vet/依赖通过；真实CREATE后应用确认错误仍登记并清理，占用名字受保护；强制TCP Close与Serve完成后 handler尾部仍挡住owner，放门才收尾，原失败/Shutdown/尾部原因均保留。两轮各4表与DDL专属表精确不存在、DB全0。 |
+| [M23](m23_gorm_semantics/README.md) | GORM1.31.2/mysql1.6.0实库零值更新、链式条件污染、用户作用域、callback/manual Tx、吞1062与recover误Commit、外层DB逃离Tx。Preload2与N+1=4、安全查询3及soft-delete持久行核对；hook已confirm的真Rabbit消息不随SQL Rollback撤回，同Tx outbox修复边界明确。root run/6辅助及完整enabled race/vet/依赖通过；阻塞SQL取消后原服务端任务已结束，5表/独占队列不存在、DB全0，AMQP绝对deadline修复有真实pipe辅助证明。 |
+| [M26](m26_cache_consistency/README.md) | 真SQL+Redis 44项：错误用户/租户key、旧SELECT回填覆盖新提交、TTL真实到期、版本key与Lua代际拒旧、post-Commit窗口、singleflight键/ctx/共享结果、负缓存/抖动TTL/大DTO/热点/真实AUTH降级及提交后失效失败。root返工复跑run/7辅助及enabled race/vet/依赖通过；16次确定的permit交接使Peak保持2，旧顺序mutation实际失败Peak3。body与drainer最终Done分别加入；32精确键/1表不存在，SQL与Redis关闭通过。 |
+| [M30](m30_outbox_idempotency/README.md) | 真SQL+Kafka双写坏顺序、独占Produce ACK截断、原key恢复、outbox与持久inbox、重复事件、offset提前丢效果及精确修复group、v2/v1拒绝和受控对账。root两轮各6次真实独立进程强杀/9次恢复，最终订单/qty11、outbox9全部sent、inbox11、stock/projection99、effects11、broker12。返工补实际1062恢复出口的cleanup/UNKNOWN优先级，8辅助子项与两轮各2次真实1062通过；root明确enabled的全量race123.304s通过，默认SKIP不算实库。另以独立只读入口复查两份登记各5表/11topic/12group及offset为空，30个登记child PID不存在。 |
+| [M32](m32_framework_source_reading/README.md) | 真Kratos3.0.0 HTTP/gRPC生成链、具体仓储副作用，typed业务错误、commit前后panic、lost ctx晚写、正确ctx零写、已commit后同ID显式重试双写、真实双向流。forced HTTP Close/App.Run及两个Start完成仍有active handler1，尾部退出/idle后才关仓储；Stop.Result与最终Done分开。root run/5项race/vet/依赖通过；返工后独立执行生成/race成功及真实Go失败的环境三态恢复，共78项断言、15个测试PASS、6次预期配置失败、16运行文件hash不变。Kitex/go-zero只读锁定源码，未宣称运行。 |
+
+本层各模块均保留原失败与返工事实，普通/实库测试的SKIP界限、环境变量缺失/空串/非空三态、提交未知和清理失败不被成功归一化。有限应用owner的退出证据不扩为所有库内部goroutine已回收。M30只做单relay/单分区与SQL副作用；M32业务账本仍是本课进程内库存。已验机制仍需在M37真实综合链和M38故障矩阵中重新证明组合行为。
+
 ## 验证和资源边界
 
 每课 README 的命令都以独立 module 为工作目录。并发课实际使用兼容 Windows/amd64 的便携 GCC 16.2.0 进行 race；CC/CXX/CGO/PATH 只设置在命令进程，没有改变系统设置。默认 mingw32 的构建失败保留为历史诊断，不算检测器已执行。必要故障入口用 build tag、显式命令或有界子进程隔离；正常入口和正向断言保持可运行。
@@ -62,8 +74,8 @@
 
 取消通知、结果可读、handler 退出、清理完成和 owner join 分别核对。M07/M12/M17/M34 的失败路径曾有收尾缺口，已经返工或主修正并独立复验；没有用自然结束、自报 PASS、HTTP 200、编译成功或全进程 goroutine 数量替代验收。正常验证进程、故障子进程、课程独占 listener、HTTP/RPC Body/连接、任务和临时隧道已收尾。性能 profile/调试产物与原始无秘密诊断在忽略目录保留以便追查，不随课程源文件提交。
 
-基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，M21/M24/M27新增真实事务、表结构与Redis/SQL组合。M19的进程内幂等不等于跨进程数据库唯一约束；M27的SQL唯一性实验仅固定载荷、同订单顺序重试。前三层的有界协议与失败窗口证据不能外推到后续缓存/outbox、跨服务幂等、云观测、生产SLA或长期稳定性。Kafka单副本确认、同进程文件Sync和当前SQL读回也不证明多节点容灾。
+基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，M21/M24/M27新增真实事务、表结构与Redis/SQL组合，M22/M23/M26/M30运行真实隔离/ORM/缓存/outbox链路。M19的进程内幂等不等于跨进程数据库唯一约束；M27的SQL唯一性实验仅固定载荷、同订单顺序重试，M30下游幂等只覆盖其同Tx SQL效果。前四层的有界协议与失败窗口证据不能外推到后续综合业务、跨服务幂等、云观测、生产SLA或长期稳定性。Kafka单副本确认、同进程文件Sync和当前SQL读回也不证明多节点容灾。
 
 ## 后续层
 
-第 0～2 层均已验收。第 3 层为 M22/M23/M26/M30/M32；随后依次 M37、M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。
+第 0～3 层均已验收。随后依次 M37、M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。

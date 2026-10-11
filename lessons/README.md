@@ -2,7 +2,7 @@
 
 面向熟练 Java 工程师、Go 初学者。每课有详细中文 README、透彻注释的源码、直接交付的反例/修复、真实可运行实验与必要独立断言，不布置额外 exercise。共同规范见 [TEACHING_STYLE](../learning_prompts/TEACHING_STYLE.md)。
 
-第 0～2 层共 31 课已完成主 agent 独立验收并汇总；剩余 8 课仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
+第 0～3 层共 36 课已完成主 agent 独立验收并汇总；剩余 M37、M38、M39 仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
 
 各课是独立 Go module；根 `go test ./...` 不覆盖它们。先读该课 README 的参数/资源/实际范围，再执行例如：
 
@@ -64,11 +64,11 @@ go -C lessons/m17_net_http vet ./...
 
 | 模块 | 内容 | 硬前置 | 交付状态 |
 | --- | --- | --- | --- |
-| [M22](../learning_prompts/M22_mysql_locks_isolation.md) | MySQL 隔离、行锁、死锁与并发库存 | M21 | 待交付 |
-| [M23](../learning_prompts/M23_gorm_semantics.md) | GORM：SQL、零值更新、作用域、hooks 与事务 | M21 | 待交付 |
-| [M26](../learning_prompts/M26_cache_consistency.md) | 缓存一致性、singleflight、热点与降级 | M25、M15、M21 | 待交付 |
-| [M30](../learning_prompts/M30_outbox_idempotency.md) | MySQL + Kafka：outbox、幂等与结果未知 | M21、M29 | 待交付 |
-| [M32](../learning_prompts/M32_framework_source_reading.md) | 真实微服务框架：Kratos 主线，Kitex/go-zero 迁移阅读 | M19、M31 | 待交付 |
+| [M22](m22_mysql_locks_isolation/README.md) | MySQL 隔离、行锁、死锁与并发库存 | M21 | 已验收 |
+| [M23](m23_gorm_semantics/README.md) | GORM：SQL、零值更新、作用域、hooks 与事务 | M21 | 已验收 |
+| [M26](m26_cache_consistency/README.md) | 缓存一致性、singleflight、热点与降级 | M25、M15、M21 | 已验收 |
+| [M30](m30_outbox_idempotency/README.md) | MySQL + Kafka：outbox、幂等与结果未知 | M21、M29 | 已验收 |
+| [M32](m32_framework_source_reading/README.md) | 真实微服务框架：Kratos 主线，Kitex/go-zero 迁移阅读 | M19、M31 | 已验收 |
 
 ## 第 4 层
 

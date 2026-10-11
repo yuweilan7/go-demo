@@ -1,0 +1,320 @@
+MODULE github.com/go-kratos/kratos/v3 v3.0.0 sum=h1:dCXqKoeo2Bo9jgC72YfuwJ3g7bPCkHeVeNGyZQ51bLE=
+FILE app.go SHA256=EFBB731B99E3E0C1D2122C987BA5FE6C1518E324861F9E032F5E3A6FC70BEF73
+app.go:39: func New(opts ...Option) *App {
+app.go:54: ctx, cancel := context.WithCancel(o.ctx)
+app.go:63: func (a *App) ID() string { return a.opts.id }
+app.go:66: func (a *App) Name() string { return a.opts.name }
+app.go:69: func (a *App) Version() string { return a.opts.version }
+app.go:72: func (a *App) Metadata() map[string]string { return a.opts.metadata }
+app.go:75: func (a *App) Endpoint() []string {
+app.go:83: func (a *App) Run() error {
+app.go:105: stopCtx := context.WithoutCancel(octx)
+app.go:108: stopCtx, cancel = context.WithTimeout(stopCtx, a.opts.stopTimeout)
+app.go:111: return server.Stop(stopCtx)
+app.go:115: wg.Done() // here is to ensure server start has begun running before register, so defer is not needed
+app.go:116: return server.Start(octx)
+app.go:121: rctx, rcancel := context.WithTimeout(ctx, a.opts.registrarTimeout)
+app.go:154: func (a *App) Stop() (err error) {
+app.go:164: ctx, cancel := context.WithTimeout(NewContext(a.ctx, a), a.opts.registrarTimeout)
+app.go:176: func (a *App) buildInstance() (*registry.ServiceInstance, error) {
+app.go:204: func NewContext(ctx context.Context, s AppInfo) context.Context {
+app.go:209: func FromContext(ctx context.Context) (s AppInfo, ok bool) {
+FILE options.go SHA256=2D7385BD668AF8C9F05D205A5A2B46311C3E2F341773FC1CC37B65058DEFCB2D
+options.go:15: type Option func(o *options)
+options.go:18: type options struct {
+options.go:42: func ID(id string) Option {
+options.go:47: func Name(name string) Option {
+options.go:52: func Version(version string) Option {
+options.go:57: func Metadata(md map[string]string) Option {
+options.go:62: func Endpoint(endpoints ...*url.URL) Option {
+options.go:67: func Context(ctx context.Context) Option {
+options.go:72: func Logger(logger *slog.Logger) Option {
+options.go:77: func Server(srv ...transport.Server) Option {
+options.go:82: func Signal(sigs ...os.Signal) Option {
+options.go:87: func Registrar(r registry.Registrar) Option {
+options.go:92: func RegistrarTimeout(t time.Duration) Option {
+options.go:97: func StopTimeout(t time.Duration) Option {
+options.go:104: func BeforeStart(fn func(context.Context) error) Option {
+options.go:111: func BeforeStop(fn func(context.Context) error) Option {
+options.go:118: func AfterStart(fn func(context.Context) error) Option {
+options.go:125: func AfterStop(fn func(context.Context) error) Option {
+FILE middleware/middleware.go SHA256=A0579940D87C871E4B69B5729E98136A6D03D4F264ADE34497D9A9B08BF1CA38
+middleware/middleware.go:8: type Handler func(ctx context.Context, req any) (any, error)
+middleware/middleware.go:11: type Middleware func(Handler) Handler
+middleware/middleware.go:14: func Chain(m ...Middleware) Middleware {
+FILE middleware/recovery/recovery.go SHA256=0318A2053C9B5AC6A45F0EFC31E2FDA806CFA45C7713FC09971584B82588DA84
+middleware/recovery/recovery.go:20: type HandlerFunc func(ctx context.Context, req, err any) error
+middleware/recovery/recovery.go:23: type Option func(*options)
+middleware/recovery/recovery.go:25: type options struct {
+middleware/recovery/recovery.go:31: func WithHandler(h HandlerFunc) Option {
+middleware/recovery/recovery.go:39: func WithLogger(logger *slog.Logger) Option {
+middleware/recovery/recovery.go:46: func Recovery(opts ...Option) middleware.Middleware {
+FILE transport/http/server.go SHA256=8A129F1E953D851CD2B0FA3216C9F091B783B977DCC31715377D08EECE968EA5
+transport/http/server.go:32: func Network(network string) ServerOption {
+transport/http/server.go:39: func Address(addr string) ServerOption {
+transport/http/server.go:46: func Endpoint(endpoint *url.URL) ServerOption {
+transport/http/server.go:53: func Timeout(timeout time.Duration) ServerOption {
+transport/http/server.go:60: func Middleware(m ...middleware.Middleware) ServerOption {
+transport/http/server.go:67: func Filter(filters ...FilterFunc) ServerOption {
+transport/http/server.go:74: func RequestVarsDecoder(dec DecodeRequestFunc) ServerOption {
+transport/http/server.go:81: func RequestQueryDecoder(dec DecodeRequestFunc) ServerOption {
+transport/http/server.go:88: func RequestDecoder(dec DecodeRequestFunc) ServerOption {
+transport/http/server.go:95: func ResponseEncoder(en EncodeResponseFunc) ServerOption {
+transport/http/server.go:102: func ErrorEncoder(en EncodeErrorFunc) ServerOption {
+transport/http/server.go:109: func TLSConfig(c *tls.Config) ServerOption {
+transport/http/server.go:118: func StrictSlash(strictSlash bool) ServerOption {
+transport/http/server.go:125: func Listener(lis net.Listener) ServerOption {
+transport/http/server.go:132: func PathPrefix(prefix string) ServerOption {
+transport/http/server.go:138: func NotFoundHandler(handler http.Handler) ServerOption {
+transport/http/server.go:144: func MethodNotAllowedHandler(handler http.Handler) ServerOption {
+transport/http/server.go:172: func NewServer(opts ...ServerOption) *Server {
+transport/http/server.go:205: func (s *Server) Use(selector string, m ...middleware.Middleware) {
+transport/http/server.go:210: func (s *Server) WalkRoute(fn WalkRouteFunc) error {
+transport/http/server.go:230: func (s *Server) WalkHandle(handle func(method, path string, handler http.HandlerFunc)) error {
+transport/http/server.go:238: func (s *Server) Route(prefix string, filters ...FilterFunc) *Router {
+transport/http/server.go:243: func (s *Server) Handle(path string, h http.Handler) {
+transport/http/server.go:248: func (s *Server) HandlePrefix(prefix string, h http.Handler) {
+transport/http/server.go:253: func (s *Server) HandleFunc(path string, h http.HandlerFunc) {
+transport/http/server.go:258: func (s *Server) HandleHeader(key, val string, h http.HandlerFunc) {
+transport/http/server.go:263: func (s *Server) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+transport/http/server.go:267: func (s *Server) filter() mux.MiddlewareFunc {
+transport/http/server.go:275: ctx, cancel = context.WithTimeout(req.Context(), s.timeout)
+transport/http/server.go:277: ctx, cancel = context.WithCancel(req.Context())
+transport/http/server.go:309: func (s *Server) Endpoint() (*url.URL, error) {
+transport/http/server.go:317: func (s *Server) Start(ctx context.Context) error {
+transport/http/server.go:338: func (s *Server) Stop(ctx context.Context) error {
+transport/http/server.go:339: log.Info("[HTTP] server stopping")
+transport/http/server.go:340: err := s.Shutdown(ctx)
+transport/http/server.go:350: func (s *Server) listenAndEndpoint() error {
+FILE transport/http/client.go SHA256=CBFB75A5267B85CF720BD1AD89EC027A3023F93914C152AAD71B61ABB6568814
+transport/http/client.go:23: func init() {
+transport/http/client.go:61: func WithSubset(size int) ClientOption {
+transport/http/client.go:68: func WithTransport(trans http.RoundTripper) ClientOption {
+transport/http/client.go:74: // WithTimeout with client request timeout.
+transport/http/client.go:75: func WithTimeout(d time.Duration) ClientOption {
+transport/http/client.go:82: func WithUserAgent(ua string) ClientOption {
+transport/http/client.go:89: func WithMiddleware(m ...middleware.Middleware) ClientOption {
+transport/http/client.go:96: func WithEndpoint(endpoint string) ClientOption {
+transport/http/client.go:103: func WithRequestEncoder(encoder EncodeRequestFunc) ClientOption {
+transport/http/client.go:110: func WithResponseDecoder(decoder DecodeResponseFunc) ClientOption {
+transport/http/client.go:117: func WithErrorDecoder(errorDecoder DecodeErrorFunc) ClientOption {
+transport/http/client.go:124: func WithDiscovery(d registry.Discovery) ClientOption {
+transport/http/client.go:131: func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
+transport/http/client.go:138: func WithBlock() ClientOption {
+transport/http/client.go:145: func WithTLSConfig(c *tls.Config) ClientOption {
+transport/http/client.go:162: func NewClient(ctx context.Context, opts ...ClientOption) (*Client, error) {
+transport/http/client.go:212: func (client *Client) Invoke(ctx context.Context, method, path string, args any, reply any, opts ...CallOption) error {
+transport/http/client.go:259: func (client *Client) invoke(ctx context.Context, req *http.Request, args any, reply any, c callInfo, opts ...CallOption) error {
+transport/http/client.go:271: defer res.Body.Close()
+transport/http/client.go:288: func (client *Client) Do(req *http.Request, opts ...CallOption) (*http.Response, error) {
+transport/http/client.go:299: func (client *Client) do(req *http.Request) (*http.Response, error) {
+transport/http/client.go:338: func (client *Client) Close() error {
+transport/http/client.go:346: func DefaultRequestEncoder(_ context.Context, contentType string, in any) ([]byte, error) {
+transport/http/client.go:363: func DefaultResponseDecoder(_ context.Context, res *http.Response, v any) error {
+transport/http/client.go:364: defer res.Body.Close()
+transport/http/client.go:378: func DefaultErrorDecoder(_ context.Context, res *http.Response) error {
+transport/http/client.go:382: defer res.Body.Close()
+transport/http/client.go:395: func CodecForResponse(r *http.Response) encoding.Codec {
+FILE transport/http/context.go SHA256=F3E6FE7AE9D4E13556B3123834BE4DBA2950A32CC4B9CE3EB6BFABAE8FF4FD2B
+transport/http/context.go:49: func (w *responseWriter) reset(res http.ResponseWriter) {
+transport/http/context.go:53: func (w *responseWriter) Header() http.Header        { return w.w.Header() }
+transport/http/context.go:54: func (w *responseWriter) WriteHeader(statusCode int) { w.code = statusCode }
+transport/http/context.go:55: func (w *responseWriter) Write(data []byte) (int, error) {
+transport/http/context.go:59: func (w *responseWriter) Unwrap() http.ResponseWriter { return w.w }
+transport/http/context.go:68: func (c *wrapper) Header() http.Header {
+transport/http/context.go:72: func (c *wrapper) Vars() url.Values {
+transport/http/context.go:81: func (c *wrapper) Form() url.Values {
+transport/http/context.go:88: func (c *wrapper) Query() url.Values {
+transport/http/context.go:91: func (c *wrapper) Request() *http.Request        { return c.req }
+transport/http/context.go:92: func (c *wrapper) Response() http.ResponseWriter { return c.res }
+transport/http/context.go:93: func (c *wrapper) Middleware(h middleware.Handler) middleware.Handler {
+transport/http/context.go:99: func (c *wrapper) Bind(v any) error      { return c.router.srv.decBody(c.req, v) }
+transport/http/context.go:100: func (c *wrapper) BindVars(v any) error  { return c.router.srv.decVars(c.req, v) }
+transport/http/context.go:101: func (c *wrapper) BindQuery(v any) error { return c.router.srv.decQuery(c.req, v) }
+transport/http/context.go:102: func (c *wrapper) BindForm(v any) error  { return bindForm(c.req, v) }
+transport/http/context.go:103: func (c *wrapper) Returns(v any, err error) error {
+transport/http/context.go:110: func (c *wrapper) Result(code int, v any) error {
+transport/http/context.go:115: func (c *wrapper) JSON(code int, v any) error {
+transport/http/context.go:121: func (c *wrapper) XML(code int, v any) error {
+transport/http/context.go:127: func (c *wrapper) String(code int, text string) error {
+transport/http/context.go:137: func (c *wrapper) Blob(code int, contentType string, data []byte) error {
+transport/http/context.go:147: func (c *wrapper) Stream(code int, contentType string, rd io.Reader) error {
+transport/http/context.go:154: func (c *wrapper) Reset(res http.ResponseWriter, req *http.Request) {
+transport/http/context.go:160: func (c *wrapper) Deadline() (time.Time, bool) {
+transport/http/context.go:167: func (c *wrapper) Done() <-chan struct{} {
+transport/http/context.go:174: func (c *wrapper) Err() error {
+transport/http/context.go:181: func (c *wrapper) Value(key any) any {
+FILE transport/http/router.go SHA256=5116977BA7F334F344A376DCACB70B206F9054CC01026B5E134CAEDBC23AED0B
+transport/http/router.go:18: type HandlerFunc func(Context) error
+transport/http/router.go:27: func newRouter(prefix string, srv *Server, filters ...FilterFunc) *Router {
+transport/http/router.go:37: func (r *Router) Group(prefix string, filters ...FilterFunc) *Router {
+transport/http/router.go:45: func (r *Router) Handle(method, relativePath string, h HandlerFunc, filters ...FilterFunc) {
+transport/http/router.go:62: func (r *Router) GET(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:67: func (r *Router) HEAD(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:72: func (r *Router) POST(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:77: func (r *Router) PUT(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:82: func (r *Router) PATCH(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:87: func (r *Router) DELETE(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:92: func (r *Router) CONNECT(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:97: func (r *Router) OPTIONS(path string, h HandlerFunc, m ...FilterFunc) {
+transport/http/router.go:102: func (r *Router) TRACE(path string, h HandlerFunc, m ...FilterFunc) {
+FILE transport/http/codec.go SHA256=D5CD0D7226D95A5E1A69CC7E6DA05086ABA7BD64AC414D47C4CB51A2C769634B
+transport/http/codec.go:53: func DefaultRequestVars(r *http.Request, v any) error {
+transport/http/codec.go:63: func DefaultRequestQuery(r *http.Request, v any) error {
+transport/http/codec.go:68: func DefaultRequestDecoder(r *http.Request, v any) error {
+transport/http/codec.go:101: func DefaultResponseEncoder(w http.ResponseWriter, r *http.Request, v any) error {
+transport/http/codec.go:133: func DefaultErrorEncoder(w http.ResponseWriter, r *http.Request, err error) {
+transport/http/codec.go:140: se := errors.FromError(err)
+transport/http/codec.go:153: func CodecForRequest(r *http.Request, name string) (encoding.Codec, bool) {
+transport/http/codec.go:163: func httpBody(v any) (*httpbody.HttpBody, bool) {
+transport/http/codec.go:180: func decodeWithCodec(codec encoding.Codec, data []byte, v any) error {
+transport/http/codec.go:213: func BodyContentType(v any) string {
+FILE transport/grpc/server.go SHA256=6BDA86E49F40D70581DC4084DE02323B4CD5EB86B5F725700B89B0DFC71FFCB1
+transport/grpc/server.go:34: func Network(network string) ServerOption {
+transport/grpc/server.go:41: func Address(addr string) ServerOption {
+transport/grpc/server.go:48: func Endpoint(endpoint *url.URL) ServerOption {
+transport/grpc/server.go:55: func Timeout(timeout time.Duration) ServerOption {
+transport/grpc/server.go:62: func Middleware(m ...middleware.Middleware) ServerOption {
+transport/grpc/server.go:68: func StreamMiddleware(m ...middleware.Middleware) ServerOption {
+transport/grpc/server.go:75: func CustomHealth() ServerOption {
+transport/grpc/server.go:82: func TLSConfig(c *tls.Config) ServerOption {
+transport/grpc/server.go:89: func Listener(lis net.Listener) ServerOption {
+transport/grpc/server.go:96: func UnaryInterceptor(in ...grpc.UnaryServerInterceptor) ServerOption {
+transport/grpc/server.go:103: func StreamInterceptor(in ...grpc.StreamServerInterceptor) ServerOption {
+transport/grpc/server.go:110: func DisableReflection() ServerOption {
+transport/grpc/server.go:117: func Options(opts ...grpc.ServerOption) ServerOption {
+transport/grpc/server.go:146: func NewServer(opts ...ServerOption) *Server {
+transport/grpc/server.go:200: func (s *Server) Use(selector string, m ...middleware.Middleware) {
+transport/grpc/server.go:208: func (s *Server) Endpoint() (*url.URL, error) {
+transport/grpc/server.go:216: func (s *Server) Start(ctx context.Context) error {
+transport/grpc/server.go:227: func (s *Server) Stop(ctx context.Context) error {
+transport/grpc/server.go:231: s.health.Shutdown()
+transport/grpc/server.go:236: log.Info("[gRPC] server stopping")
+transport/grpc/server.go:237: s.GracefulStop()
+transport/grpc/server.go:244: s.Server.Stop()
+transport/grpc/server.go:249: func (s *Server) listenAndEndpoint() error {
+FILE transport/grpc/client.go SHA256=43D72F25C0AFCF6341140C51965B523F05323EFC745D418D869F7243B23F5C32
+transport/grpc/client.go:26: func init() {
+transport/grpc/client.go:36: func WithEndpoint(endpoint string) ClientOption {
+transport/grpc/client.go:44: func WithSubset(size int) ClientOption {
+transport/grpc/client.go:50: // WithTimeout with client timeout.
+transport/grpc/client.go:51: func WithTimeout(timeout time.Duration) ClientOption {
+transport/grpc/client.go:58: func WithMiddleware(m ...middleware.Middleware) ClientOption {
+transport/grpc/client.go:65: func WithStreamMiddleware(m ...middleware.Middleware) ClientOption {
+transport/grpc/client.go:72: func WithDiscovery(d registry.Discovery) ClientOption {
+transport/grpc/client.go:79: func WithTLSConfig(c *tls.Config) ClientOption {
+transport/grpc/client.go:86: func WithUnaryInterceptor(in ...grpc.UnaryClientInterceptor) ClientOption {
+transport/grpc/client.go:93: func WithStreamInterceptor(in ...grpc.StreamClientInterceptor) ClientOption {
+transport/grpc/client.go:100: func WithOptions(opts ...grpc.DialOption) ClientOption {
+transport/grpc/client.go:107: func WithNodeFilter(filters ...selector.NodeFilter) ClientOption {
+transport/grpc/client.go:114: func WithHealthCheck(healthCheck bool) ClientOption {
+transport/grpc/client.go:140: func NewClient(ctx context.Context, opts ...ClientOption) (*grpc.ClientConn, error) {
+transport/grpc/client.go:180: discovery.WithTimeout(options.timeout),
+transport/grpc/client.go:200: func unaryClientInterceptor(ms []middleware.Middleware, timeout time.Duration, filters []selector.NodeFilter) grpc.UnaryClientInterceptor {
+transport/grpc/client.go:210: ctx, cancel = context.WithTimeout(ctx, timeout)
+transport/grpc/client.go:242: func (w *wrappedClientStream) Context() context.Context {
+transport/grpc/client.go:246: func (w *wrappedClientStream) SendMsg(m any) error {
+transport/grpc/client.go:264: func (w *wrappedClientStream) RecvMsg(m any) error {
+transport/grpc/client.go:282: func streamClientInterceptor(ms []middleware.Middleware, filters []selector.NodeFilter) grpc.StreamClientInterceptor {
+FILE transport/grpc/interceptor.go SHA256=251AC14A05535B87EC036812B636B552DED90D869E8C97F13FFEA3D6CA88EA8B
+transport/grpc/interceptor.go:17: func (s *Server) unaryServerInterceptor() grpc.UnaryServerInterceptor {
+transport/grpc/interceptor.go:33: ctx, cancel = context.WithTimeout(ctx, s.timeout)
+transport/grpc/interceptor.go:57: func NewWrappedStream(ctx context.Context, stream grpc.ServerStream, m matcher.Matcher) grpc.ServerStream {
+transport/grpc/interceptor.go:65: func (w *wrappedStream) Context() context.Context {
+transport/grpc/interceptor.go:70: func (s *Server) streamServerInterceptor() grpc.StreamServerInterceptor {
+transport/grpc/interceptor.go:110: func GetStream(ctx context.Context) grpc.ServerStream {
+transport/grpc/interceptor.go:114: func (w *wrappedStream) SendMsg(m any) error {
+transport/grpc/interceptor.go:132: func (w *wrappedStream) RecvMsg(m any) error {
+FILE internal/context/context.go SHA256=237E4EA107F6C6661088A7DBAC510F7F478BD3061DD6A5843190586B89DC8820
+internal/context/context.go:23: func Merge(parent1, parent2 context.Context) (context.Context, context.CancelFunc) {
+internal/context/context.go:41: func (mc *mergeCtx) finish(err error) error {
+internal/context/context.go:50: func (mc *mergeCtx) wait() {
+internal/context/context.go:63: func (mc *mergeCtx) cancel() {
+internal/context/context.go:70: func (mc *mergeCtx) Done() <-chan struct{} {
+internal/context/context.go:75: func (mc *mergeCtx) Err() error {
+internal/context/context.go:94: func (mc *mergeCtx) Deadline() (time.Time, bool) {
+internal/context/context.go:110: func (mc *mergeCtx) Value(key any) any {
+FILE errors/errors.go SHA256=566B4E40235919B40BBD54DEF18476FF29E4A89504DC4E3B0045474D2B0F9ECD
+errors/errors.go:28: func (e *Error) Error() string {
+errors/errors.go:33: func (e *Error) Unwrap() error { return e.cause }
+errors/errors.go:36: func (e *Error) Is(err error) bool {
+errors/errors.go:44: func (e *Error) WithCause(cause error) *Error {
+errors/errors.go:51: func (e *Error) WithMetadata(md map[string]string) *Error {
+errors/errors.go:58: func (e *Error) GRPCStatus() *status.Status {
+errors/errors.go:60: WithDetails(&errdetails.ErrorInfo{
+errors/errors.go:68: func New(code int, reason, message string) *Error {
+errors/errors.go:79: func Newf(code int, reason, format string, a ...any) *Error {
+errors/errors.go:84: func Errorf(code int, reason, format string, a ...any) error {
+errors/errors.go:90: func Code(err error) int {
+errors/errors.go:99: func Reason(err error) string {
+errors/errors.go:107: func Clone(err *Error) *Error {
+errors/errors.go:128: func FromError(err error) *Error {
+FILE transport/http/status/status.go SHA256=113E665148E778E5718D41D9D6008FB99DD196C5742AF708823F3E857D5D6B68
+transport/http/status/status.go:32: func (c statusConverter) ToGRPCCode(code int) codes.Code {
+transport/http/status/status.go:66: func (c statusConverter) FromGRPCCode(code codes.Code) int {
+transport/http/status/status.go:107: func ToGRPCCode(code int) codes.Code {
+transport/http/status/status.go:112: func FromGRPCCode(code codes.Code) int {
+FILE config/config.go SHA256=22F45A4EA5ED39073291588C17D51C2BCACAB5C4777F51636C6E70CE7F2A16CF
+config/config.go:43: func New(opts ...Option) Config {
+config/config.go:58: func (c *config) watch(w Watcher) {
+config/config.go:92: func (c *config) Load() error {
+config/config.go:120: func (c *config) Value(key string) Value {
+config/config.go:131: func (c *config) Scan(v any) error {
+config/config.go:139: func (c *config) Watch(key string, o Observer) error {
+config/config.go:147: func (c *config) Close() error {
+config/config.go:157: func Get[T any](c Config, key string) (T, error) {
+MODULE github.com/cloudwego/kitex v0.16.4 sum=h1:x/HwNdlP6HEXr/xUBtLa6mxKKQPjLIaw0xWtThhqkLY=
+FILE client/client.go SHA256=0A0FD0903ABA2122414D901AC4B7ABBBCE3A0A7458D13B7BAEC267DAEC68BFAC
+client/client.go:90: func (kf *kcFinalizerClient) Call(ctx context.Context, method string, request, response interface{}) error {
+client/client.go:96: func NewClient(svcInfo *serviceinfo.ServiceInfo, opts ...Option) (Client, error) {
+client/client.go:267: kc.lbf.DeregisterRebalanceHook(rbIdx)
+client/client.go:272: kc.lbf.DeregisterDeleteHook(dIdx)
+client/client.go:365: func (kc *kClient) Call(ctx context.Context, method string, request, response interface{}) (err error) {
+client/client.go:416: lastRI, recycleRI, err = kc.opt.UnaryOptions.RetryContainer.WithRetryIfNeeded(ctx, callOptRetry, kc.rpcCallWithRetry(ri, method), ri, request, response)
+client/client.go:479: func (kc *kClient) buildInvokeChain(mw middleware) error {
+client/client.go:550: func (kc *kClient) Close() error {
+client/client.go:687: func validateForCall(ctx context.Context, inited, closed bool) {
+FILE client/option.go SHA256=17E32245153A20A2A13B84EE83DB55B0C7784355EEEF675CB803B810BC0FA80D
+client/option.go:249: func WithRPCTimeout(d time.Duration) Option {
+client/option.go:342: func WithFailureRetry(p *retry.FailurePolicy) Option {
+FILE server/server.go SHA256=84EEEE8D955AD46081CCE568C1793149E97D1BE26FA827D558A26F45A955DB10
+server/server.go:76: func NewServer(ops ...Option) Server {
+server/server.go:142: func (s *server) buildMiddlewares(ctx context.Context) []endpoint.Middleware {
+server/server.go:156: mws = append(mws, serverTimeoutMW)
+server/server.go:170: func (s *server) buildInvokeChain(ctx context.Context) {
+server/server.go:176: func (s *server) RegisterService(svcInfo *serviceinfo.ServiceInfo, handler interface{}, opts ...RegisterOption) error {
+server/server.go:202: func (s *server) Run() (err error) {
+server/server.go:271: func (s *server) Stop() (err error) {
+server/server.go:283: err = s.opt.Registry.Deregister(s.opt.RegistryInfo)
+FILE server/option.go SHA256=20E5503963321ACE7A710552990FD3DF70AA7AA277719A9CFBF754F253B29BA0
+server/option.go:433: func WithEnableContextTimeout(enable bool) Option {
+FILE pkg/remote/remotesvr/server.go SHA256=AAA0C65C51B7332FEE7EC9A19384CF4E7A7A89D032E779A83CE18FAB75336FB0
+pkg/remote/remotesvr/server.go:44: func NewServer(opt *remote.ServerOption, transHdlr remote.ServerTransHandler) (Server, error) {
+pkg/remote/remotesvr/server.go:85: func (s *server) Stop() (err error) {
+MODULE github.com/zeromicro/go-zero v1.10.3 sum=h1:fm4+jUuUF77IWtFeAyf2xVoBRcgEpF1NZJUqTvZ3dw0=
+FILE zrpc/client.go SHA256=9EA2770C3150FE261F6B98412DC519F3DF7672A60CBE32249786536F41FD4309
+zrpc/client.go:50: func MustNewClient(c RpcClientConf, options ...ClientOption) Client {
+zrpc/client.go:57: func NewClient(c RpcClientConf, options ...ClientOption) (Client, error) {
+zrpc/client.go:100: func NewClientWithTarget(target string, opts ...ClientOption) (Client, error) {
+FILE zrpc/server.go SHA256=EDFC0DB3BC6D7A3BC055800744B492C872B51B4591AC71311C5BFF4557DD75D0
+zrpc/server.go:23: func MustNewServer(c RpcServerConf, register internal.RegisterFn) *RpcServer {
+zrpc/server.go:30: func NewServer(c RpcServerConf, register internal.RegisterFn) (*RpcServer, error) {
+zrpc/server.go:88: func (rs *RpcServer) Start() {
+zrpc/server.go:96: func (rs *RpcServer) Stop() {
+zrpc/server.go:97: logx.Close()
+zrpc/server.go:144: func setupUnaryInterceptors(svr internal.Server, c RpcServerConf, metrics *stat.Metrics) {
+FILE zrpc/internal/rpcserver.go SHA256=4445FACDDE6351D62D678B501A18E9D8F96F7E75E3E092983AE2321AF5B5B80C
+zrpc/internal/rpcserver.go:47: func (s *rpcServer) Start(register RegisterFn) error {
+zrpc/internal/rpcserver.go:70: waitForCalled := proc.AddShutdownListener(func() {
+zrpc/internal/rpcserver.go:74: server.GracefulStop()
+zrpc/internal/rpcserver.go:76: defer waitForCalled()
+FILE zrpc/internal/serverinterceptors/timeoutinterceptor.go SHA256=FB2D8BBA289D03D7C9A5B8EFC2D350D609B041192C5DFF6574775905A85518C5
+zrpc/internal/serverinterceptors/timeoutinterceptor.go:28: func UnaryTimeoutInterceptor(timeout time.Duration,
+zrpc/internal/serverinterceptors/timeoutinterceptor.go:43: go func() {
+zrpc/internal/serverinterceptors/timeoutinterceptor.go:53: resp, err = handler(ctx, req)
+zrpc/internal/serverinterceptors/timeoutinterceptor.go:64: case <-ctx.Done():
+FILE core/proc/shutdown.go SHA256=BDF17A73EECEE2C02CE7AB10DABC7551C83E2A922F58628686547A921CBBF49F
+core/proc/shutdown.go:42: func AddShutdownListener(fn func()) (waitForCalled func()) {
+core/proc/shutdown.go:48: func AddWrapUpListener(fn func()) (waitForCalled func()) {
+core/proc/shutdown.go:81: func gracefulStop(signals chan os.Signal, sig syscall.Signal) {
+core/proc/shutdown.go:105: func (lm *listenerManager) addListener(fn func()) (waitForCalled func()) {

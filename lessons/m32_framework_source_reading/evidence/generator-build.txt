@@ -1,0 +1,46 @@
+protoc-36.2-win64.zip SHA256=F0C128DC0D8492ECEECE83BB459A4C0E316764B929FFBF1AA416357FD644EDD3
+.local/bin/protoc-gen-go.exe: go1.27.0
+	path	google.golang.org/protobuf/cmd/protoc-gen-go
+	mod	google.golang.org/protobuf	v1.36.12	h1:pJOKDDOyeXErUroCihFAd5LQuwXBSpVnKGrj5o/fwxc=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	DefaultGODEBUG=containermaxprocs=0,cryptocustomrand=1,decoratemappings=0,gotestjsonbuildtext=1,httpcookiemaxnum=0,multipathtcp=0,randseednop=0,rsa1024min=0,tlsmlkem=0,tlssecpmlkem=0,tlssha1=1,tracebacklabels=0,updatemaxprocs=0,urlmaxqueryparams=0,urlstrictcolons=0,x509rsacrt=0,x509sha256skid=0,x509sslcertoverrideplatform=0,x509usepolicies=0
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=windows
+	build	GOAMD64=v1
+.local/bin/protoc-gen-go-grpc.exe: go1.27.0
+	path	google.golang.org/grpc/cmd/protoc-gen-go-grpc
+	mod	google.golang.org/grpc/cmd/protoc-gen-go-grpc	v1.6.2	h1:rgSNvqscFZ1JgV/4wH5GOsZFSFkR2Eua9As3KIr2LlM=
+	dep	google.golang.org/protobuf	v1.36.11	h1:fV6ZwhNocDyBLK0dj+fg8ektcVegBBuEolpbTQyBNVE=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	DefaultGODEBUG=cryptocustomrand=1,tlssecpmlkem=0,tracebacklabels=0,urlstrictcolons=0,x509sslcertoverrideplatform=0
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=windows
+	build	GOAMD64=v1
+.local/bin/protoc-gen-go-http.exe: go1.27.0
+	path	github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v3
+	mod	github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v3	v3.0.0-20260626125723-668db92c2c00	h1:rYDnZOxc9RSNLuodBNLfTe1odrEG8K1s9paiw1IHJdg=
+	dep	google.golang.org/genproto/googleapis/api	v0.0.0-20260511170946-3700d4141b60	h1:3WsB1FAbiRIf2tOxscWKs3pQBD9he1NsrnbhMuWfekc=
+	dep	google.golang.org/protobuf	v1.36.11	h1:fV6ZwhNocDyBLK0dj+fg8ektcVegBBuEolpbTQyBNVE=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	DefaultGODEBUG=cryptocustomrand=1,tlssecpmlkem=0,tracebacklabels=0,urlstrictcolons=0,x509sslcertoverrideplatform=0
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=windows
+	build	GOAMD64=v1

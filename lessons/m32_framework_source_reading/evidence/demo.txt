@@ -1,0 +1,160 @@
+E01 generated HTTP/gRPC → real Kratos → usecase → repository
+2026/10/12 04:19:53 INFO [gRPC] server listening addr=127.0.0.1:4018
+001 [E01-grpc] client.enter operation=/course.inventory.v1.Inventory/Reserve
+2026/10/12 04:19:53 INFO [HTTP] server listening addr=127.0.0.1:4017
+002 [E01-grpc] server.enter operation=/course.inventory.v1.Inventory/Reserve
+003 [E01-grpc] usecase.enter tenant=m32
+004 [E01-grpc] repository.commit
+005 [E01-grpc] server.exit code=200 reason=
+006 [E01-grpc] client.exit error=false
+007 [E01-http] client.enter operation=/course.inventory.v1.Inventory/Reserve
+008 [E01-http] server.enter operation=/course.inventory.v1.Inventory/Reserve
+009 [E01-http] usecase.enter tenant=m32
+010 [E01-http] repository.commit
+011 [E01-http] server.exit code=200 reason=
+012 [E01-http] client.exit error=false
+013 [inspect] client.enter operation=/course.inventory.v1.Inventory/Inspect
+014 [inspect] server.enter operation=/course.inventory.v1.Inventory/Inspect
+015 [inspect] server.exit code=200 reason=
+016 [inspect] client.exit error=false
+E02 business error / explicit recovery / panic does not rollback
+017 [E02-stock-grpc] client.enter operation=/course.inventory.v1.Inventory/Reserve
+018 [E02-stock-grpc] server.enter operation=/course.inventory.v1.Inventory/Reserve
+019 [E02-stock-grpc] usecase.enter tenant=m32
+020 [E02-stock-grpc] server.exit code=412 reason=STOCK_INSUFFICIENT
+021 [E02-stock-grpc] client.exit error=true
+022 [E02-stock-http] client.enter operation=/course.inventory.v1.Inventory/Reserve
+023 [E02-stock-http] server.enter operation=/course.inventory.v1.Inventory/Reserve
+024 [E02-stock-http] usecase.enter tenant=m32
+025 [E02-stock-http] server.exit code=412 reason=STOCK_INSUFFICIENT
+026 [E02-stock-http] client.exit error=true
+027 [E02-input] client.enter operation=/course.inventory.v1.Inventory/Reserve
+028 [E02-input] server.enter operation=/course.inventory.v1.Inventory/Reserve
+029 [E02-input] usecase.enter tenant=m32
+030 [E02-input] server.exit code=400 reason=INPUT
+031 [E02-input] client.exit error=true
+032 [E02-missing] client.enter operation=/course.inventory.v1.Inventory/Reserve
+033 [E02-missing] server.enter operation=/course.inventory.v1.Inventory/Reserve
+034 [E02-missing] usecase.enter tenant=m32
+035 [E02-missing] server.exit code=404 reason=SKU_NOT_FOUND
+036 [E02-missing] client.exit error=true
+037 [E02-auth] client.enter operation=/course.inventory.v1.Inventory/Reserve
+038 [E02-auth] server.enter operation=/course.inventory.v1.Inventory/Reserve
+039 [E02-auth] server.exit code=401 reason=AUTH
+040 [E02-auth] client.exit error=true
+041 [E02-panic-before] client.enter operation=/course.inventory.v1.Inventory/Reserve
+042 [E02-panic-before] server.enter operation=/course.inventory.v1.Inventory/Reserve
+043 [E02-panic-before] usecase.enter tenant=m32
+044 [E02-panic-before] server.exit code=500 reason=UNKNOWN
+045 [E02-panic-before] client.exit error=true
+046 [E02-panic-http] client.enter operation=/course.inventory.v1.Inventory/Reserve
+047 [E02-panic-http] server.enter operation=/course.inventory.v1.Inventory/Reserve
+048 [E02-panic-http] usecase.enter tenant=m32
+049 [E02-panic-http] server.exit code=500 reason=UNKNOWN
+050 [E02-panic-http] client.exit error=true
+051 [inspect] client.enter operation=/course.inventory.v1.Inventory/Inspect
+052 [inspect] server.enter operation=/course.inventory.v1.Inventory/Inspect
+053 [inspect] server.exit code=200 reason=
+054 [inspect] client.exit error=false
+055 [E02-panic-after] client.enter operation=/course.inventory.v1.Inventory/Reserve
+056 [E02-panic-after] server.enter operation=/course.inventory.v1.Inventory/Reserve
+057 [E02-panic-after] usecase.enter tenant=m32
+058 [E02-panic-after] repository.commit
+059 [E02-panic-after] server.exit code=500 reason=UNKNOWN
+060 [E02-panic-after] client.exit error=true
+061 [inspect] client.enter operation=/course.inventory.v1.Inventory/Inspect
+062 [inspect] server.enter operation=/course.inventory.v1.Inventory/Inspect
+063 [inspect] server.exit code=200 reason=
+064 [inspect] client.exit error=false
+065 [E02] ASSERT shortage=FailedPrecondition/412 typed-detail=true panic-before-writes=0 panic-after-writes=1 stock=16
+E03 lost context: client deadline first, server commit after gate release
+066 [E03-lost] client.enter operation=/course.inventory.v1.Inventory/Reserve
+067 [E03-lost] server.enter operation=/course.inventory.v1.Inventory/Reserve
+068 [E03-lost] usecase.enter tenant=m32
+069 [E03-lost] wait.lost-context tenant=
+070 [E03-lost] client.exit error=true
+071 [E03-lost] repository.commit
+072 [E03-lost] usecase.cleanup
+073 [E03-lost] server.exit code=200 reason=
+074 [E03-lost] ASSERT client=DeadlineExceeded actual-writes=1 tenant-lost=true
+075 [inspect] client.enter operation=/course.inventory.v1.Inventory/Inspect
+076 [inspect] server.enter operation=/course.inventory.v1.Inventory/Inspect
+077 [inspect] server.exit code=200 reason=
+078 [inspect] client.exit error=false
+E04 propagate context: cancel / server timeout gRPC and HTTP
+079 [E04-cancel] client.enter operation=/course.inventory.v1.Inventory/Reserve
+080 [E04-cancel] server.enter operation=/course.inventory.v1.Inventory/Reserve
+081 [E04-cancel] usecase.enter tenant=m32
+082 [E04-cancel] wait.request-context
+083 [E04-cancel] client.exit error=true
+084 [E04-cancel] cancel.before-commit
+085 [E04-cancel] usecase.cleanup
+086 [E04-cancel] server.exit code=499 reason=
+087 [E04-cancel] ASSERT writes=0 actual-business-Done=true
+088 [E04-grpc-timeout] client.enter operation=/course.inventory.v1.Inventory/Reserve
+089 [E04-grpc-timeout] server.enter operation=/course.inventory.v1.Inventory/Reserve
+090 [E04-grpc-timeout] usecase.enter tenant=m32
+091 [E04-grpc-timeout] wait.request-context
+092 [E04-grpc-timeout] cancel.before-commit
+093 [E04-grpc-timeout] usecase.cleanup
+094 [E04-grpc-timeout] server.exit code=504 reason=
+095 [E04-grpc-timeout] client.exit error=true
+096 [E04-grpc-timeout] ASSERT writes=0 actual-business-Done=true
+097 [E04-http-timeout] client.enter operation=/course.inventory.v1.Inventory/Reserve
+098 [E04-http-timeout] server.enter operation=/course.inventory.v1.Inventory/Reserve
+099 [E04-http-timeout] usecase.enter tenant=m32
+100 [E04-http-timeout] wait.request-context
+101 [E04-http-timeout] cancel.before-commit
+102 [E04-http-timeout] usecase.cleanup
+103 [E04-http-timeout] server.exit code=504 reason=
+104 [E04-http-timeout] client.exit error=true
+105 [E04-http-timeout] ASSERT writes=0 actual-business-Done=true
+106 [inspect] client.enter operation=/course.inventory.v1.Inventory/Inspect
+107 [inspect] server.enter operation=/course.inventory.v1.Inventory/Inspect
+108 [inspect] server.exit code=200 reason=
+109 [inspect] client.exit error=false
+E05 committed response lost / explicit retry is another stock deduction
+110 [E05-committed] client.enter operation=/course.inventory.v1.Inventory/Reserve
+111 [E05-committed] server.enter operation=/course.inventory.v1.Inventory/Reserve
+112 [E05-committed] usecase.enter tenant=m32
+113 [E05-committed] repository.commit
+114 [E05-committed] wait.after-commit
+115 [E05-committed] client.exit error=true
+116 [E05-committed] cancel.after-commit
+117 [E05-committed] usecase.cleanup
+118 [E05-committed] server.exit code=504 reason=
+119 [E05-committed] client.enter operation=/course.inventory.v1.Inventory/Reserve
+120 [E05-committed] server.enter operation=/course.inventory.v1.Inventory/Reserve
+121 [E05-committed] usecase.enter tenant=m32
+122 [E05-committed] repository.commit
+123 [E05-committed] server.exit code=200 reason=
+124 [E05-committed] client.exit error=false
+125 [E05-committed] ASSERT timeout-did-not-rollback=true explicit-retry-writes=2 stock=10
+126 [inspect] client.enter operation=/course.inventory.v1.Inventory/Inspect
+127 [inspect] server.enter operation=/course.inventory.v1.Inventory/Inspect
+128 [inspect] server.exit code=200 reason=
+129 [inspect] client.exit error=false
+E06 retained M31 bidi stream: CloseSend → two replies → EOF
+130 [E06] ASSERT messages=2 stock=10 final=EOF
+131 [root] beforeStop.sealed-and-canceled
+2026/10/12 04:19:54 INFO [HTTP] server stopping
+2026/10/12 04:19:54 INFO [gRPC] server stopping
+132 [root] App.Run.return
+133 [root] repository.closed
+134 [root] Close.joined-and-closed
+E07 Stop notification / forced HTTP close / active handler final defer
+2026/10/12 04:19:54 INFO [HTTP] server listening addr=127.0.0.1:4023
+2026/10/12 04:19:54 INFO [gRPC] server listening addr=127.0.0.1:4024
+001 [root] beforeStop.sealed-and-canceled
+002 [E07] OBSERVE App.Stop.result=nil close-caller.Done=false handler.active=1
+2026/10/12 04:19:54 INFO [HTTP] server stopping
+2026/10/12 04:19:54 INFO [gRPC] server stopping
+2026/10/12 04:19:54 WARN [HTTP] server couldn't stop gracefully in time, doing force stop
+003 [root] App.Run.return
+004 [E07] OBSERVE App.Run.Done=true transport.Start.Done=true TCP.closed=true handler.Done=false repo.closed=false
+005 [root] beforeStop.sealed-and-canceled
+006 [tail] handler.defer.released
+007 [root] repository.closed
+008 [root] Close.joined-and-closed
+009 [E07] ASSERT caller.Done=true handler.Done=true active=0 repository.closed=true all-owned-tasks-joined=true
+PASS stock=10 lost_ctx_writes=1 propagated_writes=0 committed_and_retry_writes=2 stream_messages=2 handlers_joined=true connections_closed=true
