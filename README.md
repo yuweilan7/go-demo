@@ -2,6 +2,8 @@
 
 一个通过“阅读注释 + 运行代码 + 对比输出”学习 Go 的示例项目。
 
+面向熟练 Java 工程师的 Go 后端课程规划已放在 [learning_prompts/README.md](learning_prompts/README.md)：M00–M39 共 40 份可独立复制的 prompt，包含真实中间件实验、必要硬依赖与并行生成批次。当前交付的是 prompt，课程代码会在执行各模块时创建。
+
 ## 环境要求
 
 - Go 1.27 或更高版本
