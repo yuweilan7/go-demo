@@ -1,0 +1,15 @@
+首次独立测试命令（工具返回，以下仅保存失败片段，不是完整stdout）：
+工作目录 C:/Users/Lenovo/.codex/worktrees/go-course-m16/go-demo/lessons/m16_timers_shutdown
+go test -v -count=1 -timeout=60s ./...
+退出码 1
+
+=== RUN   TestShutdownPaths/timeout
+    lesson_test.go:175: 取消原因丢失: {ID:A Price:0 Err:context canceled}
+--- FAIL: TestShutdownPaths (0.03s)
+    --- FAIL: TestShutdownPaths/timeout (0.03s)
+FAIL
+FAIL go-demo/lessons/m16_timers_shutdown 6.153s
+
+修复：断言不再把运行中A的ctx.Err()取消类型，和未开始B的context.Cause()触发原因混同。
+A应为context.Canceled，B保留drain的DeadlineExceeded，ShutdownReport.Err仍保留超时主因。
+没有通过改业务输出/吞错误让测试通过。最终普通和race测试日志见test.txt/test-race.txt。

@@ -1,0 +1,28 @@
+M16 Go go1.27.0 ：Timer / task Result / 服务 Done 分别归属
+E01 Stop=true/false Reset(stopped/active)=false/true C.cap(timer/ticker)=0/0 AfterFunc.C=nil:true Stop=false Reset=false callbacks=2 Stop不join=true 慢接收tick跨度=40ms
+E02 Stop-only worker 未退出=true；fixture Reset 救援后已 join；ctx 修复已 join
+E03 overlap received=2 started=2 skipped=0 errors=0
+E03 serial received=2 started=2 skipped=0 errors=0
+E03 skip received=2 started=1 skipped=1 errors=0
+E04 real HTTP A/B total=14300分 ledger=map[A:12500 B:1800] fullRejected=true closedRejected=true Result等待取消=true 提前关client拒绝=true
+  1 → 入口 stopped
+  2 → 生产者 cancel 通知
+  3 → 生产者 joined
+  4 → 队列 closed，选择 drain
+  5 → worker joined
+  6 → worker 之后 client closed
+  HTTP资源 accepted/closed=2/2 activeHandlers=0 serviceDone=true
+E05 idle rows=0 unknownAtDeadline=[] active/queued=0/0 joined=true/true clientClosed=true repeatSame=true drainErr=<nil>
+E05 running rows=2 unknownAtDeadline=[] active/queued=0/0 joined=true/true clientClosed=true repeatSame=true drainErr=<nil>
+E05 full rows=2 unknownAtDeadline=[] active/queued=0/0 joined=true/true clientClosed=true repeatSame=true drainErr=<nil>
+E05 timeout rows=2 unknownAtDeadline=[A B] active/queued=1/1 joined=true/true clientClosed=true repeatSame=true drainErr=正常 drain: 等待 pool worker join: context deadline exceeded
+E05 canceled-budget rows=2 unknownAtDeadline=[A B] active/queued=1/1 joined=true/true clientClosed=true repeatSame=true drainErr=正常预算等待生产者: context canceled
+正常 drain: 等待 pool worker join: context canceled
+E05 panic rows=2 unknownAtDeadline=[] active/queued=0/0 joined=true/true clientClosed=true repeatSame=true drainErr=<nil>
+  任务终态 order=A err=任务 panic: 订单扫描配置错误
+  任务终态 order=B err=任务 panic: 订单扫描配置错误
+E06 父ctx取消 → Ticket已终态 → pool仍未joined → owner.Close+Wait 才结束
+E07 real HTTP deadline unknownAtDeadline=[A B] finalTicket成功合计=0分 最终查询ledger=map[A:12500] accepted/closed=1/1 handlers=0
+  order=A amount=0 err=Post "http://127.0.0.1:9213/orders?id=A": 正常 drain: 等待 pool worker join: context deadline exceeded
+  order=B amount=0 err=正常 drain: 等待 pool worker join: context deadline exceeded
+M16 SELF VERIFIED：实验与资源收尾完成；主 agent 独立验收另行记录

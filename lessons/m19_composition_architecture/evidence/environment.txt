@@ -1,0 +1,37 @@
+2026-10-12 03:39:51 +08:00
+5929af4af6d8a599362bdbb20e2d2d3cfa2cf6ba
+go version go1.27.0 windows/amd64
+go1.27.0
+auto
+D:\Go
+C:\Users\Lenovo\go
+https://goproxy.cn,direct
+windows
+amd64
+C:\Users\Lenovo\.codex\worktrees\go-course-m19\go-demo\lessons\m19_composition_architecture\go.mod
+
+1
+gcc
+g++
+{
+	"Path": "github.com/gin-gonic/gin",
+	"Version": "v1.12.0",
+	"Time": "2026-02-28T10:10:09Z",
+	"Dir": "C:\\Users\\Lenovo\\go\\pkg\\mod\\github.com\\gin-gonic\\gin@v1.12.0",
+	"GoMod": "C:\\Users\\Lenovo\\go\\pkg\\mod\\cache\\download\\github.com\\gin-gonic\\gin\\@v\\v1.12.0.mod",
+	"GoVersion": "1.25.0",
+	"Sum": "h1:b3YAbrZtnf8N//yjKeU2+MQsh2mY5htkZidOM7O0wG8=",
+	"GoModSum": "h1:VxccKfsSllpKshkBWgVgRniFFAzFb9csfngsqANjnLc="
+}
+{
+  "name": "WinLibs",
+  "tag": "16.2.0posix-14.0.0-ucrt-r2",
+  "gcc": "16.2.0",
+  "mingw_w64": "14.0.0",
+  "sha256": "d5dbafc4a170e762ca6143151ec918fb9e2c72736fb14cd704abebc6bdd5276a",
+  "source": "https://github.com/brechtsanders/winlibs_mingw/releases/download/16.2.0posix-14.0.0-ucrt-r2/winlibs-x86_64-posix-seh-gcc-16.2.0-mingw-w64ucrt-14.0.0-r2.zip",
+  "cc": "D:\\IdeaProject\\go-demo\\.local\\toolchains\\winlibs-16.2.0posix-14.0.0-ucrt-r2\\mingw64\\bin\\gcc.exe",
+  "cxx": "D:\\IdeaProject\\go-demo\\.local\\toolchains\\winlibs-16.2.0posix-14.0.0-ucrt-r2\\mingw64\\bin\\g++.exe",
+  "bin_dir": "D:\\IdeaProject\\go-demo\\.local\\toolchains\\winlibs-16.2.0posix-14.0.0-ucrt-r2\\mingw64\\bin",
+  "scope": "process-local environment only; no global PATH or go env changes"
+}

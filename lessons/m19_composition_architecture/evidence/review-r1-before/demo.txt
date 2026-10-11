@@ -1,0 +1,72 @@
+effective_config={"listen":"127.0.0.1:0","version":"m19-composition-v1","request_timeout_ms":250,"storage":"process-memory"}
+E01 显式装配/真实 HTTP/幂等与错误返回
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+  version=m19-composition-v1 duplicate_requests=9 order_id=1 rows=1 conflict=409 invalid=422 auth=401
+  PASS
+E02 typed nil/尚未 Start/构造断言修复
+  typed_nil_interface!=nil=true bad_call=panic root_reject=true early=ErrNotReady fixed_rows=1
+  PASS
+E03 包全局 client 串线/每 App 作用域修复
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+  global_bad=true request_to=A rows_A=0 rows_B=1
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+  global_bad=false request_to=A rows_A=1 rows_B=0
+  PASS
+E04 中途构造失败/资源关闭/错误原因同时保留
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+  real_listener=closed repository=closed errors.Is(construction)=true errors.Is(cleanup)=true
+  PASS
+E05 真实请求取消/写入前屏障/独立清理预算
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+  gate=entered client_result=context.Canceled root_shutdown=joined cancelled_rows=0 repository=closed
+  PASS
+E06 Serve Result 已可读/Done 尚未完成
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /version                  --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func2 (2 handlers)
+[GIN-debug] POST   /api/orders               --> go-demo/lessons/m19_composition_architecture/internal/api.NewRouter.func4 (3 handlers)
+  serve_result=nil final_done=false close_owner_returned=false repository=ready
+  PASS
+E07 init 偷绑端口/配置读取过早
+  initbad.bound_before_main=true observed_version="before-main" main_version="main-configured"
+initbad.owner.closed=true
+  PASS

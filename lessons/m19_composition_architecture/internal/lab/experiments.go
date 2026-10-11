@@ -1,0 +1,479 @@
+package lab
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"sync"
+	"time"
+
+	"go-demo/lessons/m19_composition_architecture/internal/app"
+	"go-demo/lessons/m19_composition_architecture/internal/config"
+	"go-demo/lessons/m19_composition_architecture/internal/memory"
+	"go-demo/lessons/m19_composition_architecture/internal/order"
+)
+
+const GoodBody = `{"sku":"sku-m17","qty":1}`
+
+var ErrInjected = errors.New("synthetic construction failure after acquiring listener")
+
+// Run 由 cmd/demo 调用，顺序执行七段完整反例/修复，不给 learner 留未解析 exercise。
+// 每段独占对象和 loopback 动态端口；任何失败立即返回，具体函数的 defer 完成资源回收。
+func Run(cfg config.Config, out io.Writer) error {
+	safe, _ := json.Marshal(cfg.Safe())
+	fmt.Fprintf(out, "effective_config=%s\n", safe)
+	for _, step := range []struct {
+		name string
+		run  func() error
+	}{
+		{"E01 显式装配/真实 HTTP/幂等与错误返回", func() error { return Protocol(cfg, out) }},
+		{"E02 typed nil/尚未 Start/构造断言修复", func() error { return Construction(out) }},
+		{"E03 包全局 client 串线/每 App 作用域修复", func() error { return GlobalScope(cfg, out) }},
+		{"E04 中途构造失败/资源关闭/错误原因同时保留", func() error { return PartialFailure(cfg, out) }},
+		{"E05 真实请求取消/写入前屏障/独立清理预算", func() error { return Cancellation(cfg, out) }},
+		{"E06 Serve Result 已可读/Done 尚未完成", func() error { return ResultBeforeDone(cfg, out) }},
+		{"E07 init 偷绑端口/配置读取过早", func() error { return InitFault(out) }},
+	} {
+		fmt.Fprintln(out, step.name)
+		if err := step.run(); err != nil {
+			return fmt.Errorf("%s: %w", step.name, err)
+		}
+		fmt.Fprintln(out, "  PASS")
+	}
+	return nil
+}
+
+// Protocol 把 root 构造的 service 交给真实 Gin 请求链。主 goroutine 同步读响应；
+// 八个客户端 worker 只各发一次请求，WaitGroup 是它们的 join owner，不用 sleep 猜结束。
+func Protocol(cfg config.Config, out io.Writer) (err error) {
+	a, err := app.New(cfg)
+	if err != nil {
+		return err
+	}
+	c := NewClient()
+	defer func() { err = Cleanup(a, c, err) }()
+	if err := a.Start(); err != nil {
+		return err
+	}
+	version, err := c.Call(context.Background(), a.URL()+"/version", http.MethodGet, "", "", "")
+	if err != nil {
+		return err
+	}
+	var public config.Public
+	if err := json.Unmarshal(version.Body, &public); err != nil {
+		return err
+	}
+	if version.Status != 200 || public.Version != cfg.Version || strings.Contains(string(version.Body), cfg.Token) {
+		return errors.New("version/config exposure invariant failed")
+	}
+	first, err := c.Call(context.Background(), a.URL()+"/api/orders", http.MethodPost, cfg.Token, "same", GoodBody)
+	if err != nil {
+		return err
+	}
+	if err := RequireReply(first, 201, "OK", true); err != nil {
+		return err
+	}
+	var wg sync.WaitGroup
+	results := make(chan Reply, 8)
+	failures := make(chan error, 8)
+	for range 8 {
+		wg.Add(1)
+		go func() {
+			defer wg.Done() // worker 的 body 在 Call 退出前关闭，随后才允许 owner 的 Wait 完成。
+			reply, callErr := c.Call(context.Background(), a.URL()+"/api/orders", http.MethodPost, cfg.Token, "same", GoodBody)
+			if callErr != nil {
+				failures <- callErr
+				return
+			}
+			results <- reply
+		}()
+	}
+	wg.Wait()
+	close(results)
+	close(failures)
+	for failure := range failures {
+		err = errors.Join(err, failure)
+	}
+	if err != nil {
+		return err
+	}
+	for reply := range results {
+		if err := RequireReply(reply, 201, "OK", true); err != nil {
+			return err
+		}
+		if reply.Envelope.OrderID != first.Envelope.OrderID {
+			return errors.New("duplicate changed order id")
+		}
+	}
+	for _, check := range []struct {
+		token, key, body string
+		status           int
+		code             string
+	}{
+		{cfg.Token, "same", `{"sku":"sku-m17","qty":2}`, 409, "CONFLICT"},
+		{cfg.Token, "invalid", `{"sku":"sku-m17","qty":-1}`, 422, "ORDER_INVALID"},
+		{cfg.Token, "unknown", `{"sku":"sku-m17","qty":1,"role":"admin"}`, 400, "INPUT"},
+		{"", "no-auth", GoodBody, 401, "AUTH"},
+	} {
+		reply, err := c.Call(context.Background(), a.URL()+"/api/orders", http.MethodPost, check.token, check.key, check.body)
+		if err != nil {
+			return err
+		}
+		if err := RequireReply(reply, check.status, check.code, false); err != nil {
+			return err
+		}
+	}
+	rows := a.Repository().Snapshot()
+	if len(rows) != 1 || rows[0].Owner != "alice" || rows[0].SKU != "sku-m17" || rows[0].Qty != 1 {
+		return fmt.Errorf("wrong effect: %+v", rows)
+	}
+	fmt.Fprintf(out, "  version=%s duplicate_requests=9 order_id=%d rows=1 conflict=409 invalid=422 auth=401\n", public.Version, first.Envelope.OrderID)
+	return nil
+}
+
+// ObservePanic 只用于同步的显式反例；recover 在 action 所在 goroutine 的 defer 中。
+// 捕获后 Construction 从调用点继续，但危险 action 内被 panic 中断的语句不会恢复。
+func ObservePanic(action func()) (value any) {
+	defer func() { value = recover() }()
+	action()
+	return nil
+}
+
+// Construction 对照 M04 的接口二元值：nil 指针进入接口后有动态类型，因此 !=nil。
+// 同时展示非 nil 并不代表 ready；修复分别位于 root 的具体检查与显式 Start。
+func Construction(out io.Writer) error {
+	var pointer *memory.Repository
+	var contract order.Repository = pointer
+	unsafe, err := order.NewService(contract)
+	if err != nil || contract == nil {
+		return errors.New("typed nil setup did not match interface rule")
+	}
+	panicValue := ObservePanic(func() {
+		_, _ = unsafe.Create(context.Background(), order.Request{Owner: "alice", Key: "typednil", SKU: "sku-m17", Qty: 1})
+	})
+	if panicValue == nil {
+		return errors.New("unsafe typed nil call unexpectedly succeeded")
+	}
+	if _, err := app.WireService(pointer); err == nil {
+		return errors.New("root accepted nil concrete pointer")
+	}
+	r := memory.New(nil)
+	defer r.Close()
+	early, _ := order.NewService(r)
+	_, earlyErr := early.Create(context.Background(), order.Request{Owner: "alice", Key: "early", SKU: "sku-m17", Qty: 1})
+	if !errors.Is(earlyErr, order.ErrNotReady) || len(r.Snapshot()) != 0 {
+		return errors.New("early lifecycle was not rejected")
+	}
+	if _, err := app.WireService(r); !errors.Is(err, order.ErrNotReady) {
+		return errors.New("root accepted new resource")
+	}
+	if err := r.Start(); err != nil {
+		return err
+	}
+	fixed, err := app.WireService(r)
+	if err != nil {
+		return err
+	}
+	if _, err := fixed.Create(context.Background(), order.Request{Owner: "alice", Key: "fixed", SKU: "sku-m17", Qty: 1}); err != nil {
+		return err
+	}
+	fmt.Fprintln(out, "  typed_nil_interface!=nil=true bad_call=panic root_reject=true early=ErrNotReady fixed_rows=1")
+	return nil
+}
+
+// GlobalScope 连续创建两个实际 App。危险路径使用加锁的全局 client，稳定证明语义串线；
+// 修复路径创建两个正常 App，同样从 A 的 HTTP 路由请求，仓储仅 A 增加一行。
+func GlobalScope(cfg config.Config, out io.Writer) (err error) {
+	defer ResetLegacy()
+	for _, bad := range []bool{true, false} {
+		var apps []*app.App
+		c := NewClient()
+		// 小范围闭包让这一轮资源在下一轮开始前完全 Close，不积累四个 listener。
+		roundErr := func() (err error) {
+			defer func() {
+				c.Close()
+				for i := len(apps) - 1; i >= 0; i-- {
+					err = Cleanup(apps[i], nil, err)
+				}
+			}()
+			for range 2 {
+				r := memory.New(nil)
+				f := app.Factories{OpenRepository: func() (*memory.Repository, error) { return r, nil }}
+				if bad {
+					f.Router = LegacyRouter(r)
+				}
+				a, err := app.Build(cfg, f)
+				if err != nil {
+					return err
+				}
+				apps = append(apps, a)
+				if err := a.Start(); err != nil {
+					return err
+				}
+			}
+			reply, err := c.Call(context.Background(), apps[0].URL()+"/api/orders", http.MethodPost, cfg.Token, "scope", GoodBody)
+			if err != nil {
+				return err
+			}
+			if err := RequireReply(reply, 201, "OK", true); err != nil {
+				return err
+			}
+			left, right := len(apps[0].Repository().Snapshot()), len(apps[1].Repository().Snapshot())
+			if bad && (left != 0 || right != 1) {
+				return errors.New("global mismatch did not reproduce")
+			}
+			if !bad && (left != 1 || right != 0) {
+				return errors.New("explicit graph did not isolate")
+			}
+			fmt.Fprintf(out, "  global_bad=%t request_to=A rows_A=%d rows_B=%d\n", bad, left, right)
+			return nil
+		}()
+		if roundErr != nil {
+			return roundErr
+		}
+	}
+	return nil
+}
+
+// PartialFailure 在 Listen factory 中取得真实 TCP listener 再返回注入错误。
+// Build 的回滚必须关闭 listener 和已 ready 仓储；错误链保留构造原因+清理原因。
+func PartialFailure(cfg config.Config, out io.Writer) error {
+	r := memory.New(nil)
+	var listener net.Listener
+	constructed, err := app.Build(cfg, app.Factories{
+		OpenRepository: func() (*memory.Repository, error) { return r, nil },
+		Listen: func(address string) (net.Listener, error) {
+			l, listenErr := net.Listen("tcp", address)
+			listener = l
+			if listenErr != nil {
+				return l, listenErr
+			}
+			return l, ErrInjected
+		},
+		AfterRepositoryClose: func() error { return memory.ErrCleanup },
+	})
+	if listener != nil {
+		defer listener.Close()
+	}
+	defer r.Close() // 实验断言失败也接管对象，避免反例留下资源。
+	if constructed != nil || !errors.Is(err, ErrInjected) || !errors.Is(err, memory.ErrCleanup) {
+		return fmt.Errorf("lost failure reason: %v", err)
+	}
+	if r.State() != "closed" {
+		return errors.New("constructor did not close repository")
+	}
+	if listener == nil {
+		return errors.New("real listener was not acquired")
+	}
+	if tcp, ok := listener.(*net.TCPListener); ok {
+		_ = tcp.SetDeadline(time.Now().Add(500 * time.Millisecond))
+	} // 回归时未关闭也只等待到 deadline。
+	_, acceptErr := listener.Accept()
+	if !errors.Is(acceptErr, net.ErrClosed) {
+		return fmt.Errorf("listener not closed: %v", acceptErr)
+	}
+	fmt.Fprintln(out, "  real_listener=closed repository=closed errors.Is(construction)=true errors.Is(cleanup)=true")
+	return nil
+}
+
+// Cancellation 等 Entered 确認 HTTP handler 已进入仓储写入前，再发 cancel。
+// result 是客户端 Call 返回的网络结果；Cancel 后仍要接收 result，最后独立预算 Close App。
+func Cancellation(cfg config.Config, out io.Writer) (err error) {
+	g := memory.NewGate()
+	defer g.Release()
+	r := memory.New(g)
+	a, err := app.Build(cfg, app.Factories{OpenRepository: func() (*memory.Repository, error) { return r, nil }})
+	if err != nil {
+		return err
+	}
+	c := NewClient()
+	defer func() { err = Cleanup(a, c, err) }()
+	if err := a.Start(); err != nil {
+		return err
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	result := make(chan error, 1)
+	finished := make(chan struct{})
+	go func() {
+		defer close(finished)
+		_, callErr := c.Call(ctx, a.URL()+"/api/orders", http.MethodPost, cfg.Token, "cancel", GoodBody)
+		result <- callErr
+	}()
+	// 从创建 goroutine 起就注册退出路径，观察超时也先 cancel/release，再用新预算等 finished。
+	defer func() {
+		cancel()
+		g.Release()
+		join, stop := context.WithTimeout(context.Background(), 3*time.Second)
+		defer stop()
+		err = errors.Join(err, Wait(join, finished))
+	}()
+	observe, stop := context.WithTimeout(context.Background(), 2*time.Second)
+	defer stop()
+	if err := Wait(observe, g.Entered); err != nil {
+		return err
+	}
+	cancel()
+	select {
+	case callErr := <-result:
+		if !errors.Is(callErr, context.Canceled) {
+			return fmt.Errorf("client cancellation: %w", callErr)
+		}
+	case <-observe.Done():
+		return observe.Err()
+	}
+	// 客户端已返回仍不作为 handler 完成证明。App Close 通知 root，并 Shutdown 等 handler，
+	// 在 gate 尚未释放时完成：只能由 ctx 取消路径退出，从而确定没有 append。
+	clean, release := context.WithTimeout(context.Background(), 3*time.Second)
+	closeErr := a.Close(clean)
+	release()
+	if closeErr != nil {
+		return closeErr
+	}
+	if r.State() != "closed" || len(r.Snapshot()) != 0 {
+		return errors.New("cancelled precommit had effect or unclosed resource")
+	}
+	fmt.Fprintln(out, "  gate=entered client_result=context.Canceled root_shutdown=joined cancelled_rows=0 repository=closed")
+	return nil
+}
+
+// ResultBeforeDone 通过真正的 Server.Shutdown 让 Serve 返回。FinalizeServe 卡在 tail 屏障，
+// Serve Result 已可读，而App.Done/Close调用尚未完成；放开tail才关闭仓储。
+// Close caller也有独立Result/Done：其结果发送后还要cancel和尾部清理，owner必须再次join。
+func ResultBeforeDone(cfg config.Config, out io.Writer) (err error) {
+	tail := make(chan struct{})
+	var once sync.Once
+	open := func() { once.Do(func() { close(tail) }) }
+	a, err := app.Build(cfg, app.Factories{FinalizeServe: func() { <-tail }})
+	if err != nil {
+		return err
+	}
+	defer func() { open(); err = Cleanup(a, nil, err) }()
+	if err := a.Start(); err != nil {
+		return err
+	}
+	callerTail := make(chan struct{})
+	callerCleanupEntered := make(chan struct{})
+	var callerOnce sync.Once
+	openCaller := func() { callerOnce.Do(func() { close(callerTail) }) }
+	caller := StartCloseCaller(a.Close, func() error {
+		close(callerCleanupEntered) // 这时caller已cancel自己的预算，但这段尾部清理尚未退出。
+		<-callerTail
+		return nil
+	})
+	// 从创建caller起立即登记最终join。正常return、错误、观察超时都先开两道门，
+	// 再用新的预算等caller.Done；只在Done后读取含尾部清理的最终原因。
+	defer func() {
+		open()
+		openCaller()
+		ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+		defer cancel()
+		err = caller.Join(ctx, err)
+		if err == nil {
+			fmt.Fprintln(out, "  close_caller_done=true owner_joined=true repository=closed")
+		}
+	}()
+	observe, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	select {
+	case serveErr := <-a.Result():
+		if serveErr != nil {
+			return serveErr
+		}
+	case <-observe.Done():
+		return observe.Err()
+	}
+	select {
+	case <-a.Done():
+		return errors.New("Done prematurely closed")
+	default:
+	}
+	select {
+	case <-caller.Result():
+		return errors.New("Close prematurely returned")
+	default:
+	}
+	if a.Repository().State() != "ready" {
+		return errors.New("repository closed before final join")
+	}
+	fmt.Fprintln(out, "  serve_result=nil final_done=false close_owner_returned=false repository=ready")
+	open()
+	if err := Wait(observe, a.Done()); err != nil {
+		return err
+	}
+	select {
+	case closeErr := <-caller.Result():
+		if closeErr != nil {
+			return closeErr
+		}
+	case <-observe.Done():
+		return observe.Err()
+	}
+	if err := Wait(observe, callerCleanupEntered); err != nil {
+		return err
+	}
+	select {
+	case <-caller.Done():
+		return errors.New("Close caller Done closed before tail cleanup")
+	default:
+	}
+	fmt.Fprintln(out, "  close_caller_result=nil close_caller_done=false tail_cleanup=waiting")
+	return nil // 最终defer放开callerTail、实际join caller.Done；预览结果从未充当最终完成。
+}
+
+// InitFault 构建和运行独立坏例子，因此正常进程不会因 import 启动隐藏 listener。
+// 子进程是本函数拥有的资源，Run 会执行 Wait；20秒预算，退出后移除本模块 .local 产物。
+func InitFault(out io.Writer) (err error) {
+	if err := os.MkdirAll(".local", 0700); err != nil {
+		return err
+	}
+	dir, err := os.MkdirTemp(".local", "initbad-")
+	if err != nil {
+		return err
+	}
+	abs, err := filepath.Abs(dir)
+	if err != nil {
+		return err
+	}
+	base, err := filepath.Abs(".local")
+	if err != nil {
+		return err
+	}
+	if !strings.HasPrefix(abs, base+string(os.PathSeparator)) {
+		return errors.New("temp path escaped module .local")
+	}
+	defer func() { err = errors.Join(err, os.RemoveAll(abs)) }()
+	binary := filepath.Join(abs, "initbad.exe")
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	build := exec.CommandContext(ctx, "go", "build", "-o", binary, "./cmd/initbad")
+	build.Dir = "." // cmd/demo 必须从 module 运行，README 的 go -C 正是这个契约。
+	if output, err := build.CombinedOutput(); err != nil {
+		return fmt.Errorf("build initbad: %w: %s", err, output)
+	}
+	child := exec.CommandContext(ctx, binary)
+	for _, value := range os.Environ() {
+		if !strings.HasPrefix(value, "M19_VERSION=") {
+			child.Env = append(child.Env, value)
+		}
+	}
+	child.Env = append(child.Env, "M19_VERSION=before-main")
+	output, err := child.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("run initbad: %w: %s", err, output)
+	}
+	text := string(output)
+	if !strings.Contains(text, `observed_version="before-main" main_version="main-configured"`) || !strings.Contains(text, "initbad.owner.closed=true") {
+		return fmt.Errorf("init order/cleanup evidence missing: %s", text)
+	}
+	fmt.Fprint(out, "  ", text)
+	return nil
+}

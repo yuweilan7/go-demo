@@ -1,0 +1,17 @@
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/context.go:188:func (c *Context) Next() {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:74:		Handlers: group.combineHandlers(handlers),
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:86:func (group *RouterGroup) handle(httpMethod, relativePath string, handlers HandlersChain) IRoutes {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:88:	handlers = group.combineHandlers(handlers)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:89:	group.engine.addRoute(httpMethod, absolutePath, handlers)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:111:func (group *RouterGroup) POST(relativePath string, handlers ...HandlerFunc) IRoutes {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/routergroup.go:241:func (group *RouterGroup) combineHandlers(handlers HandlersChain) HandlersChain {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:357:	engine.allNoRoute = engine.combineHandlers(engine.noRoute)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:361:	engine.allNoMethod = engine.combineHandlers(engine.noMethod)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:364:func (engine *Engine) addRoute(method, path string, handlers HandlersChain) {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:377:	root.addRoute(path, handlers)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:662:func (engine *Engine) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:667:	c := engine.pool.Get().(*Context)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:674:	engine.pool.Put(c)
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:690:func (engine *Engine) handleHTTPRequest(c *Context) {
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:722:			c.Next()
+C:/Users/Lenovo/go/pkg/mod/github.com/gin-gonic/gin@v1.12.0/gin.go:766:	c.Next()

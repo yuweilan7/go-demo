@@ -1,0 +1,57 @@
+=== RUN   TestTimerContracts
+--- PASS: TestTimerContracts (0.05s)
+=== RUN   TestRealTickerDropsTicks
+--- PASS: TestRealTickerDropsTicks (0.00s)
+=== RUN   TestStopOnlyAndRepair
+--- PASS: TestStopOnlyAndRepair (0.00s)
+=== RUN   TestPolicies
+=== RUN   TestPolicies/overlap
+=== RUN   TestPolicies/serial
+=== RUN   TestPolicies/skip
+--- PASS: TestPolicies (0.00s)
+    --- PASS: TestPolicies/overlap (0.00s)
+    --- PASS: TestPolicies/serial (0.00s)
+    --- PASS: TestPolicies/skip (0.00s)
+=== RUN   TestScheduledPanic
+--- PASS: TestScheduledPanic (0.00s)
+=== RUN   TestOverlapHasBoundedCapacity
+--- PASS: TestOverlapHasBoundedCapacity (0.00s)
+=== RUN   TestRealPeriodicProducer
+--- PASS: TestRealPeriodicProducer (0.00s)
+=== RUN   TestCoreRealHTTPDrain
+--- PASS: TestCoreRealHTTPDrain (0.00s)
+=== RUN   TestShutdownPaths
+=== RUN   TestShutdownPaths/idle
+=== RUN   TestShutdownPaths/running
+=== RUN   TestShutdownPaths/full
+=== RUN   TestShutdownPaths/timeout
+=== RUN   TestShutdownPaths/canceled-budget
+=== RUN   TestShutdownPaths/panic
+--- PASS: TestShutdownPaths (0.03s)
+    --- PASS: TestShutdownPaths/idle (0.00s)
+    --- PASS: TestShutdownPaths/running (0.00s)
+    --- PASS: TestShutdownPaths/full (0.00s)
+    --- PASS: TestShutdownPaths/timeout (0.03s)
+    --- PASS: TestShutdownPaths/canceled-budget (0.00s)
+    --- PASS: TestShutdownPaths/panic (0.00s)
+=== RUN   TestParentCancelIsNotJoin
+--- PASS: TestParentCancelIsNotJoin (0.00s)
+=== RUN   TestConcurrentShutdown
+--- PASS: TestConcurrentShutdown (0.00s)
+=== RUN   TestCleanupErrorsArePreserved
+--- PASS: TestCleanupErrorsArePreserved (0.00s)
+=== RUN   TestIndependentJoinError
+--- PASS: TestIndependentJoinError (2.00s)
+=== RUN   TestRealHTTPAbortUnknown
+--- PASS: TestRealHTTPAbortUnknown (0.03s)
+=== RUN   TestHTTPRejectsBadBusinessBody
+=== RUN   TestHTTPRejectsBadBusinessBody/{"id":"B","amount":12500}
+=== RUN   TestHTTPRejectsBadBusinessBody/{"id":"A","amount":0}
+=== RUN   TestHTTPRejectsBadBusinessBody/{"id":"A","amount":12500}{"extra":1}
+--- PASS: TestHTTPRejectsBadBusinessBody (0.00s)
+    --- PASS: TestHTTPRejectsBadBusinessBody/{"id":"B","amount":12500} (0.00s)
+    --- PASS: TestHTTPRejectsBadBusinessBody/{"id":"A","amount":0} (0.00s)
+    --- PASS: TestHTTPRejectsBadBusinessBody/{"id":"A","amount":12500}{"extra":1} (0.00s)
+PASS
+ok  	go-demo/lessons/m16_timers_shutdown	8.883s
+?   	go-demo/lessons/m16_timers_shutdown/cmd/demo	[no test files]

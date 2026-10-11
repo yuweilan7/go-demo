@@ -1,0 +1,92 @@
+lessons/m19_composition_architecture/internal\order\service.go:18:type Request struct {
+lessons/m19_composition_architecture/internal\order\service.go:24:type Record struct {
+lessons/m19_composition_architecture/internal\order\service.go:34:type Repository interface {
+lessons/m19_composition_architecture/internal\order\service.go:38:type Service struct{ repo Repository }
+lessons/m19_composition_architecture/internal\order\service.go:43:func NewService(repo Repository) (*Service, error) {
+lessons/m19_composition_architecture/internal\order\service.go:52:func (s *Service) Create(ctx context.Context, req Request) (Record, error) {
+lessons/m19_composition_architecture/cmd\initbad\main.go:13:func run() (err error) {
+lessons/m19_composition_architecture/cmd\initbad\main.go:27:func main() {
+lessons/m19_composition_architecture/cmd\demo\main.go:14:func run() error {
+lessons/m19_composition_architecture/cmd\demo\main.go:25:func main() {
+lessons/m19_composition_architecture/internal\api\router.go:17:type Envelope struct {
+lessons/m19_composition_architecture/internal\api\router.go:25:type State struct {
+lessons/m19_composition_architecture/internal\api\router.go:34:func NewRouter(service *order.Service, cfg config.Config) (*gin.Engine, error) {
+lessons/m19_composition_architecture/internal\api\router.go:67:func create(c *gin.Context, service *order.Service) {
+lessons/m19_composition_architecture/internal\api\router.go:119:func rejectInput(c *gin.Context, err error) {
+lessons/m19_composition_architecture/internal\api\router.go:130:func reject(c *gin.Context, status int, code string) {
+lessons/m19_composition_architecture/internal\app\app.go:20:var _ order.Repository = (*memory.Repository)(nil) // 编译只证明方法集匹配，nil 值仍不可注入。
+lessons/m19_composition_architecture/internal\app\app.go:25:type Factories struct {
+lessons/m19_composition_architecture/internal\app\app.go:33:type App struct {
+lessons/m19_composition_architecture/internal\app\app.go:52:func WireService(r *memory.Repository) (*order.Service, error) {
+lessons/m19_composition_architecture/internal\app\app.go:63:func New(cfg config.Config) (*App, error) { return Build(cfg, Factories{}) }
+lessons/m19_composition_architecture/internal\app\app.go:68:func Build(cfg config.Config, f Factories) (a *App, err error) {
+lessons/m19_composition_architecture/internal\app\app.go:139:func (a *App) Start() error {
+lessons/m19_composition_architecture/internal\app\app.go:172:func (a *App) Close(ctx context.Context) error {
+lessons/m19_composition_architecture/internal\app\app.go:211:func (a *App) closeRepository() error {
+lessons/m19_composition_architecture/internal\app\app.go:218:func (a *App) URL() string                    { return "http://" + a.listener.Addr().String() }
+lessons/m19_composition_architecture/internal\app\app.go:219:func (a *App) Repository() *memory.Repository { return a.repo }
+lessons/m19_composition_architecture/internal\app\app.go:220:func (a *App) Result() <-chan error           { return a.result }
+lessons/m19_composition_architecture/internal\app\app.go:221:func (a *App) Done() <-chan struct{}          { return a.done }
+lessons/m19_composition_architecture/internal\app\app.go:222:func (a *App) ActiveHandlers() int            { return a.handlers.Active() }
+lessons/m19_composition_architecture/internal\badinit\init.go:17:func init() {
+lessons/m19_composition_architecture/internal\badinit\init.go:23:func Close() error {
+lessons/m19_composition_architecture/internal\lab\client.go:18:type Client struct {
+lessons/m19_composition_architecture/internal\lab\client.go:23:func NewClient() *Client {
+lessons/m19_composition_architecture/internal\lab\client.go:27:func (c *Client) Close() { c.Transport.CloseIdleConnections() }
+lessons/m19_composition_architecture/internal\lab\client.go:29:type Reply struct {
+lessons/m19_composition_architecture/internal\lab\client.go:37:func (c *Client) Call(ctx context.Context, url, method, token, key, body string) (reply Reply, err error) {
+lessons/m19_composition_architecture/internal\lab\client.go:70:func Cleanup(a *app.App, c *Client, cause error) error {
+lessons/m19_composition_architecture/internal\lab\client.go:84:func RequireReply(r Reply, status int, code string, committed bool) error {
+lessons/m19_composition_architecture/internal\lab\client.go:92:func Wait(ctx context.Context, ch <-chan struct{}) error {
+lessons/m19_composition_architecture/internal\memory\repository.go:14:type Gate struct {
+lessons/m19_composition_architecture/internal\memory\repository.go:21:func NewGate() *Gate     { return &Gate{Entered: make(chan struct{}), release: make(chan struct{})} }
+lessons/m19_composition_architecture/internal\memory\repository.go:22:func (g *Gate) Release() { g.releaseOnce.Do(func() { close(g.release) }) }
+lessons/m19_composition_architecture/internal\memory\repository.go:24:type Repository struct {
+lessons/m19_composition_architecture/internal\memory\repository.go:34:func New(gate *Gate) *Repository {
+lessons/m19_composition_architecture/internal\memory\repository.go:40:func (r *Repository) Start() error {
+lessons/m19_composition_architecture/internal\memory\repository.go:51:func (r *Repository) Ready() error {
+lessons/m19_composition_architecture/internal\memory\repository.go:65:func (r *Repository) Commit(ctx context.Context, req order.Request) (order.Record, error) {
+lessons/m19_composition_architecture/internal\memory\repository.go:102:func (r *Repository) Close() error  { r.mu.Lock(); defer r.mu.Unlock(); r.state = "closed"; return nil }
+lessons/m19_composition_architecture/internal\memory\repository.go:103:func (r *Repository) State() string { r.mu.Lock(); defer r.mu.Unlock(); return r.state }
+lessons/m19_composition_architecture/internal\memory\repository.go:106:func (r *Repository) Snapshot() []order.Record {
+lessons/m19_composition_architecture/internal\app\app_test.go:18:func valid() config.Config {
+lessons/m19_composition_architecture/internal\app\app_test.go:23:func closeOwner(t *testing.T, a *app.App) {
+lessons/m19_composition_architecture/internal\app\app_test.go:34:func TestConcreteBoundary(t *testing.T) {
+lessons/m19_composition_architecture/internal\app\app_test.go:58:func TestPartialConstructionRealListener(t *testing.T) {
+lessons/m19_composition_architecture/internal\app\app_test.go:99:func TestPartialRepositoryAndValidation(t *testing.T) {
+lessons/m19_composition_architecture/internal\app\app_test.go:117:func TestResultNotDoneAndCloseRetry(t *testing.T) {
+lessons/m19_composition_architecture/internal\app\app_test.go:167:func TestNeverStartedClose(t *testing.T) {
+lessons/m19_composition_architecture/internal\app\app_test.go:183:func TestConstructionPanicUnwindsResources(t *testing.T) {
+lessons/m19_composition_architecture/internal\app\app_test.go:201:func TestForcedCloseStillJoinsRealHandler(t *testing.T) {
+lessons/m19_composition_architecture/internal\config\config.go:20:type Config struct {
+lessons/m19_composition_architecture/internal\config\config.go:27:type Public struct {
+lessons/m19_composition_architecture/internal\config\config.go:37:func Load(path string, lookup func(string) (string, bool)) (cfg Config, err error) {
+lessons/m19_composition_architecture/internal\config\config.go:94:func (c Config) Validate() error {
+lessons/m19_composition_architecture/internal\config\config.go:115:func (c Config) RequestTimeout() time.Duration { return time.Duration(c.RequestMS) * time.Millisecond }
+lessons/m19_composition_architecture/internal\config\config.go:116:func (c Config) Safe() Public {
+lessons/m19_composition_architecture/internal\lab\experiments.go:30:func Run(cfg config.Config, out io.Writer) error {
+lessons/m19_composition_architecture/internal\lab\experiments.go:56:func Protocol(cfg config.Config, out io.Writer) (err error) {
+lessons/m19_composition_architecture/internal\lab\experiments.go:144:func ObservePanic(action func()) (value any) {
+lessons/m19_composition_architecture/internal\lab\experiments.go:152:func Construction(out io.Writer) error {
+lessons/m19_composition_architecture/internal\lab\experiments.go:194:func GlobalScope(cfg config.Config, out io.Writer) (err error) {
+lessons/m19_composition_architecture/internal\lab\experiments.go:248:func PartialFailure(cfg config.Config, out io.Writer) error {
+lessons/m19_composition_architecture/internal\lab\experiments.go:289:func Cancellation(cfg config.Config, out io.Writer) (err error) {
+lessons/m19_composition_architecture/internal\lab\experiments.go:350:func ResultBeforeDone(cfg config.Config, out io.Writer) (err error) {
+lessons/m19_composition_architecture/internal\lab\experiments.go:414:func InitFault(out io.Writer) (err error) {
+lessons/m19_composition_architecture/internal\app\handlers.go:12:type handlerOwner struct {
+lessons/m19_composition_architecture/internal\app\handlers.go:22:func newHandlerOwner(next http.Handler) *handlerOwner {
+lessons/m19_composition_architecture/internal\app\handlers.go:30:func (h *handlerOwner) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+lessons/m19_composition_architecture/internal\app\handlers.go:54:func (h *handlerOwner) Stop() { h.mu.Lock(); h.stopping = true; h.mu.Unlock() }
+lessons/m19_composition_architecture/internal\app\handlers.go:58:func (h *handlerOwner) Wait(ctx context.Context) error {
+lessons/m19_composition_architecture/internal\app\handlers.go:69:func (h *handlerOwner) Active() int { h.mu.Lock(); defer h.mu.Unlock(); return h.active }
+lessons/m19_composition_architecture/internal\lab\lab_test.go:20:func valid() config.Config {
+lessons/m19_composition_architecture/internal\lab\lab_test.go:26:func TestRealHTTPContract(t *testing.T) {
+lessons/m19_composition_architecture/internal\lab\lab_test.go:115:func TestRequestBudgetReachedAtActualRepository(t *testing.T) {
+lessons/m19_composition_architecture/internal\lab\lab_test.go:153:func TestGlobalAndCancellation(t *testing.T) {
+lessons/m19_composition_architecture/internal\lab\lab_test.go:168:func TestCancelledObserverStillOwned(t *testing.T) {
+lessons/m19_composition_architecture/internal\lab\legacy.go:20:type globalRepository struct{}
+lessons/m19_composition_architecture/internal\lab\legacy.go:24:func (globalRepository) Commit(ctx context.Context, req order.Request) (order.Record, error) {
+lessons/m19_composition_architecture/internal\lab\legacy.go:36:func LegacyRouter(repo *memory.Repository) func(*order.Service, config.Config) (http.Handler, error) {
+lessons/m19_composition_architecture/internal\lab\legacy.go:48:func ResetLegacy() { legacyMu.Lock(); legacyClient = nil; legacyMu.Unlock() }
+lessons/m19_composition_architecture/internal\config\config_test.go:15:func TestConfigurationSources(t *testing.T) {
+lessons/m19_composition_architecture/internal\config\config_test.go:39:func TestConfigurationRejectsBeforeResources(t *testing.T) {

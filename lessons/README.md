@@ -2,7 +2,7 @@
 
 面向熟练 Java 工程师、Go 初学者。每课有详细中文 README、透彻注释的源码、直接交付的反例/修复、真实可运行实验与必要独立断言，不布置额外 exercise。共同规范见 [TEACHING_STYLE](../learning_prompts/TEACHING_STYLE.md)。
 
-第 0、1 层共 26 课已完成主 agent 独立验收并汇总；剩余 13 课仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
+第 0～2 层共 31 课已完成主 agent 独立验收并汇总；剩余 8 课仍按 [DAG](../learning_prompts/DAG.md) 的严格整层屏障实施。下面“待交付”的链接指向模块 prompt，尚不表示代码或真实实验已完成。验收范围见 [ACCEPTANCE](ACCEPTANCE.md)。
 
 各课是独立 Go module；根 `go test ./...` 不覆盖它们。先读该课 README 的参数/资源/实际范围，再执行例如：
 
@@ -54,11 +54,11 @@ go -C lessons/m17_net_http vet ./...
 
 | 模块 | 内容 | 硬前置 | 交付状态 |
 | --- | --- | --- | --- |
-| [M16](../learning_prompts/M16_timers_shutdown.md) | Timer/Ticker、后台任务与优雅停机 | M15 | 待交付 |
-| [M19](../learning_prompts/M19_composition_architecture.md) | 构造、配置与复杂仓库的真实业务调用链 | M04、M18 | 待交付 |
-| [M21](../learning_prompts/M21_transactions_defer_panic.md) | 事务、defer、panic 和 Commit 错误的实库交叉实验 | M20、M05、M06、M07 | 待交付 |
-| [M24](../learning_prompts/M24_schema_queries_migrations.md) | 表结构、索引、分页与安全演进 | M20 | 待交付 |
-| [M27](../learning_prompts/M27_redis_leases_limits.md) | Redis 锁、租约、fencing 与限流 | M25、M13、M20 | 待交付 |
+| [M16](m16_timers_shutdown/README.md) | Timer/Ticker、后台任务与优雅停机 | M15 | 已验收 |
+| [M19](m19_composition_architecture/README.md) | 构造、配置与复杂仓库的真实业务调用链 | M04、M18 | 已验收 |
+| [M21](m21_transactions_defer_panic/README.md) | 事务、defer、panic 和 Commit 错误的实库交叉实验 | M20、M05、M06、M07 | 已验收 |
+| [M24](m24_schema_queries_migrations/README.md) | 表结构、索引、分页与安全演进 | M20 | 已验收 |
+| [M27](m27_redis_leases_limits/README.md) | Redis 锁、租约、fencing 与限流 | M25、M13、M20 | 已验收 |
 
 ## 第 3 层
 
