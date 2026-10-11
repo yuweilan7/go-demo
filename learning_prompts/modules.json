@@ -2,7 +2,7 @@
   "schema_version": 1,
   "planned_on": "2026-10-12",
   "delivery_type": "course_generation_prompts",
-  "course_execution_state": "running",
+  "course_execution_state": "completed",
   "baseline": {
     "repository": "go-demo",
     "local_go": "go1.27.0 windows/amd64",

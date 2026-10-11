@@ -135,4 +135,4 @@ flowchart TD
 4. 当前层全部验收通过后才启动下一层；各节点独立实施，完成后在它自己的 STATUS 记录结果。
 5. 资源不足/硬前置未完成时保持其关键验收未完成，其他已就绪节点继续。
 
-依赖图已按全部 39 个节点、42 条边做拓扑校验，无环，共 19 个根节点、7 层。当前实施状态以 .local/course-orchestrator/state.json 为准；JSON 的 wave 表示规划层。
+依赖图已按全部 39 个节点、42 条边做拓扑校验，无环，共 19 个根节点、7 层。本轮全部 39 课已按严格整层屏障完成主验收，交付与实际范围见 [课程目录](../lessons/README.md) 和 [主验收记录](../lessons/ACCEPTANCE.md)。最终执行、提交和监测收尾状态以 .local/course-orchestrator/state.json 为准；JSON 的 wave 表示规划层。

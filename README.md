@@ -2,7 +2,7 @@
 
 一个通过“阅读注释 + 运行代码 + 对比输出”学习 Go 的示例项目。
 
-面向熟练 Java 工程师的 Go 后端课程位于 [learning_prompts/README.md](learning_prompts/README.md)：M00–M35、M37–M39 共 39 份完整 prompt，包含真实中间件实验、必要硬依赖与并行批次。每课按 [中文教学与源码注释规范](learning_prompts/TEACHING_STYLE.md) 交付文档、详细注释代码和可运行实验。课程正在按 [分层实施与监测约定](learning_prompts/ORCHESTRATION.md) 执行，整层验收后汇总并统一提交。第 0～5 层共 38 课已验收，课程入口见 [lessons/README.md](lessons/README.md)，实际验证范围见 [lessons/ACCEPTANCE.md](lessons/ACCEPTANCE.md)。
+面向熟练 Java 工程师的 Go 后端课程位于 [learning_prompts/README.md](learning_prompts/README.md)：M00–M35、M37–M39 共 39 份完整 prompt，包含真实中间件实验、必要硬依赖与并行批次。每课按 [中文教学与源码注释规范](learning_prompts/TEACHING_STYLE.md) 交付文档、详细注释代码和可运行实验。课程已按 [分层实施与监测约定](learning_prompts/ORCHESTRATION.md) 完成第 0～6 层全部 **39 课主验收**，整层验收后汇总并统一提交。课程入口见 [lessons/README.md](lessons/README.md)，实际验证范围见 [lessons/ACCEPTANCE.md](lessons/ACCEPTANCE.md)。最后的 [M39](lessons/m39_takeover_code_review/README.md) 提供陌生代码接手、真实审查案例和最小修复的完整示范。
 
 ## 环境要求
 

@@ -2,6 +2,8 @@
 
 2026-10-12，用户授权主 agent 实施全部 39 个模块，使用每 5 分钟一次的本会话 heartbeat 监测，严格按 DAG 的拓扑层推进，并在每层全部验收后做一次整层提交。该执行约定优先于旧的自由跨层启动方式和模块自行提交建议。
 
+本轮第 0～6 层全部 39 个模块已完成主验收并汇总到主目录，交付入口见 [课程目录](../lessons/README.md)，独立实证和限制见 [主验收记录](../lessons/ACCEPTANCE.md)。本文保留实际执行、恢复和结束约定；最终提交 SHA、资源收尾及监测删除结果由下述本机权威状态记录，不能把课程执行者的 READY/PASS 当作终态。
+
 ## 当前任务与权威记录
 
 主工作目录：`D:/IdeaProject/go-demo`。主分支：`codex/go-learning-prompts`。课程内容读取 `modules.json` 和对应完整模块 prompt，中文教学与注释按 `TEACHING_STYLE.md`；基础设施按 `INFRASTRUCTURE.md`。
