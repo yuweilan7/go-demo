@@ -1,8 +1,8 @@
 # 课程主验收记录
 
-2026-10-12（Asia/Shanghai），第 0～3 层共 36 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个、第 3 层97个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
+2026-10-12（Asia/Shanghai），第 0～4 层共 37 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个、第 3 层97个、第 4 层19个模块文件全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
 
-当前真实交付为 **36/39**。后续 M37、M38、M39 尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证；综合业务、综合故障恢复和接手审查仍需分别交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
+当前真实交付为 **37/39**。后续 M38、M39 尚未验收。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证，M37 已将 Gin、GORM/MySQL、Redis、Kafka 与只读 gRPC 接成真实订单业务；综合故障恢复和接手审查仍需分别交付。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据。
 
 ## 第 0 层实际验收
 
@@ -64,7 +64,17 @@
 | [M30](m30_outbox_idempotency/README.md) | 真SQL+Kafka双写坏顺序、独占Produce ACK截断、原key恢复、outbox与持久inbox、重复事件、offset提前丢效果及精确修复group、v2/v1拒绝和受控对账。root两轮各6次真实独立进程强杀/9次恢复，最终订单/qty11、outbox9全部sent、inbox11、stock/projection99、effects11、broker12。返工补实际1062恢复出口的cleanup/UNKNOWN优先级，8辅助子项与两轮各2次真实1062通过；root明确enabled的全量race123.304s通过，默认SKIP不算实库。另以独立只读入口复查两份登记各5表/11topic/12group及offset为空，30个登记child PID不存在。 |
 | [M32](m32_framework_source_reading/README.md) | 真Kratos3.0.0 HTTP/gRPC生成链、具体仓储副作用，typed业务错误、commit前后panic、lost ctx晚写、正确ctx零写、已commit后同ID显式重试双写、真实双向流。forced HTTP Close/App.Run及两个Start完成仍有active handler1，尾部退出/idle后才关仓储；Stop.Result与最终Done分开。root run/5项race/vet/依赖通过；返工后独立执行生成/race成功及真实Go失败的环境三态恢复，共78项断言、15个测试PASS、6次预期配置失败、16运行文件hash不变。Kitex/go-zero只读锁定源码，未宣称运行。 |
 
-本层各模块均保留原失败与返工事实，普通/实库测试的SKIP界限、环境变量缺失/空串/非空三态、提交未知和清理失败不被成功归一化。有限应用owner的退出证据不扩为所有库内部goroutine已回收。M30只做单relay/单分区与SQL副作用；M32业务账本仍是本课进程内库存。已验机制仍需在M37真实综合链和M38故障矩阵中重新证明组合行为。
+本层各模块均保留原失败与返工事实，普通/实库测试的SKIP界限、环境变量缺失/空串/非空三态、提交未知和清理失败不被成功归一化。有限应用owner的退出证据不扩为所有库内部goroutine已回收。M30只做单relay/单分区与SQL副作用；M32业务账本仍是本课进程内库存。M37 的真实组合证据见下方第 4 层；M38 的综合故障矩阵仍须独立验收。
+
+## 第 4 层实际验收
+
+[M37](m37_order_backend_capstone/README.md) 使用唯一公开 `orderbackend` 业务库：真实 Gin 创建/查询订单，库存、订单与 outbox 同一 MySQL/GORM Tx，Kafka relay、持久 inbox/receipts、Redis 代际查询缓存，以及复用 M31 生成协议的真实只读库存 gRPC。主 agent 阅读全部19个冻结文件，并独立执行默认实库入口26.264s、显式启用实库的完整 race41.809s及 vet。race 中主链、取消构造、fresh client 借用恢复三项真实入口均执行通过，六项辅助测试另行验证；默认 SKIP 不作为实库证据。
+
+主链固定 SQL 事实为3单、总数量4、库存6、outbox/inbox/receipts各3、消费效果总计3；broker原始5条，前三条同Key/Value位于offset0/1/2，持久首次处理offset0且效果仍1，group next5。完整HTTP内容、同key载荷冲突、用户隔离、真实SQL已RECORDED而Redis仍PENDING的窗口、旧读回填坏例与代际修复、error/panic回滚、提交前后相同客户端超时但不同权威副作用均核对。提前退出曾实际产生意外第4单，原失败和固定3单断言保留；修复后真实Tx hook先观察取消再放门，handler和任务最终退出后才删数据/关池，主复验再次证明3单。
+
+为下一层提供的 `BorrowCacheKeys/Manifest.Validate/CleanupOwnedVia` 已做真实复验：旧App最终Done与client关闭/SQL0后fresh构造，原key仍为同一完整订单且追踪ID不同，命中既有PENDING缓存，继续消费后API为RECORDED、next1、效果1。未授权已有键拒绝且保留，借用者清理账本为空，原owner保持责任并借fresh连接精确清理。能力来源是可信创建者授权；名字校验不等于鉴权，也不是多个活跃写者的分布式锁。
+
+主 agent 另用独立只读入口读回本模块全部18次历史与主复验账本：各精确表、键、topic、group均不存在，offset为空、每次SQL关闭为0。原始 `go mod verify` 因 M31 本地 replace 的 `missing ziphash` 仍退出1，失败保留；实际消费的两份生成文件及M31 go.mod/go.sum与已验前置完全一致，实际module图108个远端依赖独立校验通过。ACK后观察错误保留UNKNOWN的源码分类已核对；跨OS强杀、ACK/sent与消费Commit/offset间恢复、Commit通信截断、多节点耐久性仍留M38，未提前声称完成。
 
 ## 验证和资源边界
 
@@ -74,8 +84,8 @@
 
 取消通知、结果可读、handler 退出、清理完成和 owner join 分别核对。M07/M12/M17/M34 的失败路径曾有收尾缺口，已经返工或主修正并独立复验；没有用自然结束、自报 PASS、HTTP 200、编译成功或全进程 goroutine 数量替代验收。正常验证进程、故障子进程、课程独占 listener、HTTP/RPC Body/连接、任务和临时隧道已收尾。性能 profile/调试产物与原始无秘密诊断在忽略目录保留以便追查，不随课程源文件提交。
 
-基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，M21/M24/M27新增真实事务、表结构与Redis/SQL组合，M22/M23/M26/M30运行真实隔离/ORM/缓存/outbox链路。M19的进程内幂等不等于跨进程数据库唯一约束；M27的SQL唯一性实验仅固定载荷、同订单顺序重试，M30下游幂等只覆盖其同Tx SQL效果。前四层的有界协议与失败窗口证据不能外推到后续综合业务、跨服务幂等、云观测、生产SLA或长期稳定性。Kafka单副本确认、同进程文件Sync和当前SQL读回也不证明多节点容灾。
+基础语言/HTTP/RPC课的账本多数为独占内存或实际文件；M20/M25使用真实SQL/Redis，M28/M29使用真实broker，M21/M24/M27新增真实事务、表结构与Redis/SQL组合，M22/M23/M26/M30运行真实隔离/ORM/缓存/outbox链路，M37另行验证真实订单组合链。M19的进程内幂等不等于跨进程数据库唯一约束；M27的SQL唯一性实验仅固定载荷、同订单顺序重试，M30/M37下游幂等只覆盖各自同Tx SQL效果。现有有界协议与失败窗口证据不能外推到完整故障恢复、跨服务幂等、云观测、生产SLA或长期稳定性。Kafka单副本确认、同进程文件Sync和当前SQL读回也不证明多节点容灾。
 
 ## 后续层
 
-第 0～3 层均已验收。随后依次 M37、M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。
+第 0～4 层均已验收。随后依次 M38、M39。只有上一层全部主验收通过并整层提交后才派发下一层。总体终点是39课全部验收、层提交与实验资源收尾。
