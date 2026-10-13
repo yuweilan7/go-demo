@@ -1,0 +1,936 @@
+1. 序言
+Go 语言map不支持并发读写操作，否则会出现致命的错误导致程序直接终止（fatal error无法被defer+recover捕捉）
+
+但Go官方也为我们提供了一个并发安全的sync.Map，我们本节的 目的就是为了能顺利 画下 整个sync.Map的 地图，消除我们理解sync.Map实现原理的阻力
+2. Sync.Map介绍
+- 对于Go 内置结构map本身不支持并发读写的能力，而sync.Map是Go官方提供的一个并发安全的一个Map
+- 它本质是采用空间换时间的思想，使用两个map之间的互相配合(一个read map 和 一个dirty map)，来为我们提供一个拥有并发读写能力，并且权衡整体操作性能的hashTable结构
+- 打个栗子，read map和dirty map可以看作两台服务器，一台叫做小林(read map)，另一台叫做诸葛青(dirty map)，当请求访问sync.Map，我们会让请求 先在小林服务器上解决，如果无法解决，就需要依赖诸葛青作为最后的兜底(所以诸葛青会拥有全量的数据)
+为什么诸葛青会有全量的数据：因为最终的写数据是需要依赖诸葛青兜底的
+    对于小林服务器，我们可以最大限度去访问，无任何阻碍，而我们去访问诸葛青服务器的话，其内部做了最大限流(对应Go语言里面的加锁操作)，同一时间，只允许一个人访问，其他人只能排着队去访问诸葛青
+这一段话暗示着，访问read map不需要加锁，访问dirty map需要加锁
+并且诸葛青服务器和小林服务器之间拥有共享数据的机制（两个map相同的key对应同一块value内存），还拥有双向数据流转机制(后面会慢慢介绍，这里我们留一个引子)
+
+
+上面有提到"访问"这两个字，其实里面就蕴含着read map(小林服务器)和 dirty map(诸葛青服务器)责任划分，现在我们来将对sync.Map的操作划分成四种：读、写、删、更新（类似我们的CURD）
+
+上面的"访问"指的是
+1. 读取服务器的数据(读)
+2. 删除服务器的数据(删)
+3. 更新服务器的数据(更新)
+4. 写新的数据到服务器(写)
+对于读，删，更新三种操作，我们要尽量找小林里面解决，如果实在无法解决，再找诸葛青
+而对于写操作，直接找诸葛青就好了
+3. 操作Sync.Map
+3.1 写
+Store里面可以进行 写和更新两个操作
+m.Store("今天", "对，今天")
+3.2 读
+m.Load("今天")
+3.3 删
+m.Delete("今天")
+3.4 遍历
+f := func(key, value interface{}) bool {
+    return true
+}
+// 函数f return false的时候终止遍历
+m.Range(f)
+3.5 并发安全
+下面给出三个函数，分别对应读、删、写三种操作，可以自行测试一下是否是并发安全的
+package main
+
+import (
+    "sync"
+    "time"
+)
+
+var nums = 1000
+
+func main() {
+    m := &sync.Map{}
+
+    go func() {
+       Read(m)
+    }()
+
+    go func() {
+       Write(m)
+    }()
+    go func() {
+       Write(m)
+    }()
+    go func() {
+       Write(m)
+    }()
+    go func() {
+       Delete(m)
+    }()
+
+    time.Sleep(10 * time.Second)
+}
+
+func Read(m *sync.Map) {
+    for i := 0; i < nums; i++ {
+       go func(i int) {
+          m.Load(i)
+       }(i)
+    }
+}
+
+func Write(m *sync.Map) {
+    for i := 0; i < nums; i++ {
+       go func(i int) {
+          m.Store(i, i)
+       }(i)
+    }
+}
+
+func Delete(m *sync.Map) {
+    for i := 0; i < nums; i++ {
+       go func(i int) {
+          m.Delete(i)
+       }(i)
+    }
+}
+再提供一个map的例子，试试对map进行并发操作，哪些是安全的
+package main
+
+import "time"
+
+var nums = 1000
+
+func main() {
+    // 读、删、写三种操作组合，只有读读时允许并发的
+    m := make(map[int]int, nums)
+
+    go func() {
+       Read(m)
+    }()
+
+    go func() {
+       Write(m)
+    }()
+    go func() {
+       Delete(m)
+    }()
+
+    time.Sleep(10 * time.Second)
+}
+
+func Read(m map[int]int) {
+    for i := 0; i < nums; i++ {
+       go func(i int) {
+          _, _ = m[i]
+       }(i)
+    }
+}
+
+func Write(m map[int]int) {
+    for i := 0; i < nums; i++ {
+       go func(i int) {
+          m[i] = i
+       }(i)
+    }
+}
+
+func Delete(m map[int]int) {
+    for i := 0; i < nums; i++ {
+       go func(i int) {
+          delete(m, i)
+       }(i)
+    }
+}
+4. Sync.Map结构
+基于Go 1.17版本
+type Map struct {
+    // 互斥锁，保证dirty map 和 misses的并发安全
+    mu sync.Mutex
+
+    // 无锁化的read map（小林服务器）
+    read atomic.Value // readOnly
+
+    // 读写需要加锁的map（诸葛青服务器）
+    dirty map[interface{}]*entry
+    
+    // 记录有多少次读、删请求 找了诸葛青
+    misses int
+}
+
+type readOnly struct {
+    // read map 存放 k-v的实体
+    m map[interface{}]*entry
+    // 标识是否有 数据缺失，即dirty map里面有 read map中没有的key，就是amended为true
+    amended bool
+}
+- Sync.Map中一共有两个map，一个read map(小林)，一个ditry map(诸葛青)
+  - 操作read map无须加锁，可以通过原子性的CAS操作来访问
+CAS就是一个原子操作，能保证同一时间点，只有一个修改能成功
+  - 操作ditry map需要加锁才能访问
+- 一个misses字段记录有多少个"因为找小林没有解决，从而找了诸葛青进行兜底" 的请求 
+- read map被封装成readOnly 结构体，里面有一个amended字段来标识 诸葛青是否有小林没有的数据（是，就为true）
+
+5. 双向数据流转机制
+在上文，我们提到小林和诸葛青之间有一个双向数据流转机制，那么这个数据流转机制是啥？为什么需要它？什么时候触发？
+
+首先我简单说一下，双向数据流转机制就是指：
+1. 诸葛青把全量数据直接交给小林
+2. 小林Copy全量数据给诸葛青
+
+接下来让我们来共同探索吧~
+5.1 诸葛青——>小林
+我们知道小林(read map)可以为诸葛青尽量挡住 读请求的流量，但如果小林很多次没有挡住请求，让读请求访问到了诸葛青怎么办？
+
+这就代表了小林的责任削弱了，把压力给到了诸葛青，一旦诸葛青感受到压力超过了一个阈值，就会做出一个决定
+
+这个决定就是将诸葛青的数据，全部交给小林，这样诸葛青的压力就减少了(read map获得dirty map全量数据，将dirty map的值直接赋给read map)
+
+5.2 小林——> 诸葛青
+在什么情况下，小林会Copy数据给诸葛青呢？
+
+在上面的流程中，我们知道诸葛青——>小林，并且诸葛青重置为nil，在这之后，如果有新的写请求到来，我们需要初始化诸葛青服务器(初始化dirty map)
+这个初始化的过程也就是将read map里面的逻辑上存在的数据拷贝到dirty map(以O(N)的时间复杂度将数据拷贝一份给诸葛青)
+逻辑上存在：我们能从sync.Map中读出的数据
+逻辑上不存在：可能sync.Map中物理内存上有这一份数据，但我们无法读到
+
+
+5.3 疑问
+- 数据流转操作是不是有点多余？诸葛青把数据给小林，自己重置为nil；小林又把数据给诸葛青
+这是互相踢皮球吗？
+
+但事实上，这绝对不是踢皮球，我们来一步步分析：
+1. 诸葛青把数据全给小林，为什么自己要置为nil？
+如果诸葛青不重置为nil，就会出现诸葛青和小林 使用同一个底层map，这样就无法做到数据隔离的目的
+我们希望read map和dirty map依赖的是不同的map，但entry是可以共享的
+2. 诸葛青能不能拷贝一份全量数据给小林？
+不能，因为如果是写数据给小林的话，那么对于访问小林的操作就全都要加锁(读、删、写要互斥)，那么在诸葛青——>小林这个时期，整个sync.Map将处于报废的状态
+
+
+
+6. entry的状态
+在上面，我们已经讲了sync.Map的结构，这里还有一个非常重要的结构需要单独拿出来讲讲——entry
+
+我们都知道map是k-v(key，value)键值对的hashTable结构，而在sync.Map中，read map和dirty map各自的map结构对应的value都是一个entry结构，长这样
+// 这里先记住, expunged表示硬删除态
+var expunged = unsafe.Pointer(new(interface{}))
+
+type entry struct {
+    p unsafe.Pointer
+}
+对于entry，其实就是将一个p指针封装成了一个结构体，而我们重点就是要讲一下p的状态(后文也叫做entry的状态)
+
+p一共有三种状态，也就是三个值
+- nil：我们将nil称之为软删除态，代表数据逻辑上不存在了（物理上仍存在，小林和诸葛青都有这一份数据)
+- expunged: 特殊的一个指针值，把它称之为硬删除态(物理上诸葛青没有这份数据) 
+- 正常值: 一个正常的指针值，比如下面图 "一定"这个字符串的地址
+
+我们来分析一下nil状态和expunged状态的区别：
+- 两种状态都代表着逻辑删除状态，nil表示key-entry对物理内存仍然存在于read map和dirty map中
+逻辑删除：当我们访问这两种状态的key-entry对的时候，是访问不到的
+- expunged代表key-entry对物理内存只存在于read map中(也就是dirty map中没有)
+6.1 nil状态
+这里我们可能会想，entry不就是key对应value吗？不就指向真正的物理内存就可以了，为什么还需要一个nil和expunged状态
+
+这里我给大家分析为什么需要这两种状态，首先我们知道了read map是一个可以通过无锁的操作来帮助我们消耗请求 sync.Map整体的流量（这样就不用加锁啦，性能杠杠的）
+
+那我们如何让read map帮助我们消耗删除操作的流量呢？dirty map有着全量的数据，所以删除的话，常理来讲，我们肯定会从诸葛青里面拿走东西
+
+But！当数据同时存在read map和 dirty map中的时候，我们就可以想办法让read map来帮我们消耗删除流量，从而实现无锁删除，通过CAS操作将p的值变成nil，来标识 当前key逻辑上已经被删除了（但是物理上，小林 和 诸葛青仍然有这个数据）
+// 通过CAS操作，将p的值变成为nil来说明key已经被删除(逻辑删除)
+atomic.CompareAndSwapPointer(&e.p, p, nil)
+当这个entry对应的p变成nil后，我们再来看读，写情况
+读：p变成了nil，最后返回的value是nil(这个key-entry对被隐藏了，访问不到)
+写：因为key-entry对 仍然存在于read map 和 dirty map中，所以我们再次通过CAS操作，将nil改成对应value值，完成更新操作(无需加锁访问dirty map)
+
+其实nil状态的设计就是为了做到  "对同一个key先删后写的场景的优化"
+
+
+6.2 expunged状态
+那么expunged状态有何用处呢？
+
+我们回顾 小林——>诸葛青的流程，有提到小林只会将逻辑上存在的数据 Copy 给诸葛青，那么这里有一个问题：
+小林服务器中为nil的数据没有拷贝给诸葛青(因为逻辑上不存在)，那么下一次进行写的时候，我们如何判断是直接更新写到小林服务器，还是写到诸葛青服务器
+
+所以我们需要一个额外的状态来标识——"诸葛青和小林是否正在共享 这个逻辑删除的key-entry"
+6.3 小结
+不管是nil状态还是expunged状态，都代表逻辑上，key-entry从 sync.Map中已经删除了
+- nil状态：我们将其称之为软删除，但是read map和 dirty map中物理上仍有这个key-entry对，同时我们可以基于CAS操作来让read map消耗 对p为nil的key-entry 进行写的流量(优化对同一个key 先删后写的场景)
+- expunged状态：我们将其称之为硬删除，物理上dirty map中已经没有key-entry对，它能帮助我们标识出dirty map当前有没有这个逻辑删除的key-entry(如果标识dirty map没有，我们就需要访问dirty map)
+
+7. 源码
+源码这块就没画图了，我们重原理，轻源码。
+原理有疑惑，我们再找源码~
+7.1 Load（读）
+func (m *Map) Load(key interface{}) (value interface{}, ok bool) {
+    // 加载read map
+    read, _ := m.read.Load().(readOnly)
+    // 从read map中查询（无锁）
+    e, ok := read.m[key]
+    // 2. 如果 read 中没有，并且read 的数据不全，从 dirty 中获取
+    if !ok && read.amended {
+       // 加锁
+       m.mu.Lock()
+       // double-check：再次从 read 中获取，因为在加锁的过程中，可能有其他 goroutine 已经更新了 read
+       read, _ = m.read.Load().(readOnly)
+       e, ok = read.m[key]
+       // 如果 read 中没有，并且 read 的数据不全，从 dirty 中获取
+       if !ok && read.amended {
+          // 查询dirty map
+          e, ok = m.dirty[key]
+          // 因为这次查询从read map中没有命中，所以需要增加miss次数
+          // 累加miss，还有map晋升操作
+          m.missLocked()
+       }
+       m.mu.Unlock()
+    }
+    // 还是没有，返回 nil
+    if !ok {
+       return nil, false
+    }
+
+    // 找到了，从entry中加载 value 并返回
+    return e.load()
+}
+
+func (e *entry) load() (value interface{}, ok bool) {
+    p := atomic.LoadPointer(&e.p)
+    // 如果 p == nil || p == expunged，说明 entry 逻辑上已经被删除了，value返回nil
+    if p == nil || p == expunged {
+       return nil, false
+    }
+
+    // 返回对应value
+    return *(*interface{})(p), true
+}
+
+
+- 先查询read map，如果read map中有，直接返回entry对应的值
+- 如果read map中没有，并且数据有缺失，则需要加锁，进行一次double check
+- 然后再次查询read map，如果read map中还是没有，则需要访问dirty map
+- 因为使用了dirty map兜底，所以进入missLocked 流程
+  - 诸葛青的怒气++😡
+  - 如果怒气值达到了诸葛青的容忍上限，诸葛青就会将所有数据交给小林，然后诸葛青清空数据，怒气值也清零🥳
+  - 如果没有超过，诸葛青选择再次忍让😁
+- 解锁，返回结果
+missLocked
+// missLocked: 锁保护misses, 怒气值增加也要并发安全
+func (m *Map) missLocked() {
+    // 每当大家找小林无法解决，然后找诸葛青，诸葛青怒气值+1
+    m.misses++
+    // 判断诸葛青的怒气值是否达到了容忍的上限(上限是：诸葛青拥有的key-entry对数量)
+    // ps: 诸葛青拥有的越多，容忍的上限就越高!!!
+    if m.misses < len(m.dirty) {
+       return
+    }
+    // 诸葛青把所有的数据都交给小林
+    m.read.Store(readOnly{m: m.dirty})
+    // 诸葛青重置为nil
+    m.dirty = nil
+    // 诸葛青怒气值清零
+    m.misses = 0
+}
+7.2 Store（写）
+// Store操作(整合了我们讲的写和更新)
+func (m *Map) Store(key, value interface{}) {
+    // 加载read map(先找小林)
+    read, _ := m.read.Load().(readOnly)
+
+    // 如果 小林有这个数据吗，我们就用CAS来更新，避免加锁找诸葛青, 因为小林和诸葛青服务器之间同一份数据是共享的，在小林上面同一份数据的修改，诸葛青也能知道
+    if e, ok := read.m[key]; ok && e.tryStore(&value) {
+       return
+    }
+
+    // 加锁
+    m.mu.Lock()
+    // double-check
+    read, _ = m.read.Load().(readOnly)
+    // 再找一遍小林，小林有这份数据
+    if entry, ok := read.m[key]; ok {
+       // 如果存在于read map中
+       if entry.unexpungeLocked() {
+          // 为 expunged 态, 诸葛青还需要同步得到小林的这份数据
+          m.dirty[key] = entry
+       }
+       // 更新这一份数据（小林和诸葛青都能得到这一份更新）
+       entry.storeLocked(&value)
+    } else if doc, ok := m.dirty[key]; ok {
+       // 小林没有这份数据，所以直接找诸葛青更新
+       doc.storeLocked(&value)
+    } else {
+       // 诸葛青和小林都没有这份数据，所以判定这是一个"写"操作，一定要交给诸葛青
+       // 小林的数据是完整的（那么诸葛青可能为nil）
+       if !read.amended {
+          m.dirtyLocked()
+          // 将 amended 设置为 true，表示 read 中有数据缺失（因为这是写操作，等会要向dirty map中写一个新的entry）
+          m.read.Store(readOnly{m: read.m, amended: true})
+       }
+       // 将写数据，写到诸葛青服务器上
+       m.dirty[key] = newEntry(value)
+    }
+
+    // 解锁
+    m.mu.Unlock()
+}
+
+func (e *entry) tryStore(i *interface{}) bool {
+    // 来到这个函数，就说明小林物理内存上，有这一份数据
+    for {
+       // 加载p的状态
+       p := atomic.LoadPointer(&e.p)
+       // p为expunged, 诸葛青没有这份数据，说明要去找诸葛青， 返回false
+       if p == expunged {
+          return false
+       }
+
+       // p不为expunged, p为nil或者value，那么就可以在小林这里更新了, return true
+       if atomic.CompareAndSwapPointer(&e.p, p, unsafe.Pointer(i)) {
+          return true
+       }
+    }
+}
+
+
+func (e *entry) unexpungeLocked() (wasExpunged bool) {
+    // 如果当前p是 expunged状态，则更新成nil状态
+    return atomic.CompareAndSwapPointer(&e.p, expunged, nil)
+}
+1. 看一下read map中是否存在对应key-entry对，如果存在，则使用CAS操作来更新(减少锁的使用), return
+  - 要保证entry不为expunged，否则走下面流程
+2. 如果没有通过流程1完成，则加锁进行double check
+3. 如果发现key-entry对在read map中存在，直接覆盖更新entry的值
+  1. 如果发现entry是expunged态，在覆盖更新之前，需要在dirty map中补全对应key-entry对
+4. 流程3没通过，如果发现key-entry对在dirty map中存在，直接覆盖更新entry的值
+5. 流程4没通过，说明这次Store操作是写操作，直接往dirty map里面写入一个新的key-entry对
+  1. 在插入之前，还需要检查dirty map是否为nil，如果为nil，需要以O(N)的时间复杂度，遍历read map中的数据，并写入到新的dirty map中
+遍历期间不会将read map中所有的key-entry都写到dirty map中，而是筛选出非nil和非expunged态的entry，并且将nil态的entry更新为expunged(表示硬删除)
+dirtyLocked
+// dirtyLocked 如果dirty map为nil，那么从read map里面全量拷贝一份到dirty map里面
+// read -> dirty
+func (m *Map) dirtyLocked() {
+    if m.dirty != nil {
+       return
+    }
+    // fmt.Println("\n从read map里面全量拷贝一份到dirty map里面\n")
+    read, _ := m.read.Load().(readOnly)
+    // 分配一个新的 dirty map, 遍历read map, 将未删除的 key-entry对 拷贝到 dirty map中
+    m.dirty = make(map[interface{}]*entry, len(read.m))
+    for k, e := range read.m {
+       // 将 read map 中软删除 nil 态的 entry 更新为硬删除 expunged 态
+       if !e.tryExpungeLocked() {
+          // 没有被删除，直接添加到 dirty map
+          m.dirty[k] = e
+       }
+    }
+}
+- 检查如果发现dirty map为nil，需要先new 一个dirty map
+- 然后以O(N)的时间复杂度 将read map中的key-entry对（并且是非删除态的）写入到dirty map中
+- 将 read map 中软删除 nil 态的 entry 更新为硬删除 expunged 态
+7.3 Delete（删）
+func (m *Map) LoadAndDelete(key interface{}) (value interface{}, loaded bool) {
+    // 加载read map
+    read, _ := m.read.Load().(readOnly)
+    e, ok := read.m[key]
+    // 如果 read 中没有 并且数据有缺失，查看 dirty 中是否存在对应key
+    if !ok && read.amended {
+       m.mu.Lock()
+       // double check()
+       read, _ = m.read.Load().(readOnly)
+       e, ok = read.m[key]
+       if !ok && read.amended {
+          // 查询dirty map
+          e, ok = m.dirty[key]
+          // 从dirty map中物理删除
+          delete(m.dirty, key)
+          // 因为这次查询从read map中没有命中，所以需要增加miss次数
+          m.missLocked()
+       }
+       m.mu.Unlock()
+    }
+
+    // 小林有这份数据，我们进行逻辑删除
+    if ok {
+       return e.delete()
+    }
+    return nil, false
+}
+
+
+func (e *entry) delete() (value interface{}, ok bool) {
+    for {
+       // 加载状态
+       p := atomic.LoadPointer(&e.p)
+       // 已经是逻辑删除了，跳过
+       if p == nil || p == expunged {
+          return nil, false
+       }
+
+       // 软删除(将value 变成nil)
+       if atomic.CompareAndSwapPointer(&e.p, p, nil) {
+          return *(*interface{})(p), true
+       }
+    }
+}
+- 先查询key-entry是否在read map中，如果在read map中，直接删除结束流程
+  - 删除要注意的是，key-entry不会直接从read map中移出，而是将entry变成nil态（软删除态）
+- 如果 read map中没有对应key-entry并且数据有缺失，就加锁，访问dirty map，将key-entry尝试从dirty map中删除，并再次进入到missLocked流程
+  - 因为delete操作访问read map miss，所以需要执行missLocked流程，miss++，再看看dirty map是否需要提升到read map
+- 释放锁
+7.4 Range（遍历）
+func (m *Map) Range(f func(key, value interface{}) bool) {
+    // 加载read map
+    read, _ := m.read.Load().(readOnly)
+    // 如果 read map 数据缺失
+    if read.amended {
+       // 枷锁
+       m.mu.Lock()
+       // double check
+       read, _ = m.read.Load().(readOnly)
+       if read.amended {
+          // 将dirty map提升为read-only map
+          read = readOnly{m: m.dirty}
+          m.read.Store(read)
+          // 清空dirty map
+          m.dirty = nil
+          // 清空misses
+          m.misses = 0
+       }
+       // 解锁
+       m.mu.Unlock()
+    }
+    // 遍历read map
+    for k, e := range read.m {
+       // 无锁读取
+       v, ok := e.load()
+       if !ok {
+          continue
+       }
+       if !f(k, v) {
+          // 是否需要被熔断
+          break
+       }
+    }
+}
+- 如果read map中有数据缺失，则需要加锁，然后将dirty map提升到read map，清空dirty map、misses状态
+- 之后是无锁遍历read map
+8. 回顾与检测
+1. sync.Map的底层原理是什么？
+空间换时间、数据的动态流转、entry状态的设计
+- sync.Map采用 空间换取时间的取舍策略 以及 实时动态的数据流转策略，期望使用read map来尽量将读、更新、删除操作的流量用无锁化的操作挡下来，避免去加锁去访问拥有全量数据的dirty map
+- sync.Map对于k-v对里面的v，还设计了两种删除状态，一种是为nil的软删除态，一种是为expunged的硬删除态
+  - nil态可以拦截删除操作在read map这一层
+  - expunged态可以正确标识dirty map中有没有对应的逻辑删除的key-entry
+2. read map和dirty map之间的关联？
+- read 可以当做 dirty的保护层map，尽量用轻便的原子操作将流量拦截在read map层，防止加锁访问dirty
+- dirty 当做read的兜底层map，如果在read 中没有完成的操作，最终需要加锁，然后尝试在dirty 完成兜底
+- 当因为读、删操作 miss read map而访问dirty的次数等于dirty map的大小时，需要将dirty map提升到read map，并置dirty为nil，清空misses
+- 当dirty map为nil，会在Store里面触发dirtyLocked流程，这个流程会遍历read map，将所有非逻辑删除状态的k-entry对写入到新dirty 里面去，并将entry的nil状态变成expunged状态
+3. 为什么要设计nil和expunged状态？
+- dirty map用于最终数据兜底，如果每次我们删除操作，直接删除dirty中对应k-entey对，但后面又对这个k进行写操作，那就导致多次加锁操作
+- 设计nil状态来标记k-entry对已经被逻辑删除了，但是k-entry还存在于read map和dirty map中，如果想对一个删除的key，再进行写，那么也可以通过在read map中解决
+- 而设计expunged状态是为了正确标识出key-entry对是否存在于dirty map中
+4. sync.Map 适用的场景？
+sync.Map 是适用于读多、更新多、删多、写少的场景
+5. 你认为sync.Map有啥不足吗？
+- sync.Map不适用于写多的场景，因为写操作足够多的话，sync.Map就相当于一把Mutex+Map
+- 而且sync.Map中存在一个将read map数据流转到 dirty map的过程，这个过程是线性时间复杂度，当map中k-v数量较多的时候，容易导致程序性能抖动，比如想要访问sync.Map拿锁操作的goroutine 一直等待这个线性时间复杂度的过程完成
+6. 除了sync.Map，我们还有其他选择吗？
+首先我们的雅哥@九哥 开源项目https://github.com/HDT3213/godis 在实现并发安全map的时候没有采用sync.map，最终选择的是分段锁map
+
+分段锁map的核心思想是——将一个大的map拆分成多个小的map，然后每个小的map都用一把锁来保护，这样锁的粒度就降低了（之前锁住整个map数据集，现在只需要锁住某个小map数据集）
+9. 总结
+- 我们使用read map挡住一些读、更新、删操作的流量，避免加锁访问dirty map损耗性能，而dirty map是用于最终兜底操作的，需要进行加锁操作
+- read map是看作是无锁化的map，操作read map会使用原子操作来消化流量，从而保证并发安全与性能的一个trade-off(权衡)
+无法复制加载中的内容
+
+
+Go1.17版本
+package main
+
+import (
+    "fmt"
+    "sync"
+    "sync/atomic"
+    "unsafe"
+)
+
+// 基于Go 1.17
+// sync.Map
+type Map struct {
+    // 互斥锁，保证dirty map 和 misses的并发安全
+    mu sync.Mutex
+
+    // read map（小林, 访问是无锁化的）
+    read atomic.Value // readOnly
+
+    // dirty map（诸葛青, 访问是需要加锁的）
+    dirty map[interface{}]*entry
+
+    // 记录有多少次读、删请求 因为找了诸葛青（可以看作是诸葛青的怒气值，找诸葛青一次，怒气值+1）
+    misses int
+}
+
+type readOnly struct {
+    // read map 存放 k-v的实体
+    m map[interface{}]*entry
+    // 标识小林数据是否完整，如果为true，就是不完整，代表诸葛青上面的数据才是完整的
+    amended bool
+}
+
+// expunged 是一个指针值, 表示是硬删除态(代表诸葛青没有这一份逻辑不存在的数据)
+var expunged = unsafe.Pointer(new(interface{}))
+
+type entry struct {
+    // p == nil: 软删除态，小林和诸葛青都拥有这一份逻辑删除的数据
+    // p == expunged: 硬删除，诸葛青没有这一份逻辑删除数据
+    // p == value: 一份正常的数据
+    p unsafe.Pointer
+}
+
+func newEntry(i interface{}) *entry {
+    return &entry{p: unsafe.Pointer(&i)}
+}
+
+// 读操作
+func (m *Map) Load(key interface{}) (value interface{}, ok bool) {
+    // 加载出read map
+    read, _ := m.read.Load().(readOnly)
+    // 从read map中查询（无锁）
+    e, ok := read.m[key]
+    // 2. 如果 read 中没有，并且read 的数据不全，从 dirty 中获取
+    if !ok && read.amended {
+       // 加锁
+       m.mu.Lock()
+       // double-check：再次从 read 中获取，因为在加锁的过程中，可能有其他 goroutine触发了诸葛青和小林之间的数据流转操作
+       // (dirty map -> read map，诸葛青 -> 小林)
+       read, _ = m.read.Load().(readOnly)
+       e, ok = read.m[key]
+       // 如果 read 中没有，并且 read 的数据不全，从 dirty 中获取
+       if !ok && read.amended {
+          // 查询dirty map
+          e, ok = m.dirty[key]
+          // 因为这次查询从read map中没有命中，所以需要增加miss次数
+          m.missLocked()
+       }
+       // 找完诸葛青，记得释放锁
+       m.mu.Unlock()
+    }
+
+    // 还是没有，空手而归
+    if !ok {
+       return nil, false
+    }
+
+    // 找到了，从entry中加载 value 并返回
+    return e.load()
+}
+
+func (e *entry) load() (value interface{}, ok bool) {
+    p := atomic.LoadPointer(&e.p)
+    // 如果 p == nil || p == expunged，说明 entry 逻辑上已经被删除了，value返回nil
+    if p == nil || p == expunged {
+       return nil, false
+    }
+
+    // 返回对应value
+    return *(*interface{})(p), true
+}
+
+// Store操作(整合了我们讲的写和更新)
+func (m *Map) Store(key, value interface{}) {
+    // 加载read map(先找小林)
+    read, _ := m.read.Load().(readOnly)
+
+    // 如果 小林有这个数据吗，我们就用CAS来更新，避免加锁找诸葛青, 因为小林和诸葛青服务器之间同一份数据是共享的，z，诸葛青也能知道
+    if e, ok := read.m[key]; ok && e.tryStore(&value) {
+       return
+    }
+
+    // 加锁
+    m.mu.Lock()
+    // double-check
+    read, _ = m.read.Load().(readOnly)
+    // 再找一遍小林，小林有这份数据
+    if entry, ok := read.m[key]; ok {
+       // 如果存在于read map中
+       if entry.unexpungeLocked() {
+          // 为 expunged 态, 诸葛青还需要同步得到小林的这份数据
+          m.dirty[key] = entry
+       }
+       // 更新这一份数据（小林和诸葛青都能得到这一份更新）
+       entry.storeLocked(&value)
+    } else if doc, ok := m.dirty[key]; ok {
+       // 小林没有这份数据，所以直接找诸葛青更新
+       doc.storeLocked(&value)
+    } else {
+       // 诸葛青和小林都没有这份数据，所以判定这是一个"写"操作，一定要交给诸葛青
+       // 小林的数据是完整的（那么诸葛青可能为nil）
+       if !read.amended {
+          m.dirtyLocked()
+          // 将 amended 设置为 true，表示 read 中有数据缺失（因为这是写操作，等会要向dirty map中写一个新的entry）
+          m.read.Store(readOnly{m: read.m, amended: true})
+       }
+       // 将写数据，写到诸葛青服务器上
+       m.dirty[key] = newEntry(value)
+    }
+
+    // 解锁
+    m.mu.Unlock()
+}
+
+func (e *entry) tryStore(i *interface{}) bool {
+    // 来到这个函数，就说明小林物理内存上，有这一份数据
+    for {
+       // 加载p的状态
+       p := atomic.LoadPointer(&e.p)
+       // p为expunged, 诸葛青没有这份数据，说明要去找诸葛青， 返回false
+       if p == expunged {
+          return false
+       }
+
+       // p不为expunged, p为nil或者value，那么就可以在小林这里更新了, return true
+       if atomic.CompareAndSwapPointer(&e.p, p, unsafe.Pointer(i)) {
+          return true
+       }
+    }
+}
+
+func (e *entry) unexpungeLocked() (wasExpunged bool) {
+    // 如果当前p是 expunged状态，则更新成nil状态
+    return atomic.CompareAndSwapPointer(&e.p, expunged, nil)
+}
+
+// storeLocked unconditionally stores a value to the entry.
+//
+// The entry must be known not to be expunged.
+func (e *entry) storeLocked(i *interface{}) {
+    atomic.StorePointer(&e.p, unsafe.Pointer(i))
+}
+
+func (m *Map) LoadOrStore(key, value interface{}) (actual interface{}, loaded bool) {
+    // Avoid locking if it's a clean hit.
+    read, _ := m.read.Load().(readOnly)
+    if e, ok := read.m[key]; ok {
+       actual, loaded, ok := e.tryLoadOrStore(value)
+       if ok {
+          return actual, loaded
+       }
+    }
+
+    m.mu.Lock()
+    read, _ = m.read.Load().(readOnly)
+    if e, ok := read.m[key]; ok {
+       if e.unexpungeLocked() {
+          m.dirty[key] = e
+       }
+       actual, loaded, _ = e.tryLoadOrStore(value)
+    } else if e, ok := m.dirty[key]; ok {
+       actual, loaded, _ = e.tryLoadOrStore(value)
+       m.missLocked()
+    } else {
+       if !read.amended {
+          // We're adding the first new key to the dirty map.
+          // Make sure it is allocated and mark the read-only map as incomplete.
+          m.dirtyLocked()
+          m.read.Store(readOnly{m: read.m, amended: true})
+       }
+       m.dirty[key] = newEntry(value)
+       actual, loaded = value, false
+    }
+    m.mu.Unlock()
+
+    return actual, loaded
+}
+
+// tryLoadOrStore atomically loads or stores a value if the entry is not
+// expunged.
+// F
+// If the entry is expunged, tryLoadOrStore leaves the entry unchanged and
+// returns with ok==false.
+func (e *entry) tryLoadOrStore(i interface{}) (actual interface{}, loaded, ok bool) {
+    p := atomic.LoadPointer(&e.p)
+    if p == expunged {
+       return nil, false, false
+    }
+    if p != nil {
+       return *(*interface{})(p), true, true
+    }
+
+    // Copy the interface after the first load to make this method more amenable
+    // to escape analysis: if we hit the "load" path or the entry is expunged, we
+    // shouldn't bother heap-allocating.
+    ic := i
+    for {
+       if atomic.CompareAndSwapPointer(&e.p, nil, unsafe.Pointer(&ic)) {
+          return i, false, true
+       }
+       p = atomic.LoadPointer(&e.p)
+       if p == expunged {
+          return nil, false, false
+       }
+       if p != nil {
+          return *(*interface{})(p), true, true
+       }
+    }
+}
+
+// LoadAndDelete deletes the value for a key, returning the previous value if any.
+// The loaded result reports whether the key was present.
+func (m *Map) LoadAndDelete(key interface{}) (value interface{}, loaded bool) {
+    // 加载read map
+    read, _ := m.read.Load().(readOnly)
+    e, ok := read.m[key]
+    // 如果 read 中没有 并且数据有缺失，查看 dirty 中是否存在对应key
+    if !ok && read.amended {
+       m.mu.Lock()
+       // double check()
+       read, _ = m.read.Load().(readOnly)
+       e, ok = read.m[key]
+       if !ok && read.amended {
+          // 查询dirty map
+          e, ok = m.dirty[key]
+          // 从dirty map中物理删除
+          delete(m.dirty, key)
+          // 因为这次查询从read map中没有命中，所以需要增加miss次数
+          m.missLocked()
+       }
+       m.mu.Unlock()
+    }
+
+    // 小林有这份数据，我们进行逻辑删除
+    if ok {
+       return e.delete()
+    }
+    return nil, false
+}
+
+// Delete deletes the value for a key.
+func (m *Map) Delete(key interface{}) {
+    m.LoadAndDelete(key)
+}
+
+func (e *entry) delete() (value interface{}, ok bool) {
+    for {
+       // 加载状态
+       p := atomic.LoadPointer(&e.p)
+       // 已经是逻辑删除了，跳过
+       if p == nil || p == expunged {
+          return nil, false
+       }
+
+       // 软删除(将value 变成nil)
+       if atomic.CompareAndSwapPointer(&e.p, p, nil) {
+          return *(*interface{})(p), true
+       }
+    }
+}
+
+func (m *Map) Range(f func(key, value interface{}) bool) {
+    // 加载read map
+    read, _ := m.read.Load().(readOnly)
+    // 如果 read map 数据缺失
+    if read.amended {
+       // 加锁
+       m.mu.Lock()
+       // double check
+       read, _ = m.read.Load().(readOnly)
+       if read.amended {
+          // 将dirty map提升为read-only map
+          read = readOnly{m: m.dirty}
+          m.read.Store(read)
+          // 清空dirty map
+          m.dirty = nil
+          // 清空misses
+          m.misses = 0
+       }
+       // 解锁
+       m.mu.Unlock()
+    }
+    // 遍历read map
+    for k, e := range read.m {
+       // 无锁读取
+       v, ok := e.load()
+       if !ok {
+          continue
+       }
+       if !f(k, v) {
+          // 是否需要被熔断
+          break
+       }
+    }
+}
+
+// missLocked: 锁保护misses, 怒气值增加也要并发安全
+func (m *Map) missLocked() {
+    // 每当大家找小林无法解决，然后找诸葛青，诸葛青怒气值+1
+    m.misses++
+    // 判断诸葛青的怒气值是否达到了容忍的上限(上限是：诸葛青拥有的key-entry对数量)
+    // ps: 诸葛青拥有的越多，容忍的上限就越高!!!
+    // 诸葛青把所有的数据都交给小林
+    m.read.Store(readOnly{m: m.dirty})
+    // 诸葛青重置为nil
+    m.dirty = nil
+    // 诸葛青怒气值清零
+    m.misses = 0
+}
+
+// dirtyLocked: 锁保护dirty map
+func (m *Map) dirtyLocked() {
+    // 如果诸葛青有初始化，那就返回
+    if m.dirty != nil {
+       return
+    }
+    // 来到这里，说明诸葛青没有初始化
+    // 小林需要将数据全量拷贝给诸葛青
+    read, _ := m.read.Load().(readOnly)
+    // 启动诸葛青服务器，诸葛青服务器分配内存
+    m.dirty = make(map[interface{}]*entry, len(read.m))
+    // 小林服务器以O(N)的时间复杂度，将数据拷贝给诸葛青服务器（注意！！！ 只拷贝逻辑存在的数据，也就是非nil和非expunged状态的数据）
+    for k, e := range read.m {
+       // 并且将软删除状态的数据，改成硬删除状态
+       if !e.tryExpungeLocked() {
+          // 逻辑上存在，才拷贝给诸葛青
+          m.dirty[k] = e
+       }
+    }
+}
+
+func (e *entry) tryExpungeLocked() (isExpunged bool) {
+    p := atomic.LoadPointer(&e.p)
+    for p == nil {
+       // 将 软删除，改成硬删除
+       if atomic.CompareAndSwapPointer(&e.p, nil, expunged) {
+          return true
+       }
+       p = atomic.LoadPointer(&e.p)
+    }
+    return p == expunged
+}
+
+func (m *Map) Dump() {
+    fmt.Printf("=====> sync.Map:\n")
+    // dump read
+    read, ok := m.read.Load().(readOnly)
+    fmt.Printf("\t read(amended=%v):\n", read.amended)
+    if ok {
+       // dump readOnly's map
+       for k, v := range read.m {
+          fmt.Printf("\t\t %#v:%#v\n", k, v)
+       }
+    }
+
+    // dump dirty
+    if m.dirty != nil {
+       fmt.Printf("\t dirty:\n")
+       for k, v := range m.dirty {
+          fmt.Printf("\t\t %#v:%#v\n", k, v)
+       }
+    } else {
+       fmt.Printf("\t dirty: nil\n")
+    }
+
+    // dump miss
+    fmt.Printf("\t misses:%d\n", m.misses)
+
+    // dump expunged
+    fmt.Printf("\t expunged:%#v\n", expunged)
+    fmt.Printf("<===== sync.Map\n")
+}

@@ -1,0 +1,44 @@
+
+package main
+
+import "fmt"
+
+func main() {
+   localStr := "case3" //是的，还可以通过 := 这种方式直接初始化基础变量
+   if localStr == "case3" {
+      fmt.Printf("into ture logic\n")
+   } else {
+      fmt.Printf("into false logic\n")
+   }
+   //字典初始化
+   var dic = map[string]int{
+      "apple":      1,
+      "watermelon": 2,
+   }
+   if num, ok := dic["orange"]; ok {
+      fmt.Printf("orange num %d\n", num)
+   }
+   if num, ok := dic["watermelon"]; ok {
+      fmt.Printf("watermelon num %d\n", num)
+   }
+   switch localStr {
+   case "case1":
+      fmt.Println("case1")
+   case "case2":
+      fmt.Println("case2")
+   case "case3":
+      fmt.Println("case3")
+   default:
+      fmt.Println("default")
+   }
+}
+
+输出结果：
+into ture logic
+watermelon num 2
+case3
+
+if语句在Golang和其他语言中的表现形式一样，没啥区别。上面的例子同时也展示了用if判断某个key在map是否为空的写法。
+第17行，num表示map中对应key的值，ok表示key是否存在
+
+switch中，每个case都默认break。即如果是case1，那么执行完之后，就会跳出switch条件选择。如果希望从某个case顺序往下执行，可以使用fallthrough关键字。

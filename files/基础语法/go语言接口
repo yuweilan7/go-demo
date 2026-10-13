@@ -1,0 +1,284 @@
+什么是接口
+go语言中的接口很简单，就是一组方法的声明。当某一种类型实现了所有这些声明的方法，那么就称这种类型为该接口的一种实现。
+接口定义
+go语言中同样用关键字interface来定义接口
+type interfaceName interface {
+   methodName1([parameter_list]) [return_type_list]
+   methodName2([parameter_list]) [return_type_list]
+   methodName3([parameter_list]) [return_type_list]
+   ...
+}
+下面看一个具体的interface的例子
+package main
+
+import "fmt"
+
+type Phone interface {
+    Call()
+    SendMessage()
+}
+
+type Apple struct{
+    PhoneName string
+}
+
+func (a Apple) Call() {
+    fmt.Printf("%s有打电话功能\n", a.PhoneName)
+}
+
+func (a Apple) SendMessage() {
+    fmt.Printf("%s有发短信功能\n", a.PhoneName)
+}
+
+
+type HuaWei struct{
+    PhoneName string
+}
+
+func (h HuaWei) Call() {
+    fmt.Printf("%s有打电话功能\n", h.PhoneName)
+}
+
+func (h HuaWei) SendMessage() {
+    fmt.Printf("%s有发短信功能\n", h.PhoneName)
+}
+
+
+func main() {
+    a := Apple{"apple"}
+    b := HuaWei{"huawei"}
+    a.Call()
+    a.SendMessage()
+    b.Call()
+    b.SendMessage()
+    
+    var phone Phone      // 声明一个接口类型phone
+    phone = new(Apple)   // 注意这种创建方式，new函数参数是接口的实现
+    phone.(*Apple).PhoneName = "Apple"  // 这里使用断言给phone的成员赋值，后面会讲到接口的断言
+    phone.Call()
+    phone.SendMessage()
+}
+运行结果：@
+apple有打电话功能
+apple有发短信功能
+huawei有打电话功能
+huawei有发短信功能
+Apple有打电话功能
+Apple有发短信功能
+上述声明了一个phone的接口，有两个方法Call()和Sendmessage()，然后定义了两个结构Apple和HuaWei，这两个结构都实现了Phone接口定义的所有方法，但是实现的方法不同，所以Apple和HuaWei是Phone接口的两种实现。
+注意：上述例子的phone变量的定义，首先声明phone为一个接口，接着用new方法为这个phone定义，注意，这里new的参数必须是phone的一种实现，假设这里Apple结构没有实现SendMessage方法，那么Apple结构就不是Phone接口的一个实现，上述代码的45行用new定义phone的时候就会报错。
+实现多个接口
+有上述接口的定义我们知道，类型可以实现接口，那么一种类型可以实现多个接口吗，答案是：可以的。
+请看下面例子：
+ package main
+
+import "fmt"
+
+type MyWriter interface {
+   MyWriter(s string)
+}
+
+type MyRead interface {
+   MyReader()
+}
+
+type MyWriteReader struct {
+}
+
+func (r MyWriteReader) MyWriter(s string) {
+   fmt.Printf("call MyWriteReader MyWriter %s\n", s)
+}
+
+func (r MyWriteReader) MyReader() {
+   fmt.Printf("call MyWriteReader MyReader\n")
+}
+
+func main() {
+   var myRead MyRead
+   myRead = new(MyWriteReader)
+   myRead.MyReader()
+
+   var myWriter MyWriter
+   myWriter = MyWriteReader{}
+   myWriter.MyWriter("hello")
+
+}
+运行结果：
+call MyWriteReader MyReader
+call MyWriteReader MyWriter hello
+上述例子我们定义了一个 MyWriter 接口，该接口有一个方法 MyWriter ，MyWriter 方法接受一个 string 类型的 参数。接着，我们定义了一个 MyReader 接口，该接口有一个方法 MyReader。然后定义了一个ReadWriter结构，实现了接口 MyWriter 和接口 MyReader 中的所有方法，所以ReadWriter分别实现了两个不同的接口MyWriter和MyReader。
+空接口
+没有任何方法声明的接口称之为空接口，interface{}
+所有的类型都实现了空接口，因此空接口可以存储任意类型的数值
+Golang 很多库的源代码都会以空接口作为参数，表示接受任意类型的参数，比如fmt 包下的 Print 系列函数
+func Println(a ...interface{}) (n int, err error)
+func Print(a ...interface{}) (n int, err error)
+看下面例子：
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var any interface{}
+    any = 10
+    fmt.Println(any)
+
+    any = "golang"
+    fmt.Println(any)
+
+    any = true
+    fmt.Println(any)
+}
+运行结果：
+10
+golang
+true
+上述例子首先声明了一个空接口any，首先用来存储整形变量10，然后又用来存储字符串golang，最后用来存储布尔型变量true，所以空接口可以存储任意类型的数值。fmt.Println函数的参数是空接口类型interface{}，所以能将结果正确打印出来。
+断言
+在介绍断言之前，先看一个例子
+package main
+
+func main() {
+    var a int = 1
+    var i interface{} = a
+    var b int = i
+}
+运行结果：
+./prog.go:6:14: cannot use i (variable of type interface{}) as type int in variable declaration:
+        need type assertion
+编译报错，不能将interface{}类型的变量i赋值给整型变量b
+所以在写代码的时候我们需要注意，可以将任意类型的变量赋值给空接口interface{}类型，但是反过来不行。
+那为了让这个操作能够完成，我们需要怎么做呢？就是断言
+类型断言（Type Assertion）接口操作，用来检查接口变量的值是否实现了某个接口或者是否是某个具体的类型
+断言的一般格式为：
+value, ok := x.(T)   // x为接口类型，ok为bool类型
+- T 是具体某个类型，类型断言会检查 x 的动态类型是否等于具体类型 T。如果检查成功，类型断言返回的结果是 x 的值，其类型是 T。
+- x 是接口类型，类型断言会检查 x 的动态类型是否满足 T。如果检查成功，返回值是一个类型为 T 的接口值。
+- 无论 T 是什么类型，如果 x 是 nil 接口值，类型断言都会失败。
+请看下面例子：
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var x interface{}
+    x = 8
+    val, ok := x.(int)
+    fmt.Printf("val is %d, ok is %t\n", val, ok)
+}
+运行结果：
+val is 8, ok is true
+注意：如果在断言的过程中，没有bool这个值的判断，如果断言成功程序正常运行，假设interface{}存储的值跟要断言的类型不一致，则程序会报panic。
+看下面例子
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var x interface{}
+    x = "golang"
+    val := x.(int)
+    fmt.Println(val)
+}
+运行结果：
+panic: interface conversion: interface {} is string, not int
+接口作函数参数
+接口做函数参数，在函数定义的时候，形参为接口类型，在函数调用的时候，实参为该接口的具体实现
+具体看下面看例子：
+package main
+
+import "fmt"
+
+type Reader interface {
+   Read() int
+}
+
+type MyReader struct {
+   a, b int
+}
+
+func (m *MyReader) Read() int {
+   return m.a + m.b
+}
+
+func DoJob(r Reader) {
+   fmt.Printf("myReader is %d\n", r.Read())
+}
+
+func main() {
+   myReader := &MyReader{2, 5}
+   DoJob(myReader)
+}
+运行结果：
+myReader is 7
+若函数的形参为空接口，则实参可以为任意类型，因为空接口没有定义任何方法，任意类型都是空接口的一种实现。
+package main
+
+import "fmt"
+
+
+func DoJob(value interface{}) {
+   fmt.Printf("value is %v\n", value)
+}
+
+func main() {
+   val := 10
+   DoJob(val)
+}
+运行结果:
+value is 10
+接口嵌套
+接口嵌套就是一个接口中包含了其他接口，如果要实现外部接口，则需要实现内部嵌套的接口对应的所有方法。
+看具体例子：
+package main
+
+import "fmt"
+
+type A interface {
+    run1()
+}
+
+type B interface {
+    run2()
+}
+
+// 定义嵌套接口C
+type C interface {
+    A
+    B
+    run3()
+}
+
+type Runner struct {}
+    
+// 实现嵌套接口A的方法
+func (r Runner ) run1() {
+    fmt.Println("run1!!!!")
+}
+
+// 实现嵌套接口B的方法
+func (r Runner ) run2() {
+    fmt.Println("run2!!!!")
+}
+
+func (r Runner ) run3() {
+    fmt.Println("run3!!!!")
+}
+
+func main() {
+   var runner C
+   runner = new(Runner)  // runner实现了C接口的所有方法
+   runner.run1()
+   runner.run2()
+   runner.run3()
+}
+运行结果：
+run1!!!!
+run2!!!!
+run3!!!!

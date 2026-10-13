@@ -1,0 +1,213 @@
+context是什么
+简单来说， context是Go 语言在 1.7 版本中引入的一个标准库的接口，其定义如下
+type Context interface {
+   Deadline() (deadline time.Time, ok bool)
+   Done() <-chan struct{}
+   Err() error
+   Value(key interface{}) interface{}
+}
+这个接口定义了四个方法
+- Deadline： 设置 context.Context 被取消的时间，即截止时间；
+- Done： 返回一个 只读Channel，当Context被取消或者到达截止时间，这个 Channel 就会被关闭，表示Context的链路结束，多次调用 Done 方法会返回同一个 Channel
+- Err： 返回 context.Context 结束的原因，它只会在 Done 返回的 Channel 被关闭时才会返回非空的值，返回值有以下两种情况； 
+  - 如果 是context.Context 被取消，返回 Canceled 
+  - 如果 是context.Context 超时，返回 DeadlineExceeded 
+- 4.Value — 从 context.Context 中获取键对应的值，类似于map的get方法，对于同一个context，多次调用 Value 并传入相同的 Key 会返回相同的结果，如果没有对应的key,则返回nil，键值对是通过WithValue方法写入的
+context创建
+根context创建
+主要有以下两种方式创建根context
+- context.Backgroud()
+- context.TODO()
+从源代码分析context.Background 和 context.TODO并没有太多的区别，都是用于创建根context，根context是一个空的context，不具备任何功能。但是一般情况下，如果当前函数没有上下文作为入参，我们都会使用 context.Background创建一个根context 作为起始的上下文向下传递。
+context派生
+根context在创建之后，不具备任何的功能，为了让context在我们的程序中发挥作用，我们要依靠context包提供的With系列函数来进行派生
+主要有以下几个派生函数：
+func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc)
+func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
+func WithValue(parent Context, key, val interface{}) Context
+基于当前context，每个with函数都会创建出一个新的context，这样类似于我们熟悉的树结构，当前context称为父context，派生出的新context称为子context。就像下面的context树结构：
+[图片]
+通过根context，通过四个with系列方法可以派生出四种类型的context，每种context又可以通过同样的方式调用with系列方法继续向下派生新的context，整个结构像一棵树。
+context有什么用
+context主要有两个用途，也是在项目中经常使用的
+- 用于并发控制，控制协程的优雅退出
+- 上下文的信息传递
+总的来说，Context就是用来在父子goroutine间进行值传递以及发送cancel信号的一种机制。
+并发控制
+对于一般的服务器而言，都是一致运行着的，等待接收来自客户端或者浏览器的请求做出响应，思考这样一种场景，后台微服务架构中，一般服务器在收到一个请求之后，如果逻辑复杂，不会在一个goroutine中完成，而是会创建出很多的goroutine共同完成这个请求，就像下面这种情况
+[图片]
+有一个请求过来之后，先经过第一次rpc调用，然后再到rpc2，后面创建执行两个rpc，rpc4里又有一次rpc调用rpc5，等所有 rpc 调用成功后，返回结果。假如在整个调用过程中，rpc1发生了错误，如果没有context存在的话，我们还是得等所有的rpc都执行完才能返回结果，这样其实浪费了不少时间，因为一旦出错，我们完全可以直接再rpc1这里就返回结果了，不用等到后续的rpc都执行完。假设我们在rpc1直接返回失败，不等后续的rpc继续执行，那么其实后续的rpc执行就是没有意义的，浪费计算和IO资源而已。再引入context之后，就可以很好的处理这个问题，在不需要子goroutine执行的时候，可以通过context通知子goroutine优雅的关闭。
+context.WithCancel
+方法定义如下
+func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+context.WithCancel 函数是一个取消控制函数，只需要一个context作为参数，能够从 context.Context 中衍生出一个新的子context和取消函数CancelFunc，通过将这个子context传递到新的goroutine中来控制这些goroutine的关闭，一旦我们执行返回的取消函数CancelFunc，当前上下文以及它的子上下文都会被取消，所有的 Goroutine 都会同步收到取消信号。
+使用示例：
+package main
+
+import (
+   "context"
+   "fmt"
+   "time"
+)
+
+func main() {
+   ctx, cancel := context.WithCancel(context.Background())
+   go Watch(ctx, "goroutine1")
+   go Watch(ctx, "goroutine2")
+
+   time.Sleep(6 * time.Second)   // 让goroutine1和goroutine2执行6s
+   fmt.Println("end watching!!!")
+   cancel()  // 通知goroutine1和goroutine2关闭
+   time.Sleep(1 * time.Second)
+}
+
+func Watch(ctx context.Context, name string) {
+   for {
+      select {
+      case <-ctx.Done():
+         fmt.Printf("%s exit!\n", name) // 主goroutine调用cancel后，会发送一个信号到ctx.Done()这个channel，这里就会收到信息
+         return
+      default:
+         fmt.Printf("%s watching...\n", name)
+         time.Sleep(time.Second)
+      }
+   }
+}
+运行结果：
+goroutine2 watching...
+goroutine1 watching...
+goroutine1 watching...
+goroutine2 watching...
+goroutine2 watching...
+goroutine1 watching...
+goroutine1 watching...
+goroutine2 watching...
+goroutine2 watching...
+goroutine1 watching...
+goroutine1 watching...
+goroutine2 watching...
+end watching!!!
+goroutine1 exit!
+goroutine2 exit!
+ctx, cancel := context.WithCancel(context.Background())派生出了一个带有返回函数cancel的ctx，并把它传入到子goroutine中，接下来在6s时间内，由于没有执行cancel函数，子goroutine将一直执行default语句，打印监控。6s之后，调用cancel，此时子goroutine会从ctx.Done()这个channel中收到消息，执行return结束。
+context.WithDeadline
+方法定义如下
+func WithDeadline(parent Context, d time.Time) (Context, CancelFunc)
+context.WithDeadline也是一个取消控制函数，方法有两个参数，第一个参数是一个context，第二个参数是截止时间，同样会返回一个子context和一个取消函数CancelFunc。在使用的时候，没有到截止时间，我们可以通过手动调用CancelFunc来取消子context，控制子goroutine的退出，如果到了截止时间，我们都没有调用CancelFunc，子context的Done()管道也会收到一个取消信号，用来控制子goroutine退出。
+使用示例：
+package main
+
+import (
+   "context"
+   "fmt"
+   "time"
+)
+
+func main() {
+   ctx, cancel := context.WithDeadline(context.Background(),time.Now().Add(4*time.Second)) // 设置超时时间4当前时间4s之后
+   defer cancel()
+   go Watch(ctx, "goroutine1")
+   go Watch(ctx, "goroutine2")
+
+   time.Sleep(6 * time.Second)   // 让goroutine1和goroutine2执行6s
+   fmt.Println("end watching!!!")
+}
+
+func Watch(ctx context.Context, name string) {
+   for {
+      select {
+      case <-ctx.Done():
+         fmt.Printf("%s exit!\n", name) // 4s之后收到信号
+         return
+      default:
+         fmt.Printf("%s watching...\n", name)
+         time.Sleep(time.Second)
+      }
+   }
+}
+运行结果：
+goroutine1 watching...
+goroutine2 watching...
+goroutine2 watching...
+goroutine1 watching...
+goroutine1 watching...
+goroutine2 watching...
+goroutine1 exit!
+goroutine2 exit!
+end watching!!!
+我们并没有调用cancel函数，但是在过了4s之后，子groutine里ctx.Done()收到了信号，打印出exit，子goroutine退出，这就是WithDeadline派生子context的用法。
+context.WithTimeout
+方法定义：
+func WithTimeout(parent Context, timeout time.Duration) (Context, CancelFunc)
+context.WithTimeout和context.WithDeadline的作用类似，都是用于超时取消子context，只是传递的第二个参数有所不同，context.WithTimeout传递的第二个参数不是具体时间，而是时间长度。
+使用示例：
+package main
+
+import (
+   "context"
+   "fmt"
+   "time"
+)
+
+func main() {
+   ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+   defer cancel()
+   go Watch(ctx, "goroutine1")
+   go Watch(ctx, "goroutine2")
+
+   time.Sleep(6 * time.Second)   // 让goroutine1和goroutine2执行6s
+   fmt.Println("end watching!!!")
+}
+
+func Watch(ctx context.Context, name string) {
+   for {
+      select {
+      case <-ctx.Done():
+         fmt.Printf("%s exit!\n", name) // 主goroutine调用cancel后，会发送一个信号到ctx.Done()这个channel，这里就会收到信息
+         return
+      default:
+         fmt.Printf("%s watching...\n", name)
+         time.Sleep(time.Second)
+      }
+   }
+}
+运行结果：
+goroutine2 watching...
+goroutine1 watching...
+goroutine1 watching...
+goroutine2 watching...
+goroutine2 watching...
+goroutine1 watching...
+goroutine1 watching...
+goroutine2 watching...
+goroutine1 exit!
+goroutine2 exit!
+end watching!!!
+
+程序很简单，与上个context.WithDeadline的样例代码基本一样，只是改变了下派生context的方法为context.WithTimeout，具体体现在第二个参数不再是具体时间，而是变为了4s这个具体的时间长度，执行结果也是一样。
+context.WithValue
+方法定义：
+func WithValue(parent Context, key, val interface{}) Context
+context.WithValu 函数从父context中创建一个子context用于传值，函数参数是父context，key，val键值对。返回一个context。
+项目中这个方法一般用于上下文信息的传递，比如请求唯一id，以及trace_id等，用于链路追踪以及配置透传。
+使用示例：
+package main
+
+import (
+   "context"
+   "fmt"
+   "time"
+)
+
+func func1(ctx context.Context) {
+   fmt.Printf("name is: %s", ctx.Value("name").(string))
+}
+
+func main() {
+   ctx := context.WithValue(context.Background(), "name", "zhangsan")
+   go func1(ctx)
+   time.Sleep(time.Second)
+}
+运行结果：
+name is: zhangsan

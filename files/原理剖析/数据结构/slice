@@ -1,0 +1,413 @@
+切片是什么
+简单来说，切片其实就是建立在Go的数组之上的抽象类型，如果要理解切片，我们必须首先了解数组
+数组
+我们可以知道Go语言中数组是一个值，数组变量就表示了整个数组，而不是和C语言一样 是指向第一个数组元素的指针
+验证例子
+Example one(将数组 传递到函数中，数组的地址不一样)
+package main
+
+import "fmt"
+
+func main() {
+
+    array := [3]int{1, 2, 3}
+    // 数组传递到函数中
+    test(array)
+    fmt.Printf("array 外: %p\n", &array)
+}
+
+func test(array [3]int) {
+    fmt.Printf("array 内: %p\n", &array)
+}
+
+Example two(拷贝数组，修改旧数组，对新数组无影响)
+package main
+
+import "fmt"
+
+func main() {
+
+    array1 := [3]int{1, 2, 3}
+    var array2 [3]int
+
+    array2 = array1
+    // 修改array1的值
+    array1[0] = 10
+    fmt.Println(array1)
+    fmt.Println(array2)
+}
+
+有了数组，为什么还需要切片？
+这里直接抛出几个数组面临的挑战来解释这个问题
+1. 长度如何动态扩容？
+  1. 数组长度在声明阶段已经固定，我们要想一个更大的数组，只能重新申请新数组，抛弃旧数组
+2. 应对动态数据集合处理问题，显得捉襟见肘
+  1. 比如我们从文件或网络中读取数据等场景，难以定义一个合适大小的数组
+
+切片的底层剖析
+底层结构
+type slice struct {
+    // 底层数组指针（或者说是指向一块连续内存空间的起点）
+    array unsafe.Pointer
+    // 长度
+    len   int
+    // 容量
+    cap   int
+}
+切片扩容
+1. 计算目标容量
+  case1: 如果新切片的长度 > 旧切片容量的两倍，则新切片容量就为新切片的长度
+  case2: 
+    1. 如果旧切片的容量小于256，那么新切片的容量就是旧切片的容量的两倍
+    2. 反之需要用旧切片容量按照1.25倍的增速，直到 >= 新切片长度
+为了更平滑的过渡，每次扩大1.25倍，还会加上3/4 * 256
+2. 进行内存对齐
+需要按照Go内存管理的级别去对齐内存，最终容量以这个为准
+func growslice(oldPtr unsafe.Pointer, newLen, oldCap, num int, et *_type) slice {
+    // 参数解释：
+    // oldPtr：旧切片的底层数组指针
+    // newLen：新切片的预估长度（oldlen + num）
+    // oldCap：旧切片的容量
+    // num：apeend的元素个数
+
+    // 得出原切片的长度
+    oldLen := newLen - num
+
+    newcap := oldCap
+    doublecap := newcap + newcap
+
+    // 如果新切片的长度 大于 旧切片的容量的两倍，那么就需要扩容为新切片的长度
+    if newLen > doublecap {
+       newcap = newLen
+    } else {
+       // 扩容策略分流 阈值
+       const threshold = 256
+
+       // 如果旧切片的容量小于256，那么新切片的容量就是旧切片的容量的两倍
+       if oldCap < threshold {
+          newcap = doublecap
+       } else {
+          // 每次进行1.25扩容，直到目标容量 达到 新切片长度 
+          for 0 < newcap && newcap < newLen {
+             // 从小切片的2倍增长转变为大切片的1.25倍增长。这个公式在两者之间提供了一个平稳的过渡（比如加上3/4 * threshold）
+             newcap += (newcap + 3*threshold) / 4
+          }
+       }
+    }
+
+    var overflow bool
+    var lenmem, newlenmem, capmem uintptr
+    // 基于容量，确定新数组所需要的内存空间大小 capmem
+    //  同时会针对 span class 进行取整
+    switch {
+    case et.size == 1:
+       // 倘若数组元素的大小为 1
+       lenmem = uintptr(oldLen)
+       newlenmem = uintptr(newLen)
+       capmem = roundupsize(uintptr(newcap))
+       overflow = uintptr(newcap) > maxAlloc
+       newcap = int(capmem)
+    case et.size == goarch.PtrSize:
+       // 数组元素为指针类型，则根据指针占用空间结合元素个数计算空间大小
+       lenmem = uintptr(oldLen) * goarch.PtrSize
+       newlenmem = uintptr(newLen) * goarch.PtrSize
+       capmem = roundupsize(uintptr(newcap) * goarch.PtrSize)
+       overflow = uintptr(newcap) > maxAlloc/goarch.PtrSize
+       newcap = int(capmem / goarch.PtrSize)
+    case isPowerOfTwo(et.size):
+       // 倘若元素大小为 2 的指数，则直接通过位运算进行空间大小的计算
+       var shift uintptr
+       if goarch.PtrSize == 8 {
+          // Mask shift for better code generation.
+          shift = uintptr(sys.TrailingZeros64(uint64(et.size))) & 63
+       } else {
+          shift = uintptr(sys.TrailingZeros32(uint32(et.size))) & 31
+       }
+       lenmem = uintptr(oldLen) << shift
+       newlenmem = uintptr(newLen) << shift
+       // newcap * 2^shift，然后向上取整
+       capmem = roundupsize(uintptr(newcap) << shift)
+       overflow = uintptr(newcap) > (maxAlloc >> shift)
+       newcap = int(capmem >> shift)
+       capmem = uintptr(newcap) << shift
+    default:
+       lenmem = uintptr(oldLen) * et.size
+       newlenmem = uintptr(newLen) * et.size
+       capmem, overflow = math.MulUintptr(et.size, uintptr(newcap))
+       capmem = roundupsize(capmem)
+       newcap = int(capmem / et.size)
+       capmem = uintptr(newcap) * et.size
+    }
+
+    var p unsafe.Pointer
+    // 非指针类型
+    if et.ptrdata == 0 {
+       p = mallocgc(capmem, nil, false)
+    } else {
+       // 指针类型
+       p = mallocgc(capmem, et, true)
+    }
+
+
+    // 从旧的底层数组 拷贝 lenmem个字节 到 新底层数组中
+    memmove(p, oldPtr, lenmem)
+    
+    // 返回新切片
+    return slice{p, newLen, newcap}
+}
+切片的问题解密
+1. 切片通过函数，传的是什么？
+package main
+
+import (
+        "fmt"
+        "reflect"
+        "unsafe"
+)
+
+func main() {
+        s := make([]int, 5, 10)
+        PrintSliceStruct(&s)
+        test(s)
+
+}
+
+func test(s []int) {
+        PrintSliceStruct(&s)
+}
+
+func PrintSliceStruct(s *[]int) {
+        // 代码 将slice 转换成 reflect.SliceHeader
+        ss := (*reflect.SliceHeader)(unsafe.Pointer(s))
+
+        // 查看slice的结构
+        fmt.Printf("slice struct: %+v, slice is %v\n", ss, s)
+}
+
+
+2. 在函数里面改变切片，函数外的切片会被影响吗
+package main
+
+import (
+    "fmt"
+    "reflect"
+    "unsafe"
+)
+
+func main() {
+    s := make([]int, 5)
+    //case1(s)
+    case2(s)
+    PrintSliceStruct(&s)
+}
+
+// 底层数组不变
+func case1(s []int) {
+    s[1] = 1
+    PrintSliceStruct(&s)
+}
+
+// 底层数组变化
+func case2(s []int) {
+    s = append(s, 0)
+    s[1] = 1
+    PrintSliceStruct(&s)
+}
+
+func PrintSliceStruct(s *[]int) {
+    // 代码 将slice 转换成 reflect.SliceHeader
+    ss := (*reflect.SliceHeader)(unsafe.Pointer(s))
+
+    // 查看slice的结构
+    fmt.Printf("slice struct: %+v, slice is %v\n", ss, s)
+}
+3. 截取切片
+通过 : 操作得到的新slice和原slice是什么关系？
+package main
+
+import (
+    "fmt"
+    "reflect"
+    "unsafe"
+)
+
+func main() {
+    s := make([]int, 5)
+
+    case1(s)
+    case2(s)
+    case3(s)
+    case4(s)
+    PrintSliceStruct(&s)
+}
+
+// 截取0号元素以后的元素
+func case1(s []int) {
+    s = s[1:]
+    PrintSliceStruct(&s)
+}
+
+// 截取[1, 2]区间元素
+func case2(s []int) {
+    s = s[1:3]
+    PrintSliceStruct(&s)
+}
+
+// 截取[len(s)-1, )区间元素
+func case3(s []int) {
+    s = s[len(s)-1:]
+    PrintSliceStruct(&s)
+}
+
+// 截取获得新切片
+func case4(s []int) {
+    s1 := s[2:]
+    PrintSliceStruct(&s1)
+}
+
+func PrintSliceStruct(s *[]int) {
+    // 代码 将slice 转换成 reflect.SliceHeader
+    ss := (*reflect.SliceHeader)(unsafe.Pointer(s))
+
+    // 查看slice的结构
+    fmt.Printf("slice struct: %+v, slice is %v\n", ss, s)
+}
+4. 删除元素
+package main
+
+import (
+    "fmt"
+    "reflect"
+    "unsafe"
+)
+
+func main() {
+    s := []int{0, 1, 2, 3, 4}
+
+    _ = s[4]
+    PrintSliceStruct(&s)
+    // 删除第1个元素（从0开始计数）
+    // [0, 1) + [2, len(s))
+    s1 := append(s[:1], s[2:]...)
+    {
+       // 拷贝元素
+       // 0, 1, 2, 3, 4
+       // 0, 2, 3, 4, 4
+    }
+
+    PrintSliceStruct(&s1)
+    PrintSliceStruct(&s)
+
+    //访问原切片
+    _ = s[4]
+    //访问从原切片中删除了一个元素的切片
+    _ = s1[4]
+}
+
+func PrintSliceStruct(s *[]int) {
+    // 代码 将slice 转换成 reflect.SliceHeader
+    ss := (*reflect.SliceHeader)(unsafe.Pointer(s))
+
+    // 查看slice的结构
+    fmt.Printf("slice struct: %+v, slice is %v\n", ss, s)
+}
+
+5. 新增元素
+新增元素其实就是指append操作
+package main
+
+import (
+    "fmt"
+    "reflect"
+    "unsafe"
+)
+
+func main() {
+    // case1()
+    case2()
+    // case3()
+}
+
+func case1() {
+    s1 := make([]int, 3, 3)
+    s1 = append(s1, 1)
+
+    PrintSliceStruct(&s1)
+}
+
+func case2() {
+    s1 := make([]int, 3, 4)
+    s2 := append(s1, 1)
+
+    PrintSliceStruct(&s1)
+    PrintSliceStruct(&s2)
+}
+
+func case3() {
+    s1 := make([]int, 3, 3)
+    s2 := append(s1, 1)
+
+    PrintSliceStruct(&s1)
+    PrintSliceStruct(&s2)
+}
+
+// PrintSliceStruct 打印slice的结构
+func PrintSliceStruct(s *[]int) {
+    // 代码 将slice 转换成 reflect.SliceHeader
+    ss := (*reflect.SliceHeader)(unsafe.Pointer(s))
+
+    // 查看slice的结构
+    fmt.Printf("slice struct: %+v, slice is %v\n", ss, s)
+}
+6. 深度拷贝
+我们从上面的一些解释就可以看到，切片的传递，底层数组是浅拷贝（操作原来切片会影响新切片），那么有没有深度拷贝的方法呢？
+package main
+
+import (
+    "fmt"
+    "reflect"
+    "unsafe"
+)
+
+func main() {
+    var s1 = []int{1, 2, 3}
+    var s2 []int = make([]int, len(s1))
+    // copy 函数：将s1的元素复制到s2中，复制多少个元素呢？ min(len(s1), len(s2))
+
+    copy(s2, s1)
+    PrintSliceStruct(&s1)
+    PrintSliceStruct(&s2)
+
+}
+
+// PrintSliceStruct 打印slice的结构
+func PrintSliceStruct(s *[]int) {
+    // 代码 将slice 转换成 reflect.SliceHeader
+    ss := (*reflect.SliceHeader)(unsafe.Pointer(s))
+
+    // 查看slice的结构
+    fmt.Printf("slice struct: %+v, slice is %v\n", ss, s)
+}
+7. 一道真实面试题
+请说出下面代码的执行结果
+package main
+
+import "fmt"
+
+func main() {
+    doAppend := func(s []int) {
+       s = append(s, 1)
+       printLengthAndCapacity(s)
+    }
+    s := make([]int, 8, 8)
+    doAppend(s[:4])
+    printLengthAndCapacity(s)
+    doAppend(s)
+    printLengthAndCapacity(s)
+
+}
+
+func printLengthAndCapacity(s []int) {
+    fmt.Println(s)
+    fmt.Printf("len=%d cap=%d \n", len(s), cap(s))
+}

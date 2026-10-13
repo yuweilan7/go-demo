@@ -1,0 +1,228 @@
+1、channel 是否线程安全？锁用在什么地方？
+是线程安全的，hchan的底层实现中，hchan结构体中采用Mutex锁来保证数据读写安全。在对循环数组buf中的数据进行入队和出队操作时，必须先获取互斥锁，才能操作channel数据
+2、go channel 的底层实现原理 （数据结构）
+channel的底层实现是一个hchan的结构
+回顾这个图
+type hchan struct {
+   qcount   uint           // 循环队列中的数据总数
+   dataqsiz uint           // 循环队列大小
+   buf      unsafe.Pointer // 指向循环队列的指针
+   elemsize uint16         // 循环队列中的每个元素的大小
+   closed   uint32         // 标记位，标记channel是否关闭
+   elemtype *_type         // 循环队列中的元素类型
+   sendx    uint           // 已发送元素在循环队列中的索引位置
+   recvx    uint           // 已接收元素在循环队列中的索引位置
+   recvq    waitq          // 等待从channel接收消息的sudog队列
+   sendq    waitq          // 等待向channel写入消息的sudog队列
+   lock mutex              // 互斥锁，对channel的数据读写操作加锁，保证并发安全
+}
+3、nil、关闭的 channel、有数据的 channel，再进行读、写、关闭会怎么样？（各类变种题型）
+详细解答看：Golang面试题库
+向为 nil 的 channel 发送数据会怎么样？
+会死锁，永久阻塞
+4、向 channel 发送数据和从 channel 读数据的流程是什么样的？
+5、哪些操作会使channel发生panic？
+三种情况
+情况1：往一个已经关闭的channel写数据
+情况2：关闭一个nil的channel
+情况3：关闭一个已经关闭的channel
+6、当一个channel关闭后，我们是否还能从channel读到数据？
+可以，只不过接收的是无效数据，对应数据类型的零值
+7、channel是创建在堆上还是栈上
+堆上，新建一个 chan 后，内存在堆上分配，大概长这样：
+首先，要实现channel这样的复杂功能，肯定不是几个字节可以搞定的，所以需要一个struct来实现；其次，这种被设计用来实现协程间通信的组件，其作用域和生命周期不可能仅限于某个函数内部，所以golang直接将其分配在堆上
+8、channel发送和接收元素的本质是什么？
+值的拷贝
+示例代码：
+package main
+import (
+"fmt"
+"time"
+)
+
+func print(u <-chan int) {
+   time.Sleep(2 * time.Second)
+   fmt.Println("print int", <-u)
+}
+
+func main() {
+   c := make(chan int, 5)
+   a := 0
+
+   c <- a
+   fmt.Println(a)
+   // modify g
+   a = 1
+
+   go print(c)
+   time.Sleep(5 * time.Second)
+   fmt.Println(a)
+}
+打印出什么：
+package main
+
+import (
+"fmt"
+"time"
+)
+n
+type people struct {
+   name string
+}
+
+var u = people{name: "A"}
+
+func printPeople(u <-chan *people) {
+   time.Sleep(2 * time.Second)
+   fmt.Println("printPeople", <-u)
+}
+
+func main() {
+   c := make(chan *people, 5)
+   var a = &u
+
+   c <- a
+   fmt.Println(a)
+   // modify g
+   a = &people{name:"B"}
+
+   go printPeople(c)
+   time.Sleep(5 * time.Second)
+   fmt.Println(a)
+}
+打印出什么
+9、有 4 个 goroutine，编号为 1、2、3、4。每秒钟会有一个 goroutine 打印出自己的编号，要求写一个程序，让输出的编号总是按照 1、2、3、4、1、2、3、4… 的顺序打印出来
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+  // 4个channel
+    chs := make([]chan int, 4)
+    for i, _ := range chs {
+        chs[i] = make(chan int)
+    // 开4个协程
+        go func(i int) {
+            for {
+        // 获取当前channel值并打印
+                v := <-chs[i]
+                fmt.Println(v + 1)
+                time.Sleep(time.Second)
+        // 把下一个值写入下一个channel，等待下一次消费
+                chs[(i+1)%4] <- (v + 1) % 4
+            }
+
+        }(i)
+    }
+
+  // 往第一个塞入0
+    chs[0] <- 0
+    select {}
+}
+
+10、用channel实现一个限流器
+package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    // 每次处理3个请求
+    chLimit := make(chan struct{}, 3)
+    for i := 0; i < 20; i++ {
+        chLimit <- struct{}{}
+        go func(i int) {
+            fmt.Println("下游服务处理逻辑...", i)
+            time.Sleep(time.Second * 3)
+            <-chLimit
+        }(i)
+    }
+    time.Sleep(30 * time.Second)
+}
+问题6：用chanenl实现一个互斥锁
+思路：初始化一个缓冲区为 1 的 channel，放入元素代表一把锁，谁获取到这个元素就代表获取了这把锁，释放锁的时候再把这个元素放回 channel
+package main
+
+import (
+    "log"
+    "time"
+)
+
+type Mutex struct {
+    ch chan struct{}
+}
+
+// 初始化锁
+func NewMutex() *Mutex {
+    mu := &Mutex{make(chan struct{}, 1)}
+    mu.ch <- struct{}{}
+    return mu
+}
+
+// 加锁，阻塞获取
+func (m *Mutex) Lock()  {
+    <- m.ch
+}
+
+// 释放锁
+func (m *Mutex) Unlock()  {
+    select {
+    // 成功写入channel代表释放成功
+    case m.ch <- struct{}{}:
+    default:
+        panic("unlock of unlocked mutex")
+    }
+}
+
+// 尝试获取锁
+func (m *Mutex) TryLock() bool {
+    select {
+    case <-m.ch:
+        return true
+    default:
+
+    }
+    return false
+}
+
+func (m *Mutex) LockTimeout(timeout time.Duration) bool {
+    timer := time.NewTimer(timeout)
+
+    select {
+    case <-m.ch:
+    // 成功获取锁关闭定时器
+        timer.Stop()
+        return true
+    case <-timer.C:
+
+    }
+  // 获取锁超时
+    return false
+}
+
+// 是否上锁
+func (m *Mutex) IsLocked() bool {
+    return len(m.ch) == 0
+}
+
+
+func main()  {
+    m := NewMutex()
+    ok := m.TryLock()
+    log.Printf("locked v %v\n", ok)
+    ok = m.TryLock()
+    log.Printf("locked v %v\n", ok)
+
+    go func() {
+        time.Sleep(5*time.Second)
+        m.Unlock()
+    }()
+
+    ok = m.LockTimeout(10*time.Second)
+    log.Printf("LockTimeout v %v\n", ok)
+}

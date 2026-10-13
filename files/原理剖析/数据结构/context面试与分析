@@ -1,0 +1,17 @@
+1、context 结构是什么样的？
+go语言里的context实际上是一个接口，提供了四种方法：
+Deadline() (deadline time.Time, ok bool)
+Done() <-chan struct{}
+Err() error
+Value(key interface{}) interface{}
+2、context 使用场景和用途？（基本必问）
+1. context 主要用来在 goroutine 之间传递上下文信息，比如传递请求的trace_id,以便于追踪全局唯一请求
+2. 另一个用处是可以用来做取消控制，通过取消信号和超时时间来控制子goroutine的退出，防止goroutine泄漏
+包括：取消信号、超时时间、截止时间、k-v 等。
+3、context有哪几种数据结构的实现
+有emptyCtx 、cancelCtx 、timerCtx、valueCtx四种实现
+emptyCtx：emptyCtx 虽然实现了context接口，但是不具备任何功能，因为实现很简单，基本都是直接返回空值
+cancelCtx：cancelCtx同时实现Context和Canceler接口，通过取消函数cancelFunc实现退出通知。注意其退出通知机制不但通知自己，同时也通知其children节点。
+timerCtx:  timerCtx是一个实现了Context接口的具体类型，其内部封装了cancelCtx类型实例，同时也有个deadline变量，用来实现定时退出通知
+valueCtx: valueCtx是一个实现了Context接口的具体类型,其内部封装了Context接口类型，同时也封装了一个k/v的存储变量，其是一个实现了数据传递
+

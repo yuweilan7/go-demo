@@ -1,0 +1,61 @@
+string的底层数据结构是怎样的
+go语言中字符串的底层实现是一个结构类型，包含两个字段，一个指向字节数组的指针，另一个是字符串的字节长度
+字符串可以被修改吗
+字符串不可以被修改
+[]byte转化为string互相转换会发生内存拷贝吗
+会发生内存拷贝，所以程序中应避免出现大量的长字符串的这种转换
+字符串拼接有哪几种方式，各自的性能怎么样
+方法
+说明
++
++ 拼接 2 个字符串时，会生成一个新的字符串，开辟一段新的内存空间，新空间的大小是原来两个字符串的大小之和，所以每拼接一次就要开辟一段空间，性能很差
+Sprintf
+Sprintf 会从临时对象池中获取一个 对象，然后格式化操作，最后转化为string，释放对象，实现很复杂，性能也很差
+strings.Builder
+底层存储使用[] byte，转化为字符串时可复用，每次分配内存的时候，支持预分配内存并且自动扩容，所以总体来说，开辟内存的次数就少，性能最好
+bytes.Buffer
+底层存储使用[] byte，转化为字符串时不可复用，底层实现和strings.Builder差不多，性能比strings.Builder略差一点，区别是bytes.Buffer 转化为字符串时重新申请了一块空间，存放生成的字符串变量，而 strings.Builder 直接将底层的 []byte 转换成了字符串类型返回了回来，
+append
+直接使用[]byte扩容机制，可复用，支持预分配内存和自动扩容，性能比+操作符和sprintf好
+
+补充说明
+上述表格提到 "转化成字符串时可复用"，下面做一下解释
+1. string.Builder 它可以存储[]byte，bytes.Buffer也可以，但是通过string.Builder.String() 返回的string，他底层的byte数组(往深一些是byte数组，看切片底层就知道了) 是一样的，复用同一个
+2. 而bytes.Buffer.String 返回的string，他底层的byte数组不一样，也就是没有复用内存
+
+测试代码
+package main
+import (
+    "bytes"
+    "fmt"
+    "reflect"
+    "strings"
+    "unsafe"
+)
+func main() {
+    a := []byte{1, 2, 3}
+    // 构建string.Builder 和 bytes.Buffer
+    b := strings.Builder{}
+    b.Write(a)
+    b2 := bytes.NewBuffer(a)
+    str1 := b.String()
+    str2 := b.String()
+    // 来吧，我们通过反射 来获取 str1，str2的底层描述（比如它的数组指针），不出意外，它们的数组指针是一样的（复用内存）
+    String2Bytes(str1)
+    String2Bytes(str2)
+    str3 := b2.String()
+    str4 := b2.String()
+    // 来吧，我们通过反射 来获取 str3，str4的底层描述（比如它的数组指针），不出意外，它们的数组指针不一样的（没有复用）
+    String2Bytes(str3)
+    String2Bytes(str4)
+}
+func String2Bytes(s string) {
+    sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+    // []byte
+    bh := reflect.SliceHeader{
+       Data: sh.Data,
+       Len:  sh.Len,
+       Cap:  sh.Len,
+    }
+    fmt.Println(bh.Data)
+}
