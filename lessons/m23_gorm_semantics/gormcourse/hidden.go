@@ -137,56 +137,19 @@ func (l *lab) hookCounts(ctx context.Context, id string, wantAudit, wantOutbox i
 	return require(audit == wantAudit && outbox == wantOutbox, "hook SQL回滚/提交不符合预期")
 }
 
-// relayOne在业务Transaction返回成功后调用；它只借db/broker，不启动后台任务。
-// Publish确认后再标Sent会有“发布成功、标记未成”的重复窗口，业务消费需幂等。
-// 本课演示单次界限，生产relay/恢复/幂等的完整组合由M30负责。
-func (l *lab) relayOne(ctx context.Context, id string) error {
-	var event Outbox
-	if err := l.db.WithContext(ctx).Where("id = ? AND sent = ?", id, false).First(&event).Error; err != nil {
-		return err
-	}
-	if err := l.broker.publish(ctx, event.Body); err != nil {
-		return err
-	}
-	result := l.db.WithContext(ctx).Model(&Outbox{}).Where("id = ? AND sent = ?", id, false).Update("sent", true)
-	return errors.Join(result.Error, require(result.RowsAffected == 1, "outbox标记应真实修改1行"))
-}
-
-// hookCases对照未提交hook发送真实MQ和同tx outbox修复，不以Slice日志代替broker。
-// 外部confirm、Get/Ack、SQL回滚、outbox提交是不同证据，逐个断言。
+// hookCases 用独立 SELECT 对照回滚与提交，验证库存、订单和事件意图共用事务。
 func (l *lab) hookCases(ctx context.Context) error {
-	for _, sku := range []string{"hook-unsafe", "hook-fixed-rollback", "hook-fixed-commit"} {
+	for _, sku := range []string{"hook-fixed-rollback", "hook-fixed-commit"} {
 		if err := l.seed(ctx, sku, "hook", 5); err != nil {
 			return err
 		}
 	}
 	root := l.db.WithContext(ctx)
 	err := root.Transaction(func(tx *gorm.DB) error {
-		if err := l.reserve(tx, "hook-unsafe", "hook", 1); err != nil {
-			return err
-		}
-		if err := tx.Create(&Order{ID: "hook-unsafe", SKU: "hook-unsafe", Owner: "hook", Quantity: 1, Lab: l, Mode: "unsafe-mq"}).Error; err != nil {
-			return err
-		}
-		return ErrBusiness // hook已真实broker Ack；现在才发生业务失败，SQL回滚不能撤回事件。
-	})
-	if err := require(errors.Is(err, ErrBusiness), "hook危险case应业务失败"); err != nil {
-		return err
-	}
-	if err := l.verify(ctx, "hook.unsafe-rollback", "hook-unsafe", "hook-unsafe", 5, 0); err != nil {
-		return err
-	}
-	if err := l.hookCounts(ctx, "hook-unsafe", 0, 0); err != nil {
-		return err
-	}
-	if err := l.broker.take("hook-unsafe"); err != nil {
-		return err
-	}
-	err = root.Transaction(func(tx *gorm.DB) error {
 		if err := l.reserve(tx, "hook-fixed-rollback", "hook", 1); err != nil {
 			return err
 		}
-		if err := tx.Create(&Order{ID: "hook-fixed-rollback", SKU: "hook-fixed-rollback", Owner: "hook", Quantity: 1, Lab: l, Mode: "outbox"}).Error; err != nil {
+		if err := tx.Create(&Order{ID: "hook-fixed-rollback", SKU: "hook-fixed-rollback", Owner: "hook", Quantity: 1, Lab: l}).Error; err != nil {
 			return err
 		}
 		return ErrBusiness
@@ -200,14 +163,11 @@ func (l *lab) hookCases(ctx context.Context) error {
 	if err := l.hookCounts(ctx, "hook-fixed-rollback", 0, 0); err != nil {
 		return err
 	}
-	if err := l.broker.empty(); err != nil {
-		return err
-	}
 	err = root.Transaction(func(tx *gorm.DB) error {
 		if err := l.reserve(tx, "hook-fixed-commit", "hook", 1); err != nil {
 			return err
 		}
-		return tx.Create(&Order{ID: "hook-fixed-commit", SKU: "hook-fixed-commit", Owner: "hook", Quantity: 1, Lab: l, Mode: "outbox"}).Error
+		return tx.Create(&Order{ID: "hook-fixed-commit", SKU: "hook-fixed-commit", Owner: "hook", Quantity: 1, Lab: l}).Error
 	})
 	if err != nil {
 		return err
@@ -218,18 +178,14 @@ func (l *lab) hookCases(ctx context.Context) error {
 	if err := l.hookCounts(ctx, "hook-fixed-commit", 1, 1); err != nil {
 		return err
 	}
-	if err := l.broker.empty(); err != nil {
-		return err
-	} // Commit并不自动发MQ，必须显式relay。
-	if err := l.relayOne(ctx, "hook-fixed-commit"); err != nil {
-		return err
-	}
-	if err := l.broker.take("hook-fixed-commit"); err != nil {
-		return err
-	}
+	var body string
 	var sent bool
-	if err := l.pool.QueryRowContext(ctx, "SELECT sent FROM "+quote(l.tables[4])+" WHERE id=?", "hook-fixed-commit").Scan(&sent); err != nil {
+	if err := l.pool.QueryRowContext(ctx, "SELECT body, sent FROM "+quote(l.tables[4])+" WHERE id=?", "hook-fixed-commit").Scan(&body, &sent); err != nil {
 		return err
 	}
-	return require(sent, "outbox Sent持久标记未成立")
+	if err := require(body == "hook-fixed-commit" && !sent, "已提交的事件意图应等待发布"); err != nil {
+		return err
+	}
+	fmt.Fprintln(l.out, "[outbox.pending] sent=false")
+	return nil
 }

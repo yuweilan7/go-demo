@@ -39,12 +39,6 @@
       "readonly_tcp": false
     },
     {
-      "id": "rabbitmq-learning",
-      "local_address": "",
-      "state": "pending M28 installer inventory and isolated installation; no port reservation yet",
-      "readonly_tcp": false
-    },
-    {
       "id": "kafka-learning",
       "local_address": "",
       "state": "pending M29 installer inventory and isolated KRaft installation; no port reservation yet",

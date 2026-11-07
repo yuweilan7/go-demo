@@ -38,9 +38,9 @@ README 从入口到真实副作用给出阅读顺序和带符号定位的完整�
 
 3. 读 Transaction callback、Begin/Commit/Rollback、WithContext、Session/Scopes 及实际连接传递，复现 tx callback 里用了外层 db、吞 error 返回 nil、panic 被内层恢复成成功。与 M21 的逐行断言对照，默认单条写事务不等于整段业务事务。
 
-4. 用软删除、关联 preload/N+1、分页和 hook 演示隐藏行为：hook 必须明确使用哪个 tx，不能在未提交 hook 里向 MQ 发不可回滚事件。AutoMigrate 仅在独占教学 schema 使用，线上演进由 M24 管理。
+4. 用软删除、关联 preload/N+1、分页和 hook 演示隐藏行为：hook 必须使用当前 tx 写审计与 outbox，回滚后逐表读回。AutoMigrate 仅在独占教学 schema 使用，线上演进由 M24 管理。
 
-5. 验收真实 SQL、正确零值、归属过滤、回滚、panic、context 超时与可解释的行数；日志做脱敏。直接将链式调用还原成 SQL，展示漏用户条件和零值更新修复，并解释 hook 成功但事务回滚后的外部事件。
+5. 验收真实 SQL、正确零值、归属过滤、回滚、panic、context 超时与可解释的行数；日志做脱敏。直接将链式调用还原成 SQL，展示漏用户条件和零值更新修复，并验证 hook 写入的事件意图与业务数据一起回滚。
 
 ## 资料与结束条件
 

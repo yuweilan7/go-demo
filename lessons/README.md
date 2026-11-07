@@ -46,7 +46,6 @@ go -C lessons/m17_net_http vet ./...
 | [M18](m18_gin_middleware/README.md) | Gin 路由、middleware、绑定与请求作用域 | M17 | 已验收 |
 | [M20](m20_sql_pools/README.md) | database/sql、真实 MySQL 与连接池生命周期 | M00 | 已验收 |
 | [M25](m25_redis_client/README.md) | 真实 Redis、go-redis、TTL 与命令原子边界 | M00 | 已验收 |
-| [M28](m28_rabbitmq_delivery/README.md) | RabbitMQ：ack、confirm、重连与毒消息 | M00 | 已验收 |
 | [M29](m29_kafka_offsets/README.md) | Kafka：分区、offset、rebalance 与至少一次处理 | M00 | 已验收 |
 | [M33](m33_resilience_retries/README.md) | 超时、重试、熔断、限流和资源隔离 | M13、M17 | 已验收 |
 

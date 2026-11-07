@@ -284,9 +284,9 @@ Redis 连接/命令超时各 2 秒，无自动重试；PG connect_timeout=3、st
 
 第一次远端 inventory 失败原因是 SSH 账号直接 docker 无权限；改用允许的 `sudo -n docker` 固定只读操作后成功。第一次 remote bash -n 失败原因是 Windows `text=True` stdin 把 LF 转成 CRLF；改为 UTF-8 字节管道，远端 syntax 核验通过。两次失败均保存在本课 `.local/`，STATUS 保留原因，不把修复前输出改写为 PASS。
 
-修复 Redis 范围后已重跑 `-TemporaryTunnel`，真实 Redis/PG 鉴权仍通过，自己的 SSH 进程已等待退出，两临时端口关闭。该次远端只读盘点为 Linux x86_64、4 CPU、RAM 7685 MiB / available 3347 MiB，`/srv` 所在磁盘 available 28666 MiB、51% 已用。这是一次快照，不是未来容量保证。Redis/PG 容器 running，旧 `deephelp-mysql|mysql:8.4.11|Exited (0) 6 days ago`；当前容器清单没有登记 Go 学习 MySQL/RabbitMQ/Kafka，也没有因看到其他监听端口就猜组件归属。旧 MYSQL_DSN/密码/恢复卷仍存在不证明当前可连接，更不表示有权恢复双写。
+修复 Redis 范围后已重跑 `-TemporaryTunnel`，真实 Redis/PG 鉴权仍通过，自己的 SSH 进程已等待退出，两临时端口关闭。该次远端只读盘点为 Linux x86_64、4 CPU、RAM 7685 MiB / available 3347 MiB，`/srv` 所在磁盘 available 28666 MiB、51% 已用。这是一次快照，不是未来容量保证。Redis/PG 容器 running，旧 `deephelp-mysql|mysql:8.4.11|Exited (0) 6 days ago`；当前容器清单没有登记 Go 学习 MySQL/Kafka，也没有因看到其他监听端口就猜组件归属。旧 MYSQL_DSN/密码/恢复卷仍存在不证明当前可连接，更不表示有权恢复双写。
 
-端点地图、后续安装者的内核 flock、资源额度提案、端口登记和隔离名在 [安装协调约定](infra/INSTALLATION_CONTRACT.md)。M20/M28/M29 到首次需要时再核对并安装自己的实例；本课没有创建远端学习根/锁、运行安装命令、写业务数据或重启恢复实验。
+端点地图、后续安装者的内核 flock、资源额度提案、端口登记和隔离名在 [安装协调约定](infra/INSTALLATION_CONTRACT.md)。M20/M29 到首次需要时再核对并安装自己的实例；本课没有创建远端学习根/锁、运行安装命令、写业务数据或重启恢复实验。
 
 ## 启发材料中需要纠正的结论
 

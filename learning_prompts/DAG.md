@@ -9,7 +9,7 @@
 | 层 | 这一层可并行生成的模块 | 数量 |
 | --- | --- | --- |
 | 0 | M00、M01、M02、M03、M04、M05、M06、M07、M08、M09、M10、M11、M12、M13、M14、M17、M31、M34、M35 | 19 |
-| 1 | M15、M18、M20、M25、M28、M29、M33 | 7 |
+| 1 | M15、M18、M20、M25、M29、M33 | 6 |
 | 2 | M16、M19、M21、M24、M27 | 5 |
 | 3 | M22、M23、M26、M30、M32 | 5 |
 | 4 | M37 | 1 |
@@ -52,7 +52,6 @@ flowchart TD
   M25["M25 真实 Redis、go-redis、TTL 与命令原子边界"]
   M26["M26 缓存一致性、singleflight、热点与降级"]
   M27["M27 Redis 锁、租约、fencing 与限流"]
-  M28["M28 RabbitMQ"]
   M29["M29 Kafka"]
   M30["M30 MySQL + Kafka"]
   M31["M31 gRPC/Protobuf"]
@@ -86,7 +85,6 @@ flowchart TD
   M25 --> M27
   M13 --> M27
   M20 --> M27
-  M00 --> M28
   M00 --> M29
   M21 --> M30
   M29 --> M30
@@ -111,7 +109,7 @@ flowchart TD
 
 - M15 组合四种并发机制，M16 再组合任务停止和定时/服务生命周期。
 - M18 对照标准 HTTP 接入 Gin，M19 再组合接口和装配，M32 对照装配/RPC 阅读真实框架。
-- M20/M25/M28/M29 共用 M00 的基础设施接入约定，分别拥有自己的安装/数据范围，不共写 Go 源码。
+- M20/M25/M29 共用 M00 的基础设施接入约定，分别拥有自己的安装/数据范围，不共写 Go 源码。
 - M21 将 error、defer、panic 与真实 SQL 合起来；M22/M23 基于其事务不变量，M24 可以在 M20 后独立开展。
 - M26 组合真实 Redis、MySQL 事务与已验证的并发机制；M27 组合 Redis、context 与真实 MySQL fencing 校验，二者互不依赖。
 - M30 组合 SQL 与 Kafka 的失败窗口；M37 组合数据契约、装配、GORM、缓存、outbox、RPC。
@@ -135,4 +133,4 @@ flowchart TD
 4. 当前层全部验收通过后才启动下一层；各节点独立实施，完成后在它自己的 STATUS 记录结果。
 5. 资源不足/硬前置未完成时保持其关键验收未完成，其他已就绪节点继续。
 
-依赖图已按全部 39 个节点、42 条边做拓扑校验，无环，共 19 个根节点、7 层。本轮全部 39 课已按严格整层屏障完成主验收，交付与实际范围见 [课程目录](../lessons/README.md) 和 [主验收记录](../lessons/ACCEPTANCE.md)。最终执行、提交和监测收尾状态以 .local/course-orchestrator/state.json 为准；JSON 的 wave 表示规划层。
+依赖图已按全部 38 个节点、41 条边做拓扑校验，无环，共 19 个根节点、7 层。现行 38 课的原始验收已按整层完成，交付与实际范围见 [课程目录](../lessons/README.md) 和 [主验收记录](../lessons/ACCEPTANCE.md)。最终执行、提交和监测收尾状态以 .local/course-orchestrator/state.json 为准；JSON 的 wave 表示规划层。

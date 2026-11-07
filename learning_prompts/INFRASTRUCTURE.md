@@ -10,7 +10,6 @@
 | --- | --- | --- |
 | Redis | 8.2.8，`127.0.0.1:16389` | 复用既有 DeepHelp Redis，M25 实际 AUTH/键值/TTL/并发/响应失败验收；不得停机、改全局配置或 broad delete。 |
 | MySQL | 8.4.11，`127.0.0.1:13306` | 新容器 `golearn-course-mysql`、新 volume `golearn-course-mysql-data`；512MiB、1CPU、max_connections=32、InnoDB128MiB。课程账号只在 `golearn_m20` 有权限；后课可用本库的独占模块/run 表，不复用 M20 数据。真实重启写读保持，M20 已验收。 |
-| RabbitMQ | 4.3.6，`127.0.0.1:15673` | 新容器/volume，512MiB、1CPU、独占 vhost `/golearn_m28`；M28 已验收真实 confirm、投递、重投、DLQ、业务效果和精确清理，安装者已核验重启持久读回。 |
 | Apache Kafka | 4.3.1，`127.0.0.1:19192` | 新单节点 KRaft 容器/volume，768MiB、1CPU、heap256MiB；metadata 返回同一 loopback 地址。当前为课程专用 PLAINTEXT，M29 已验收分区/offset/rebalance/真实 stop/start 恢复；非多节点或生产鉴权证明。 |
 
 学习根为 `/srv/go-demo-learning`，Compose project=`golearn-course`，容器和 named volume 的 owner labels 已实际核对。镜像 tag/digest、资源配置、安装失败/修复、运行锁竞争/超时与持久性报告保存在主目录 `.local/course-orchestrator/`。初选 `mysql:8.4.12` 的 manifest 实际不存在，已保留失败并改用可拉取的 8.4.11，不能把运行版本写成 8.4.12。
@@ -29,7 +28,6 @@
 | PostgreSQL | DeepHelp 已使用独立 PG 根，文档本机/服务器入口 15432；活动业务事实在正式库 | 本路线主数据库选 MySQL；不得写正式 PG 业务库，未来 PG 对照另建独立学习库 |
 | Milvus/etcd | DeepHelp 的检索组件 | 本路线不需要安装、重建集合或做容量负载 |
 | MySQL | M30 已退役旧 MySQL；原数据/密码/冷备/旧源码保留供恢复，已退出默认隧道/health | M20 首次需要时新建 go-demo 学习实例，绝不恢复旧数据目录当课堂数据库 |
-| RabbitMQ | 本次所读现行配置没有登记 | M28 首次执行时安装独立 broker |
 | Kafka | 本次所读现行配置没有登记 | M29 首次执行时安装独立单节点 KRaft broker，后续 M30/M37 复用 |
 
 “未登记”不是扫描全服务器后的不存在证明。先查真实容器、服务、端口和资源；发现现有独立学习实例就核对版本/归属并复用，不重复安装。
@@ -46,7 +44,7 @@
 
 这是一把基础设施变更锁，不锁所有 Go 文件、正常数据库连接或模块独占数据。MySQL/Redis/Kafka 的正常隔离实验可按容量并行。
 
-M00 交付接入地图/锁和命名规范；M20/M28/M29 各自首次安装需要的组件。索引一旦变化，仅由安装者更新其权威版本；消费模块把使用的版本记在自己的 STATUS，不共同改根课程索引。
+M00 交付接入地图/锁和命名规范；M20/M29 各自首次安装需要的组件。索引一旦变化，仅由安装者更新其权威版本；消费模块把使用的版本记在自己的 STATUS，不共同改根课程索引。
 
 ## 首次安装要做的具体工作
 
@@ -70,7 +68,6 @@ Kafka 还必须验证 broker 返回的 advertised.listeners 地址可从客户�
 | 私有配置/报告 | 每课自己的 `.local/`、`.secrets/`，本目录 .gitignore 排除 | 报告与秘密分开；保留有效连接配置和必要失败证据 |
 | MySQL | `golearn_mXX_run` 独立库，或核对后的课程库内独占表前缀 | 只删本课本 run 自建对象，先核对实际目标 |
 | Redis | `golearn:mXX:run:*`，合成键设置 TTL | 仅按记录精确删除自己的键；禁 FLUSHDB/FLUSHALL 和 broad scan-delete |
-| RabbitMQ | 独立 vhost/user；队列带模块/run | 只删自己的队列/binding 或已退出的实验 vhost |
 | Kafka | 独立 topic/group/client id，保留小数据 | 不删除其他课 topic；不重置别人的 offset |
 | HTTP/gRPC/metrics/pprof | 动态 loopback 端口或登记后的专属端口 | 只停止自己创建的进程/监听器 |
 | 服务器实验进程 | 课程独立运行目录、进程/容器和端口，记录实际 owner | 只管理本课进程，不切换 DeepHelp 单元或覆盖受引用安装 |
@@ -79,7 +76,7 @@ M30/M37 用自己的业务库/topic/缓存前缀，复用服务器实例不等�
 
 ## 故障和证据边界
 
-共享 Redis/PG 的故障用课程独占网络代理、连接隔离或独立实例实现；不重启共享服务。课程自己的 Kafka/RabbitMQ/MySQL 也只在 owner 明确、其他实验没有使用时做进程故障；停止后恢复并核对状态。
+共享 Redis/PG 的故障用课程独占网络代理、连接隔离或独立实例实现；不重启共享服务。课程自己的 Kafka/MySQL 也只在 owner 明确、其他实验没有使用时做进程故障；停止后恢复并核对状态。
 
 每个命令要记录工作目录、服务端/客户端版本、命名空间、超时/并发限制、结果和清理。证明点分别是：
 

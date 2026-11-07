@@ -20,7 +20,7 @@ type Stock struct {
 }
 
 // Order 是库存业务的第二步。Lines 是 has-many 关系；外键名称指向 Line.OrderID。
-// Lab/Mode 是进程内 hook 配置，gorm:"-" 使它们不成为列。读取数据库不会还原它们。
+// Lab 是进程内 hook 配置，gorm:"-" 使它们不成为列。读取数据库不会还原它们。
 type Order struct {
 	ID       string `gorm:"primaryKey;size:80"`
 	SKU      string `gorm:"size:80;not null"`
@@ -28,7 +28,6 @@ type Order struct {
 	Quantity int64  `gorm:"not null"`
 	Lines    []Line `gorm:"foreignKey:OrderID;references:ID"`
 	Lab      *lab   `gorm:"-"`
-	Mode     string `gorm:"-"`
 }
 type Line struct {
 	ID      uint64 `gorm:"primaryKey"`
@@ -56,21 +55,11 @@ func (o *Order) AfterCreate(tx *gorm.DB) error {
 	if _, ok := tx.Statement.ConnPool.(*sql.Tx); !ok {
 		return errors.New("hook未借到真实sql.Tx")
 	}
-	l := o.Lab // 指针别名，访问本run的broker/output；本同步hook不创建goroutine。
-	fmt.Fprintf(l.out, "[hook] order=%s pool=%T 未提交 mode=%s\n", o.ID, tx.Statement.ConnPool, o.Mode)
+	l := o.Lab // 指针别名，访问本run的输出；本同步hook不创建goroutine。
+	fmt.Fprintf(l.out, "[hook] order=%s pool=%T 未提交\n", o.ID, tx.Statement.ConnPool)
 	if err := tx.Create(&HookAudit{ID: o.ID}).Error; err != nil {
 		return err
 	}
-	switch o.Mode {
-	case "unsafe-mq":
-		// 故意危险：WaitContext等到真实broker confirm，但MySQL还没有COMMIT。
-		// hook返回nil不能撤销AMQP事件；后续callback失败只能回滚SQL。
-		return l.broker.publish(tx.Statement.Context, o.ID)
-	case "outbox":
-		// 修复：只在当前tx插事件意图。callback回滚时订单/audit/outbox一起消失。
-		// 真正publish由hook外的relay在COMMIT成功后执行；不是分布式原子提交。
-		return tx.Create(&Outbox{ID: o.ID, Body: o.ID}).Error
-	default:
-		return errors.New("未知hook模式")
-	}
+	// 订单、audit 和待发布事件共用当前事务，发布者只会看见已经提交的事件。
+	return tx.Create(&Outbox{ID: o.ID, Body: o.ID}).Error
 }

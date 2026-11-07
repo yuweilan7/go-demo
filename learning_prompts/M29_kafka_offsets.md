@@ -24,7 +24,7 @@ README 从入口到真实副作用给出阅读顺序和带符号定位的完整�
 
 硬前置：M00
 
-推荐知识前置：建议 M05/M13/M15；M28 是不同 MQ 分支，无须先完成。
+推荐知识前置：建议 M05/M13/M15。
 
 学完要能：能读 Kafka Go 消费代码，区分 poll、处理、数据库提交、offset 提交及分区顺序。
 
@@ -40,7 +40,7 @@ README 从入口到真实副作用给出阅读顺序和带符号定位的完整�
 
 4. 真实加入/退出第二消费者触发 rebalance，说明 revoke 时在途工作、bounded processing、允许 rebalance 与提交边界；不能让旧 owner 在新 owner 接管后无限继续副作用。Kafka 事务的 exactly-once 保证有范围，不自动覆盖外部 MySQL/Redis。
 
-5. 验收确认生产、读回 key/value/partition/offset、组内重分配、重复处理窗口、错误处理与正常停机；保留稳定 event_id。在实验中解析异步乱序 commit 的错误与修复、producer ack 和消费完成的差别，以及跨分区没有全局顺序的原因；RabbitMQ 与 Kafka 比较只围绕代码语义。
+5. 验收确认生产、读回 key/value/partition/offset、组内重分配、重复处理窗口、错误处理与正常停机；保留稳定 event_id。在实验中解析异步乱序 commit 的错误与修复、producer ack 和消费完成的差别，以及跨分区没有全局顺序的原因。
 
 ## 资料与结束条件
 

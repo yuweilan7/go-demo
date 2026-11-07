@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 后续 M20/M28/M29 安装者在授权服务器运行；M00 只交付并做 bash -n，不获取远端锁。
+# 后续 M20/M29 安装者在授权服务器运行；M00 只交付并做 bash -n，不获取远端锁。
 # 用法：bash with-install-lock.sh ROOT m20 RUN 900 -- bash install-mysql.sh
 # ROOT 必须是已核对的学习根，control 已由安装者准备，不能指向 DeepHelp 根。
 set -Eeuo pipefail

@@ -2,7 +2,7 @@
 
 2026-10-12（Asia/Shanghai），第 0～6 层全部 39 个模块已经由主 agent 阅读实际源码、完整模块 prompt、中文文档与实验记录，并执行必要独立复验。课程由独立 worktree 生成，汇总时逐文件比对验收时的 SHA256；第 0 层395个、第 1 层130个、第 2 层106个、第 3 层97个、第 4 层19个、第 5 层20个、第 6 层17个模块文件，共 **784 个课程文件**全部一致。导航和编排文档另行检查。主 agent 按整层提交，提交 SHA 与详细无秘密验收回执保存在本机 `.local/course-orchestrator/`，也可从 Git 历史查看各层中文提交。
 
-当前真实交付为 **39/39**。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证；M37 接成真实订单业务，M38 验证通信故障、进程强杀和原事实恢复，M39 完成新订单状态切片接手、AI候选审查与最小修复的实证。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据，本记录描述主 agent 独立验收的实际范围。
+现行目录包含 **38 课**。M28 及运行依赖于 2026-11-07 下线，M23 保留真实 MySQL 实验和同事务 outbox。以下原验收记录以 2026-10-12 的交付为时间边界。MySQL、Redis、RabbitMQ、Kafka 的基础交互，事务、schema演进、Redis租约与SQL拒旧写、隔离/ORM、缓存一致性、outbox 和真实微服务框架已实际验证；M37 接成真实订单业务，M38 验证通信故障、进程强杀和原事实恢复，M39 完成新订单状态切片接手、AI候选审查与最小修复的实证。模块 STATUS 是执行者的实际实验记录；它的 READY/PASS 文字本身不是主验收依据，本记录描述主 agent 独立验收的实际范围。
 
 ## 第 0 层实际验收
 
@@ -36,7 +36,6 @@
 | [M18](m18_gin_middleware/README.md) | Gin1.12.0真实Next顺序、Abort忘return导致401后多JSON与错误写入；ShouldBind、业务校验、body缓存与严格边界。8个同key请求只1订单；Copy浅拷贝/借用生命周期、同goroutine Recovery与两个真实panic子进程、认证/资源归属/代理、取消后晚写与504均直接观察。正常run、14项真实race测试、vet通过，handler/连接/body/job归零且Serve joined。 |
 | [M20](m20_sql_pools/README.md) | MySQL8.4.11/driver1.10.1真实参数写读、NULL/空串、DECIMAL分、UTC微秒、ErrNoRows和Scan错误；Rows未关闭/Tx再借DB导致MaxOpen1真实排队deadline。PROCESSLIST先见UPDATE、已借连接WaitCount0，取消回滚并等服务端连接消失后SELECT仍101、池恢复。主审返工拆Result/Finished，确定性清理gate阻止提前join。修复版全run/5项真实integration race/vet通过；每run表DROP后查询remaining0，DB全0。 |
 | [M25](m25_redis_client/README.md) | Redis8.2.8/go-redis9.23真实46条语义断言：TTL -1/-2、丢更新与INCR、Pipeline/MULTI运行时错误/Lua不回滚、INCR→EXPIRE窗口与Lua修复、连接池与ctx取消预算差别。独占真实连接延迟响应时INCR已成功而客户端超时，未盲重放。6项真实race测试通过；独立RESP检查23个精确键全部不存在，任务18/18加入、10个socket归零；warmup错误链已修复。 |
-| [M28](m28_rabbitmq_delivery/README.md) | Rabbit4.3.6/amqp091-go1.15真实8组：confirm不等于业务完成、mandatory return312仍可publisher ACK、PublishWithContext取消I/O边界、提前ACK丢业务、提交未ACK断连重投与继续新消息、同ID效果1、有限TTL retry/DLQ与x-death、多条ACK误确认、foreign channel真实406。root全run/3项真实race/vet通过，两轮各删24队列/24exchange；独立rabbitmqctl检查队列/exchange为空、课程用户连接0。 |
 | [M29](m29_kafka_offsets/README.md) | Kafka4.3.1/franz1.22.1真实key/value原始字节/partition/offset读回、next位置、业务前commit丢处理、业务后未commit重投、乱序commit跳过低任务与watermark修复。broker确认Stable成员1→2→1，旧generation取消且Done后才交接，迟到效果0。root全core/真实race/vet通过，两份实际JSONL均16尝试/15效果；另一个只读admin确认课程topic/group为空。真实独占stop/start后before/after原始ACK一致、next1/2；B协调超时清理及C提前读marker的时间偏差诚实保留，没有把marker当broker实证。 |
 | [M33](m33_resilience_retries/README.md) | 真实HTTP总预算/单次预算、次数、Retry-After、Reader重放、三层12→2倍增、gobreaker半开成功/失败、有限排队与健康路径隔离。主审返工：实际已commit后坏JSON/超限/缺或错201回执均UNKNOWN，返回caller原key GET对账，每例rows1/POST1；空body写不能绕过key规则，可信提交前422仍确定失败。root五组run/13项真实race及6个新子例/vet通过；Result后cleanup gate仍未开放时owner不能提前完成。 |
 
