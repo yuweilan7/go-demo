@@ -334,18 +334,6 @@
       "wave": 2
     },
     {
-      "id": "M28",
-      "title": "RabbitMQ：ack、confirm、重连与毒消息",
-      "prompt": "M28_rabbitmq_delivery.md",
-      "lesson_dir": "lessons/m28_rabbitmq_delivery",
-      "hard_dependencies": [
-        "M00"
-      ],
-      "recommended_knowledge": "建议 M05/M07/M13/M15；MQ 完全没有学习前提。",
-      "priority": "按需/快进",
-      "wave": 1
-    },
-    {
       "id": "M29",
       "title": "Kafka：分区、offset、rebalance 与至少一次处理",
       "prompt": "M29_kafka_offsets.md",
@@ -353,7 +341,7 @@
       "hard_dependencies": [
         "M00"
       ],
-      "recommended_knowledge": "建议 M05/M13/M15；M28 是不同 MQ 分支，无须先完成。",
+      "recommended_knowledge": "建议 M05/M13/M15。",
       "priority": "重点",
       "wave": 1
     },
@@ -366,7 +354,7 @@
         "M21",
         "M29"
       ],
-      "recommended_knowledge": "建议 M22/M24；RabbitMQ M28 是可选迁移分支。",
+      "recommended_knowledge": "建议 M22/M24。",
       "priority": "重点",
       "wave": 3
     },
@@ -498,7 +486,6 @@
       "M18",
       "M20",
       "M25",
-      "M28",
       "M29",
       "M33"
     ],

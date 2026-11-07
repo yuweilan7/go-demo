@@ -1,4 +1,4 @@
-// Package gormcourse 用真实 MySQL/AMQP 展开 GORM 的业务副作用。
+// Package gormcourse 用真实 MySQL 展开 GORM 的业务副作用。
 package gormcourse
 
 import (
@@ -22,13 +22,13 @@ type endpoint struct {
 	Version        string `json:"server_version"`
 	CredentialFile string `json:"credential_file"`
 }
-type secret struct{ Username, User, Password, Database, Vhost string }
+type secret struct{ Username, Password, Database string }
 type config struct {
-	mysql, rabbit       endpoint
-	sqlSecret, mqSecret secret
+	mysql     endpoint
+	sqlSecret secret
 }
 
-// loadConfig 由 Run 调用，只读取 READY 索引和其中登记的两个秘密文件。
+// loadConfig 由 Run 调用，只读取 READY 索引和其中登记的 MySQL 凭据。
 // ReadFile 返回文件内容的 byte slice；Unmarshal 借用 target 指针填充结构体。
 // 错误只报告来源类别，不输出文件内容、password 或 URI。
 func loadConfig() (config, error) {
@@ -40,28 +40,21 @@ func loadConfig() (config, error) {
 	if err := readJSON(path, &index); err != nil {
 		return config{}, errors.New("读取服务索引失败")
 	}
-	c := config{mysql: index.Services["mysql"], rabbit: index.Services["rabbitmq"]}
-	for _, e := range []endpoint{c.mysql, c.rabbit} {
-		if e.State != "READY" || e.Host != "127.0.0.1" || e.Port < 1 || e.Port > 65535 || e.Version == "" {
-			return config{}, errors.New("只允许已登记 READY loopback 服务")
-		}
+	mysql := index.Services["mysql"]
+	if mysql.State != "READY" || mysql.Host != "127.0.0.1" || mysql.Port < 1 || mysql.Port > 65535 || mysql.Version == "" {
+		return config{}, errors.New("只允许已登记 READY loopback MySQL")
 	}
+	c := config{mysql: mysql}
 	if err := readJSON(c.mysql.CredentialFile, &c.sqlSecret); err != nil {
 		return config{}, errors.New("读取 MySQL 私有凭据失败")
 	}
-	if err := readJSON(c.rabbit.CredentialFile, &c.mqSecret); err != nil {
-		return config{}, errors.New("读取 RabbitMQ 私有凭据失败")
-	}
-	if c.mqSecret.Username == "" {
-		c.mqSecret.Username = c.mqSecret.User
-	}
-	if c.sqlSecret.Database != "golearn_m20" || c.sqlSecret.Username == "" || c.sqlSecret.Password == "" || c.mqSecret.Username == "" || c.mqSecret.Password == "" || c.mqSecret.Vhost != "/golearn_m28" {
-		return config{}, errors.New("凭据不符合限定课程库/vhost契约")
+	if c.sqlSecret.Database != "golearn_m20" || c.sqlSecret.Username == "" || c.sqlSecret.Password == "" {
+		return config{}, errors.New("凭据不符合限定课程库契约")
 	}
 	return c, nil
 }
 
-// readJSON 是小配置文件的解码入口，不拥有返回后的数据库/MQ资源。
+// readJSON 是小配置文件的解码入口，不拥有返回后的数据库资源。
 // os.ReadFile 内部关闭文件；我们限制正文尺寸，拒绝错误文件成为无限内存输入。
 func readJSON(path string, target any) error {
 	b, err := os.ReadFile(path)

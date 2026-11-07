@@ -1,18 +1,18 @@
 # M23：把 GORM 链式代码还原成 SQL、事务和外部事件
 
-本课围绕同一类库存订单业务：库存初始 5，扣 1，再插一条订单。它延续 M21 的业务不变量，使用本课自己的随机表，把 `database/sql` 中明确的连接归属迁到真实 GORM。你会看到能编译、没有 panic、甚至 callback 返回 nil 的程序依然留下错误库存；也会看到 MySQL 全部回滚后，RabbitMQ 仍真实投递出 hook 提前发出的事件。
+本课围绕同一类库存订单业务：库存初始 5，扣 1，再插一条订单。它延续 M21 的业务不变量，使用本课自己的随机表，把 `database/sql` 中明确的连接归属迁到真实 GORM。你会看到能编译、没有 panic、甚至 callback 返回 nil 的程序依然留下错误库存；也会用独立 SQL 连接核对 hook 写入的审计与 outbox 如何随事务提交或回滚。
 
-实际版本为 Go **1.27.0 windows/amd64**、GORM **v1.31.2**、MySQL dialector **v1.6.0**、`go-sql-driver/mysql` **v1.10.1**、MySQL **8.4.11**、`amqp091-go` **v1.15.0**、RabbitMQ **4.3.6**。版本来自本机命令、锁定 module 与真实服务索引/SQL；不把官网示例的 API 签名直接套进另一版本。本课没有 SQLite 实库，没有模拟 broker。
+实际版本为 Go **1.27.0 windows/amd64**、GORM **v1.31.2**、MySQL dialector **v1.6.0**、`go-sql-driver/mysql` **v1.10.1**、MySQL **8.4.11**。版本来自本机命令、锁定 module 与真实服务索引/SQL；不把官网示例的 API 签名直接套进另一版本。
 
 ## 先用 15 分钟讲清一个核心实验
 
-这里的核心是“同一笔库存订单，SQL 成功、事务提交、MQ 接受分别在什么时候成立”。代码通常在一分钟内跑完，10～20 分钟用于对照反例和解释，没有另建 exercise。
+这里的核心是“同一笔库存订单，SQL 成功、事务提交、事件进入待发布队列分别在什么时候成立”。代码通常在一分钟内跑完，10～20 分钟用于对照反例和解释，没有另建 exercise。
 
 | 时间 | 阅读/运行位置 | 需要自己说清的事实 |
 | --- | --- | --- |
 | 0～3 分钟 | 正常入口，E01，`Stock` | `Updates(struct)` 怎么把合法 0/false 丢掉，为什么 map/Select 能修 |
 | 3～7 分钟 | E02/E03，`reserve → Transaction → insertOrder` | 句柄是否带 Tx，看连接对象；传统链与泛型链怎么复用 |
-| 7～11 分钟 | E05，`Order.AfterCreate → broker.publish` | hook 的 After 是 INSERT 之后、COMMIT 之前；真实 MQ 不接受 SQL Rollback |
+| 7～11 分钟 | E05，`Order.AfterCreate → outbox` | hook 的 After 是 INSERT 之后、COMMIT 之前；outbox 随同一事务提交或回滚 |
 | 11～15 分钟 | E06，`cancelCase → waitSQL → join` | timeout 通知、客户端 Done、服务端会话消失、独立查账各证明什么 |
 | 15～20 分钟 | E04、源码与测试 | 软删除/Preload/分页的隐含 SQL，失败出口的资源归属 |
 
@@ -24,9 +24,9 @@ go -C lessons/m23_gorm_semantics test -v -count=1 -timeout 30s ./...
 go -C lessons/m23_gorm_semantics vet ./...
 ```
 
-默认索引为 `D:/IdeaProject/go-demo/.local/course-orchestrator/infra-services.json`。若在不同路径使用安装者交付的同类索引，设置 `GOLEARN_SERVICE_INDEX` 为**索引文件路径**。程序再读取 `services.mysql/rabbitmq.credential_file`；凭据只在内存使用，不能把整个 config、DSN、AMQP URI 打印出来。
+默认索引为 `D:/IdeaProject/go-demo/.local/course-orchestrator/infra-services.json`。若在不同路径使用安装者交付的同类索引，设置 `GOLEARN_SERVICE_INDEX` 为**索引文件路径**。程序再读取 `services.mysql.credential_file`；凭据只在内存使用，不能把整个 config、DSN 打印出来。
 
-demo 必须连真实 MySQL 和 RabbitMQ，接入失败就非零退出。普通 test 明确 SKIP `TestRealMySQLAndAMQP`，只运行六个辅助断言；SKIP 不能算实库 PASS。完整实库测试显式开启：
+demo 必须连真实 MySQL，接入失败就非零退出。普通 test 明确 SKIP `TestRealMySQL`，只运行离线辅助断言；SKIP 不能算实库 PASS。完整实库测试显式开启：
 
 ```powershell
 $savedIntegration = [Environment]::GetEnvironmentVariable('GOLEARN_INTEGRATION', 'Process')
@@ -62,13 +62,12 @@ M21 的直接契约保留在这里：显式传同一 Tx；所有 SQL 查错误�
 | [cmd/demo/main.go](cmd/demo/main.go) `main` | 建 80 秒总预算 → Run → 清理完成后退出码 |
 | [gormcourse/config.go](gormcourse/config.go) `loadConfig/openPool` | Run → 只读 READY/凭据、driver connector → 一个最多 4 连接的池 |
 | [gormcourse/lab.go](gormcourse/lab.go) `Run/remaining/drop/verify` | 入口 → 登记随机对象、按 E01～E06 执行 → 精确 DROP/Close，独立 SQL 查账 |
-| [gormcourse/models.go](gormcourse/models.go) `Stock/Order/AfterCreate` | GORM callback → model、hook 当前 Tx、audit/outbox/MQ副作用 → callback error |
+| [gormcourse/models.go](gormcourse/models.go) `Stock/Order/AfterCreate` | GORM callback → model、hook 当前 Tx、audit/outbox 副作用 → callback error |
 | [gormcourse/crud.go](gormcourse/crud.go) `crudCases/owned/chainCases` | Run → 传统/泛型 API、零值/归属/复用反例 → 行内容断言 |
 | [gormcourse/transactions.go](gormcourse/transactions.go) `reserve/insertOrder/manualTx/transactionCases` | 业务入口 → 连接归属、手动/回调事务、危险与修复 → 两表 SELECT |
-| [gormcourse/hidden.go](gormcourse/hidden.go) `hiddenCases/page/hookCases/relayOne` | Run → 默认隐藏 SQL、未提交事件与修复 → 查询计数、broker证据 |
+| [gormcourse/hidden.go](gormcourse/hidden.go) `hiddenCases/page/hookCases` | Run → 默认隐藏 SQL、同事务事件意图 → 独立查询读回 |
 | [gormcourse/cancel.go](gormcourse/cancel.go) `cancelCase/waitSQL` | Run → holder/worker/observer → 真实锁等待、timeout、服务器退出、回滚 |
 | [gormcourse/task.go](gormcourse/task.go) `startOwned/join/stopAndJoin` | cancelCase/test → 登记 Result/Done/取消/清理 → 真正 owner 收尾 |
-| [gormcourse/netbudget.go](gormcourse/netbudget.go) `boundedConn/resetBudget` | AMQP库/owner → 真实socket deadline上限 → 库握手/heartbeat不能取消owner预算 |
 | [gormcourse/sqltrace.go](gormcourse/sqltrace.go) `Trace/count` | GORM processor → 合成 SQL 展示、SELECT次数 → 读者及关联断言 |
 | [gormcourse/course_test.go](gormcourse/course_test.go) | testing → 实库整课、参数分离、非法分页、Result/Done、错误树、提前返回 → 独立断言 |
 
@@ -81,7 +80,6 @@ main → Run
   loadConfig → mysql.NewConnector → sql.OpenDB
   gorm.Open(mysql.New(Config{Conn: pool}))             一个池，不是两个池
   remaining=0 → 登记owned/defer drop → AutoMigrate    仅本run五张教学表
-  openBroker → passive404 → declare → confirm        本run一个队列
   E01/E02 → GORM chain → processor.Execute
     ConvertToAssignments/BuildQuerySQL
     Statement.ConnPool.ExecContext/QueryContext(ctx, SQL, Vars...)
@@ -96,14 +94,10 @@ main → Run
   E05 → Transaction → tx.Create(Order)
     create INSERT → AfterCreate(tx的NewDB session，仍*sql.Tx)
       tx.Create(HookAudit)
-      危险: AMQP publish → confirm Ack → callback ErrBusiness → SQL Rollback
-      修复: tx.Create(Outbox) → callback nil → SQL Commit → relayOne
-    broker.Get → body/id核对 → Ack → 下一Get为空
   E06 → holder Begin/FOR UPDATE
     startOwned → worker Conn/CONNECTION_ID/Begin/INSERT/UPDATE等行锁
     owner PROCESSLIST屏障 → timeout → worker清理 → Result → Done → owner join
     holder Rollback → PROCESSLIST原ID消失 → verify库存5/订单0
-  defer broker.close → queue.delete/被动404/连接关闭
   defer drop → 精确五表DROP/remaining0
   defer pool.Close → open/inuse/idle全部0
 ```
@@ -232,36 +226,20 @@ GORM的父查询Trace在processor执行完整callbacks后记录，因此日志�
 
 OFFSET分页在跨请求期间有并发插删仍可能移位，唯一排序只能定义当次页序，不能保证多次请求快照。大OFFSET开销、游标分页、线上索引/迁移与查询计划详见M24，不拿本课三行实验当生产性能证明。AutoMigrate只在先核对不存在的本run五表使用，无外键DDL；GORM关系仍能Create/Preload，数据库外键约束需要另行设计。
 
-## E05：hook 成功、SQL 回滚，真实 MQ 仍存在
+## E05：hook 和 outbox 共用当前事务
 
-`Order.AfterCreate(tx)` 是方法接收者为 `*Order` 的hook：GORM反射拿刚保存的model，判断是否实现 AfterCreateInterface，再在同一goroutine调用。Lab/Mode标记为 `gorm:"-"`，只是本次请求的进程依赖，不写SQL列，也不会在Find后恢复。
+[Order.AfterCreate](gormcourse/models.go) 在 INSERT 后执行，拿到的 `tx.Statement.ConnPool` 仍是这笔 `*sql.Tx`。hook 通过它写 audit 和待发布事件，外层回滚会撤销库存、订单和这两条记录。
 
-`callMethod` 给hook一个 `Session(NewDB:true)` 句柄，这里只是没有当前INSERT/WHERE条件，仍传同一 `Statement.ConnPool=*sql.Tx`。本课实际输出并断言该动态类型。HookAudit写当前tx，因此它和订单一起回滚；改用l.db去写audit会绕过这个原子边界。[Hook文档](https://gorm.io/docs/hooks.html)。
+| 路径 | 独立连接读回库存 / 订单 | audit / outbox | 事件状态 |
+|---|---|---|---|
+| hook 成功后返回业务错误 | 5 / 0 | 0 / 0 | 无待发布事件 |
+| callback 返回 nil 并提交 | 4 / 1 | 1 / 1 | outbox 内容与订单 ID 相同，`sent=false` |
 
-危险路径完全使用真实AMQP：
-
-| 顺序 | 参与者/函数/等待点 | 已知状态/真实证据 |
-| --- | --- | --- |
-| 1 | owner → Transaction → reserve | Tx库存暂时4，未提交 |
-| 2 | GORM Create → Order.AfterCreate | 订单INSERT已执行，COMMIT尚未执行；hook收到*sql.Tx |
-| 3 | hook → tx.Create(HookAudit) | audit也未提交，同一连接 |
-| 4 | hook → publish/WaitContext | 真broker接收，publisher confirm Ack=true；MySQL仍未提交 |
-| 5 | callback返回ErrBusiness | Transaction回滚库存、订单、audit |
-| 6 | owner → SQL查账 | 库存5、订单0、audit0、outbox0 |
-| 7 | owner → AMQP basic.get | 真投递id/body=hook-unsafe，消息没有被SQL回滚撤掉 |
-| 8 | owner → Delivery.Ack → 下一Get | Ack已发送；同channel后续basic.get-empty，消息已消费 |
-
-这不是内存slice、打印日志或健康检查。本课使用一个独占随机**durable队列**，已有默认交换机，不创建新exchange/group；两条有限合成消息。RabbitMQ4.3.6默认禁止transient非exclusive队列，首次运行真实收到541拒绝后改用durable定义，没有改变服务器feature配置。队列durable不等于消息persistent；本课只验证当前broker的confirm/投递/清理，没有宣称重启耐久性。
-
-修复hook只写Outbox事件意图，同一个tx同时保存业务和意图。失败版真实SQL为库存5、订单0、audit0、outbox0，同时broker basic.get-empty；成功版先Commit，真实库存4、订单1、audit1、outbox1，但队列仍为空，因为Commit不自动调用relay。然后 `relayOne`读取已提交unsent事件 → publish/confirm → 标Sent=true → 真Get/Ack，SQL读回Sent=true。
-
-“提交后直接发MQ”仍有业务已经提交但publish失败的漏事件窗口；outbox将意图保存为可恢复数据库事实。这里relay只是同步单次教学入口，confirm后标Sent前仍可能失败造成重复事件，消费者需按eventID幂等；完整后台relay/恢复由M30组合课程负责。MySQL Tx与AMQP channel没有分布式原子提交，GORM hooks也不提供这个能力。
-
-AMQP v1.15.0 `PublishWithDeferredConfirmWithContext` 只在publish开始前检查ctx，不能打断在途socket写入；`WaitContext`等待confirm时能观察取消。我们用socket deadline保证无ctx的Get/Delete和在途I/O有上限，失败收尾用新的8秒socket预算。这里不能只在Dial时设一次deadline：`connection.go:openComplete`会清握手deadline，heartbeater又会延长read deadline。`boundedConn`装饰真实net.Conn，把库的clear/extend截到owner的75秒绝对上限，仅owner能reset为独立清理预算；没有替换AMQP数据或模拟协议。辅助测试使用真实net.Pipe证明已过期限不会被库式clear/extend抹掉。confirm丢失时存在已发未确认的未知结果，不能随便换eventID再发；本课没有注入MQ响应丢失，但准确保留该边界。[锁定AMQP源码](https://github.com/rabbitmq/amqp091-go/blob/v1.15.0/channel.go)。
+`sent=false` 是给 relay 的持久任务。完整的 Kafka 发布、确认后标记与重复消费见 [M30](../m30_outbox_idempotency/README.md)。
 
 ## E06：WithContext 的真正等待和取消清理
 
-取消case只有一个应用worker goroutine；Run/cancelCase是owner。AMQP客户端内部reader/heartbeat由库连接管理，本课没有异步consumer。SQL worker用专属Conn，让当前服务器ID可以被owner独立观测。
+取消case只有一个应用worker goroutine，Run/cancelCase 负责等待它退出。SQL worker用专属Conn，让当前服务器ID可以被owner独立观测。
 
 | 顺序 | 谁 → 当前函数/实际等待点 | 状态/资源变化 → 为何下一步 |
 | --- | --- | --- |
@@ -293,16 +271,15 @@ AMQP v1.15.0 `PublishWithDeferredConfirmWithContext` 只在publish开始前检�
 | --- | --- | --- |
 | TestOwnerIsBoundParameter | 恶意owner字符串只进入Vars，不进入SQL语法 | 真实归属授权已由builder自动完成 |
 | TestInvalidPageRejectsBeforeSQL | page0/size0/size101在SQL前拒绝 | 数据库分页性能 |
-| TestLibraryCannotExtendSocketBudget | 真net.Pipe在owner期限已过时仍返回deadline错误，库式clear/extend无效 | broker断线重连/耐久性 |
 | TestResultIsNotFinalDone | Result已就绪、清理门未开时owner真join不返回；放门后读完整错误 | server事务已经结束 |
 | TestJoinBudgetRetainsFailure | 已取消join预算返回ErrJoin+Canceled+原失败；新预算最终真join | 第一次join失败后任务已经结束 |
 | TestEarlyReturnCancelsAndJoins | 原失败、工作Canceled、两层清理错误都保留；返回时Done关闭 | 任意第三方API取消都立即响应 |
 
 测试用明确门和进入join的通知context，不用sleep断言调度。测试中的join观察者也登记独立ownerFinished，错误断言出口放门后先等观察者真正退出，再执行原任务保护join，避免两个owner并发修改task状态。门无论测试成功失败都由owner释放，随后新预算join；不存在断言失败后卡住的测试goroutine。`close(done)`建立完成观察同步点，`sync.Mutex`保护日志计数和共享writer；不会在持mutex时等待SQL。精确耗时和connectionID是本次观察，不是语言保证。[Go规范defer/panic/recover](https://go.dev/ref/spec#Defer_statements)。
 
-每run资源只有：课程库golearn_m20中的五张 `m23_<24hex>_stocks/orders/lines/hook_audits/outboxes`，同后缀 `_events` 队列，一个最多4连接的池，一条AMQP连接，一个有界SQL worker。随机名字在建对象前已登记，建表前确认五个名字不存在，建队列前被动声明确认404。没有共享go.work、全局服务/代理/隧道变更；不操作DeepHelp数据或其他课对象。
+每run资源只有：课程库golearn_m20中的五张 `m23_<24hex>_stocks/orders/lines/hook_audits/outboxes`，一个最多 4 个连接的池和一个有界 SQL worker。随机名字在建对象前已登记，建表前确认五个名字不存在。没有共享go.work、全局服务/代理/隧道变更；不操作DeepHelp数据或其他课对象。
 
-清理顺序是worker/Tx先结束 → 精确queue.delete → passive404读回 → Close AMQP → 精确五表DROP → information_schema remaining0 → pool.Close/Stats全部0。失败同样执行已登记defer，清理使用Background/新socket预算，Join保留原失败与清理原因。GORM查询内部关闭Rows，独立查账用QueryRow.Scan，不把裸Rows交给caller；本课不拥有安装者课程容器和隧道的关闭权。
+清理顺序是worker/Tx先结束 → 精确五表DROP → information_schema remaining0 → pool.Close/Stats全部0。失败同样执行已登记defer，清理使用独立的 Background 超时，Join保留原失败与清理原因。GORM查询内部关闭Rows，独立查账用QueryRow.Scan，不把裸Rows交给caller；本课不拥有安装者课程容器和隧道的关闭权。
 
 ## 锁定源码入口与材料纠正
 
@@ -320,8 +297,7 @@ AMQP v1.15.0 `PublishWithDeferredConfirmWithContext` 只在publish开始前检�
 | `callbacks/callmethod.go:callMethod`、`callbacks/create.go:AfterCreate` | NewDB session仍当前ConnPool → 调model方法 → Error参与提交/回滚 |
 | `generics.go:G/apply/chainG.with/Update/Updates/First/Find` | 类型T、ops副本、每次应用上下文、直接返回rows/error |
 | `gorm.io/driver/mysql@v1.6.0/mysql.go:Initialize` | 使用Config.Conn既有池，并读版本 |
-| `github.com/rabbitmq/amqp091-go@v1.15.0/channel.go/confirms.go/connection.go` | deferred publish与WaitContext的取消差异；basic.get/delete/passive协议；openComplete/heartbeater deadline行为 |
 
-原 `files/开发框架` 提供“GORM与MySQL CRUD”的方向，但仅CRUD成功不够判断复杂后端的安全性。本课补出数据库行内容、Tx范围、归属过滤、真实MQ边界，修正文档/版本差异；没有复制整批材料。传统API在现网仍需能读，泛型API自v1.30加入，当前v1.31.2不是“类型安全就事务安全”。
+原 `files/开发框架` 提供“GORM与MySQL CRUD”的方向，但仅CRUD成功不够判断复杂后端的安全性。本课补出数据库行内容、Tx范围、归属过滤、outbox 事务边界，修正文档/版本差异；没有复制整批材料。传统API在现网仍需能读，泛型API自v1.30加入，当前v1.31.2不是“类型安全就事务安全”。
 
-真实结果与历史失败见 [STATUS.md](STATUS.md)。范围边界包括：单节点学习服务、少量合成数据、当前进程协议；没有生产负载/权限体系评估，没有服务重启/宕机/硬断电耐久性、生产TLS、多节点MQ、所有网络失败排列、完整分布式事务或公司旧版本兼容证明。
+真实结果与历史失败见 [STATUS.md](STATUS.md)。范围边界包括：单节点学习服务、少量合成数据、当前进程协议；没有生产负载/权限体系评估，没有服务重启/宕机/硬断电耐久性、生产TLS、所有网络失败排列、完整分布式事务或公司旧版本兼容证明。

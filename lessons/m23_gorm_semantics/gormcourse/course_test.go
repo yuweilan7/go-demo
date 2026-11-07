@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"net"
 	"os"
 	"strings"
 	"sync"
@@ -15,11 +14,11 @@ import (
 	"gorm.io/gorm"
 )
 
-// TestRealMySQLAndAMQP由testing显式开启；Run内部的断言来自独立SELECT和broker协议。
+// TestRealMySQL由testing显式开启；Run内部的断言来自独立SELECT。
 // 默认SKIP只是避免普通test偷偷依赖服务器，不算实库验收；race也必须带integration=1。
-func TestRealMySQLAndAMQP(t *testing.T) {
+func TestRealMySQL(t *testing.T) {
 	if os.Getenv("GOLEARN_INTEGRATION") != "1" {
-		t.Skip("真实MySQL+AMQP未开启：设置GOLEARN_INTEGRATION=1；SKIP不是实库PASS")
+		t.Skip("真实MySQL未开启：设置GOLEARN_INTEGRATION=1；SKIP不是实库PASS")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 80*time.Second)
 	defer cancel()
@@ -30,7 +29,7 @@ func TestRealMySQLAndAMQP(t *testing.T) {
 		t.Fatal(err)
 	}
 	// 验证整课输出里的真实结束证据都存在，避免入口漏执行后半部分仍被当成功。
-	for _, proof := range []string{"[hook.unsafe-rollback.SELECT] quantity=5 orders=0", "[AMQP.get/ack] id=hook-unsafe", "[cancel.server-gone]", "passive404=true", "remaining=0", "[cleanup.pool] open=0 inuse=0 idle=0"} {
+	for _, proof := range []string{"[hook.fixed-rollback.SELECT] quantity=5 orders=0", "[hook.SELECT] id=hook-fixed-rollback audit=0 outbox=0", "[hook.SELECT] id=hook-fixed-commit audit=1 outbox=1", "[outbox.pending] sent=false", "[cancel.server-gone]", "remaining=0", "[cleanup.pool] open=0 inuse=0 idle=0"} {
 		if !strings.Contains(output.String(), proof) {
 			t.Fatalf("缺最终证据: %s", proof)
 		}
@@ -38,7 +37,7 @@ func TestRealMySQLAndAMQP(t *testing.T) {
 }
 
 // dryDB只借真实dialector构建语句，禁Ping/版本读和默认写事务，因此不会连服务器。
-// 它只支持参数化辅助断言，不能代替Run里的真实库存/事务/MQ验证。
+// 它只支持参数化辅助断言，不能代替Run里的真实库存/事务验证。
 func dryDB(t *testing.T) *gorm.DB {
 	t.Helper()
 	db, err := gorm.Open(mysql.New(mysql.Config{DSN: "unused:unused@tcp(127.0.0.1:1)/unused", SkipInitializeWithVersion: true}), &gorm.Config{DryRun: true, DisableAutomaticPing: true, SkipDefaultTransaction: true})
@@ -87,31 +86,6 @@ func TestInvalidPageRejectsBeforeSQL(t *testing.T) {
 		if _, _, err := l.page(context.Background(), "owner", input[0], input[1]); err == nil {
 			t.Fatal("无效分页被接受")
 		}
-	}
-}
-
-// TestLibraryCannotExtendSocketBudget用真实net.Pipe验证库式clear/extend不能抹去
-// 已过期的owner期限。Read真实返回deadline错误，不靠计时sleep猜网络是否还阻塞。
-func TestLibraryCannotExtendSocketBudget(t *testing.T) {
-	for _, mode := range []string{"handshake-clear", "heartbeat-extend"} {
-		t.Run(mode, func(t *testing.T) {
-			left, right := net.Pipe()
-			defer func() { _ = left.Close(); _ = right.Close() }()
-			c := &boundedConn{Conn: left, budget: time.Now().Add(-time.Second)}
-			var err error
-			if mode == "handshake-clear" {
-				err = c.SetDeadline(time.Time{})
-			} else {
-				err = c.SetReadDeadline(time.Now().Add(time.Hour))
-			}
-			if err != nil {
-				t.Fatal(err)
-			}
-			_, err = c.Read(make([]byte, 1))
-			if !errors.Is(err, os.ErrDeadlineExceeded) {
-				t.Fatalf("库取消owner预算: %v", err)
-			}
-		})
 	}
 }
 

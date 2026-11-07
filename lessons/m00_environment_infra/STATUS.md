@@ -2,7 +2,7 @@
 
 记录日期：2026-10-12，Asia/Shanghai。Redis 范围修复后的最新远端核验报告时间为 2026-10-11T17:42:15.048285+00:00（北京时间 10-12 01:42:15）。执行者只写 `C:/Users/Lenovo/.codex/worktrees/go-course-m00/go-demo/lessons/m00_environment_infra/`，没有提交、推送、修改主工作目录或其他 module。
 
-**课程源码/解释/只读接入验证已交付，run/test/vet/build 与实际 Windows race 已通过，待主 agent 验收。默认 Windows 32 位 GCC 的历史 race 构建失败已通过主 agent 提供的便携 amd64 CC/CXX 解决。** 本课未安装 MySQL/RabbitMQ/Kafka、未恢复退役 MySQL、未改共享服务/配置或业务数据。
+**课程源码/解释/只读接入验证已交付，run/test/vet/build 与实际 Windows race 已通过，待主 agent 验收。默认 Windows 32 位 GCC 的历史 race 构建失败已通过主 agent 提供的便携 amd64 CC/CXX 解决。** 本课未安装 MySQL/Kafka、未恢复退役 MySQL、未改共享服务/配置或业务数据。
 
 ## 交付文件与读取材料
 
@@ -92,7 +92,7 @@ FAIL go-demo/lessons/m00_environment_infra/internal/environment [build failed]
 | PG 实际协议 | TCP=true，既有凭据连接成功；server_version=`18.6 (Debian 18.6-1.pgdg12+2)`；transaction_read_only=`on`；cursor/connection closed | 未读正式业务表，未写表，事务业务/恢复未验 |
 | SSH 只读 inventory | uname/nproc/free/df/ss/sudo -n docker ps/stats 通过 | 未改服务，未安装，未扫描全服务器所有可能的非容器组件 |
 | 退役 MySQL | `deephelp-mysql` image=`mysql:8.4.11`，`Exited (0) 6 days ago` | 旧端口/DSN/秘密不足以证明当前连接；本课未连接或启动它 |
-| 新学习 MySQL/RabbitMQ/Kafka | 当前课程没有登记，当前 Docker 清单未看到对应独立学习容器；按 M20/M28/M29 首次需要时再核对 | 不声称服务器所有部署方式绝对不存在这些软件；本课未预装 |
+| 新学习 MySQL/Kafka | 当前课程没有登记，当前 Docker 清单未看到对应独立学习容器；按 M20/M29 首次需要时再核对 | 不声称服务器所有部署方式绝对不存在这些软件；本课未预装 |
 
 最终只读资源快照：Linux x86_64；nproc=4；RAM total=7685 MiB、available=3347 MiB；swap total=1987 MiB、used=416 MiB；`/srv` 所在磁盘可用=28666 MiB、used=51%。这些是该时刻观察，不保证后续安装额度。Docker stats 确认正式 PG 当前 memory limit=1 GiB，与旧资料的 512 MiB 不同；资源以实时核对为准。本课没有全量分析 host cgroup quota/未来峰值，首次安装者仍须核对。
 

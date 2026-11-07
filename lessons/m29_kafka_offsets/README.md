@@ -223,11 +223,10 @@ go -C lessons/m29_kafka_offsets run ./cmd/demo -mode broker-fault -budget 5m -co
 
 安装者的C记录还明确保留一次协调偏差：首次读取failure文件恰好早于文件生成，shell未立即停止，start请求已开始；随后匹配的failure文件和producer超时/Done都在broker协议恢复成功之前观察到。C证据支持“失败producer已结束，再收到协议READY并开始恢复写读”，不能声称本轮安装者严格先读失败文件再发start。A保留严格握手的完整证据，C保留最终更强字节断言及实际时间边界，两者不互相覆盖。详细命令、失败、资源结果与安装者报告位置见STATUS。
 
-## Kafka事务、RabbitMQ比较与当前保证范围
+## Kafka 事务与当前保证范围
 
 Kafka的幂等producer在Kafka日志侧去重重试；Kafka事务可把Kafka输出记录与消费offset原子关联，配合read_committed覆盖Kafka内的读→处理→写链。它不会自动包含本课文件、MySQL或Redis的提交。外部DB先成功Kafka后失败的重复窗口仍需业务幂等/outbox等设计。M29未实施Kafka事务，不声称外部业务exactly-once。
 
-只围绕消费者代码比较RabbitMQ：RabbitMQ `Ack(deliveryTag)` 针对当前channel的交付，可以配置单条/多条；Kafka `CommitRecords` 针对group/partition的恢复位置，对更小位置有连带影响。RabbitMQ redelivery与Kafka同group从未提交offset重读，都要求应用辨认重复；Kafka增加consumer是分区重分配，不是每条消息自动找空闲worker。两者的publisher confirm/produce ack都不证明消费者业务已完成。
 
 现在必须掌握五阶段、next offset、稳定event_id、每分区连续进度、Block/Allow与Done的关系。压缩格式、批内协议字段、合作式rebalance、Kafka事务API、跨集群容灾与吞吐调优可在相应源码出现时再查。这里直接给出全部反例/修复解析，不另布置exercise。
 

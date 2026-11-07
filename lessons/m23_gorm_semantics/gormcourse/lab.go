@@ -21,7 +21,7 @@ var ErrBusiness = errors.New("合成订单第二步失败")
 var ErrConflict = errors.New("归属不存在或库存不足")
 var identifier = regexp.MustCompile(`^m23_[a-f0-9]{24}_(stocks|orders|lines|hook_audits|outboxes)$`)
 
-// lab 是当前run的资源登记表。db和pool指向同一个池；broker只由Run关闭。
+// lab 是当前run的资源登记表。db和pool指向同一个池。
 // 表名由随机prefix与锁定NamingStrategy得到，不接受业务请求提供的表名。
 type lab struct {
 	db     *gorm.DB
@@ -30,12 +30,11 @@ type lab struct {
 	prefix string
 	tables []string
 	owned  bool
-	broker *broker
 	out    io.Writer
 }
 
 // safeOutput把owner与worker的输出统一串行化，caller传bytes.Buffer时也不会数据竞争。
-// 只锁一次Write，不把锁跨SQL/AMQP等待持有，所以日志不会反过来阻塞业务资源清理。
+// 只锁一次Write，不把锁跨SQL等待持有，所以日志不会反过来阻塞业务资源清理。
 type safeOutput struct {
 	mu     sync.Mutex
 	target io.Writer
@@ -48,7 +47,7 @@ func (s *safeOutput) Write(p []byte) (int, error) {
 }
 
 // Run 由demo/integration test调用；按教学序列执行、任一步失败也走已登记的defer。
-// 返回到caller时，自己的worker/Tx/queue/table/pool均已完成收尾，错误保留清理原因。
+// 返回到caller时，自己的worker/Tx/table/pool均已完成收尾，错误保留清理原因。
 func Run(ctx context.Context, out io.Writer) (err error) {
 	out = &safeOutput{target: out}
 	c, err := loadConfig()
@@ -87,7 +86,7 @@ func Run(ctx context.Context, out io.Writer) (err error) {
 	if version != c.mysql.Version || database != "golearn_m20" {
 		return errors.New("实库版本/归属与READY索引不同")
 	}
-	fmt.Fprintf(out, "[version] mysql=%s database=%s gorm=1.31.2 dialector=1.6.0 driver=1.10.1 rabbit=%s\n", version, database, c.rabbit.Version)
+	fmt.Fprintf(out, "[version] mysql=%s database=%s gorm=1.31.2 dialector=1.6.0 driver=1.10.1\n", version, database)
 	if n, e := l.remaining(ctx); e != nil || n != 0 {
 		return errors.Join(e, errors.New("随机教学表已存在，拒绝迁移/清理别人对象"))
 	}
@@ -97,11 +96,6 @@ func Run(ctx context.Context, out io.Writer) (err error) {
 	if err = l.db.WithContext(ctx).AutoMigrate(&Stock{}, &Order{}, &Line{}, &HookAudit{}, &Outbox{}); err != nil {
 		return err
 	}
-	l.broker, err = openBroker(ctx, c, l.prefix+"_events", out)
-	if err != nil {
-		return err
-	}
-	defer func() { err = errors.Join(err, l.broker.close()) }()
 	for _, step := range []struct {
 		name string
 		fn   func(context.Context) error
@@ -110,7 +104,7 @@ func Run(ctx context.Context, out io.Writer) (err error) {
 		{"E02.链条件/Session/Scopes/generics", l.chainCases},
 		{"E03.事务迁移/失败/panic", l.transactionCases},
 		{"E04.软删除/关联/分页", l.hiddenCases},
-		{"E05.未提交hook真实AMQP/修复", l.hookCases},
+		{"E05.hook与同事务outbox", l.hookCases},
 		{"E06.context真实行锁等待取消", l.cancelCase},
 	} {
 		fmt.Fprintf(out, "\n=== %s ===\n", step.name)
